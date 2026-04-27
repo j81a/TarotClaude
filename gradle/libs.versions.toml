@@ -18,6 +18,11 @@ room = "2.6.1"
 # Kotlin Serialization - Para JSON
 kotlinSerialization = "1.7.3"
 
+# Retrofit - Cliente HTTP para API
+retrofit = "2.11.0"
+retrofitKotlinxSerializationJson = "1.0.0"
+okhttp = "4.12.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -38,6 +43,14 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 # Kotlin Serialization - Para serialización JSON
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
+
+# Retrofit - Cliente HTTP para consumir APIs REST
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-kotlinx-serialization-json = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationJson" }
+
+# OkHttp - Cliente HTTP y logging interceptor
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

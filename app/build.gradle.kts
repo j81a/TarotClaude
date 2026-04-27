@@ -58,6 +58,14 @@ dependencies {
     // Kotlin Serialization - Para JSON
     implementation(libs.kotlinx.serialization.json)
 
+    // Retrofit - Cliente HTTP para API
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization.json)
+
+    // OkHttp - Cliente HTTP y logging
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
