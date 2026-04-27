@@ -1,3 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TarotAi</string>
+    <!-- Nombre de la aplicación -->
+    <string name="app_name">TarotAI</string>
+
+    <!-- Pantalla Home -->
+    <string name="home_title">TarotAI</string>
+    <string name="home_welcome">Bienvenido a TarotAI</string>
+    <string name="home_subtitle">Tu guía espiritual con inteligencia artificial</string>
+    <string name="home_new_reading">Nueva Lectura</string>
+    <string name="home_encyclopedia">Enciclopedia de Cartas</string>
+    <string name="home_history">Historial de Lecturas</string>
+    <string name="home_settings">Configuración</string>
+
+    <!-- Navegación general -->
+    <string name="nav_back">Volver</string>
+
+    <!-- Pantallas placeholder -->
+    <string name="placeholder_encyclopedia">Enciclopedia</string>
+    <string name="placeholder_card_detail">Detalle de Carta #%1$d</string>
+    <string name="placeholder_reading_selection">Seleccionar Lectura</string>
+    <string name="placeholder_reading">Lectura: %1$s</string>
+    <string name="placeholder_settings">Configuración</string>
+    <string name="placeholder_history">Historial</string>
+    <string name="placeholder_message">Esta pantalla se implementará más adelante</string>
+
+    <!-- Tipos de lectura (para futuras implementaciones) -->
+    <string name="reading_type_one_card">Carta del Día</string>
+    <string name="reading_type_yes_no">Sí o No</string>
+    <string name="reading_type_present">Presente (3 cartas)</string>
+    <string name="reading_type_tendency">Tendencia (3 cartas)</string>
+    <string name="reading_type_cross">Cruz (5 cartas)</string>
+
+    <!-- Mensajes de estado (para futuras implementaciones) -->
+    <string name="loading">Cargando…</string>
+    <string name="error_generic">Ha ocurrido un error</string>
+    <string name="error_network">Error de conexión</string>
+    <string name="error_api_key_missing">Configura tu API Key de Claude</string>
+
+    <!-- Configuración (para futuras implementaciones) -->
+    <string name="settings_api_key_label">API Key de Claude</string>
+    <string name="settings_api_key_hint">Introduce tu clave de API</string>
+    <string name="settings_save">Guardar</string>
+
+    <!-- Acciones comunes -->
+    <string name="action_close">Cerrar</string>
+    <string name="action_retry">Reintentar</string>
+    <string name="action_share">Compartir</string>
 </resources>

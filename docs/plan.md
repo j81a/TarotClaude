@@ -98,6 +98,13 @@ com.waveapp.tarotai/
 - ✅ Animaciones más fáciles de implementar
 - ✅ Mejor integración con MVVM
 
+**Internacionalización (i18n):**
+- Todos los textos de UI deben estar en `res/values/strings.xml`
+- NO hardcodear strings en código Kotlin
+- Usar `stringResource(R.string.key)` en Composables
+- Preparado para soportar múltiples idiomas (español, inglés, etc.)
+- Los datos de las cartas (nombres, significados) también irán en recursos localizables
+
 ### 2.2 Inyección de Dependencias
 
 | Tecnología | Versión | Propósito |
