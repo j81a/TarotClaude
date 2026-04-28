@@ -24,6 +24,36 @@
     <string name="placeholder_history">Historial</string>
     <string name="placeholder_message">Esta pantalla se implementará más adelante</string>
 
+    <!-- Enciclopedia -->
+    <string name="encyclopedia_title">Enciclopedia del Tarot</string>
+    <string name="encyclopedia_search_hint">Buscar cartas…</string>
+    <string name="encyclopedia_empty_state">No se encontraron cartas</string>
+
+    <!-- Tipos de arcano -->
+    <string name="arcana_type_major">Arcanos Mayores</string>
+    <string name="arcana_type_minor">Arcanos Menores</string>
+
+    <!-- Palos -->
+    <string name="suit_wands">Bastos</string>
+    <string name="suit_cups">Copas</string>
+    <string name="suit_swords">Espadas</string>
+    <string name="suit_pentacles">Oros</string>
+
+    <!-- Filtros -->
+    <string name="clear_filters">Limpiar filtros</string>
+
+    <!-- Acciones -->
+    <string name="retry">Reintentar</string>
+
+    <!-- Detalle de carta -->
+    <string name="card_detail_title">Detalle de Carta</string>
+    <string name="card_keywords_title">Palabras Clave</string>
+    <string name="card_general_meaning_title">Significado General</string>
+    <string name="card_upright_meaning_title">Posición Normal</string>
+    <string name="card_reversed_meaning_title">Posición Invertida</string>
+    <string name="card_symbolism_title">Simbolismo</string>
+    <string name="card_image_placeholder">Imagen de carta</string>
+
     <!-- Tipos de lectura (para futuras implementaciones) -->
     <string name="reading_type_one_card">Carta del Día</string>
     <string name="reading_type_yes_no">Sí o No</string>

@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.waveapp.tarotai.R
+import com.waveapp.tarotai.presentation.carddetail.CardDetailScreen
+import com.waveapp.tarotai.presentation.encyclopedia.EncyclopediaScreen
 import com.waveapp.tarotai.presentation.screens.HomeScreen
 
 /**
@@ -50,11 +52,10 @@ fun NavGraph(
 
         // Pantalla de Enciclopedia (lista de cartas)
         composable(route = Screen.Encyclopedia.route) {
-            // TODO: Implementar EncyclopediaScreen en Fase 2
-            // Por ahora mostramos una pantalla placeholder
-            PlaceholderScreen(
-                title = stringResource(R.string.placeholder_encyclopedia),
-                onBack = { navController.popBackStack() }
+            EncyclopediaScreen(
+                onCardClick = { cardId ->
+                    navController.navigate(Screen.CardDetail.createRoute(cardId))
+                }
             )
         }
 
@@ -67,14 +68,9 @@ fun NavGraph(
                     type = NavType.IntType  // El ID es un entero
                 }
             )
-        ) { backStackEntry ->
-            // Extrae el ID de la carta desde los argumentos
-            val cardId = backStackEntry.arguments?.getInt("cardId") ?: 0
-
-            // TODO: Implementar CardDetailScreen en Fase 2
-            PlaceholderScreen(
-                title = stringResource(R.string.placeholder_card_detail, cardId),
-                onBack = { navController.popBackStack() }
+        ) {
+            CardDetailScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
