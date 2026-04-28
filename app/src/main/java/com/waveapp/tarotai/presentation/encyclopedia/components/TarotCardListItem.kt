@@ -49,7 +49,9 @@ fun TarotCardListItem(
         ) {
             // Imagen de la carta
             Card(
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(80.dp),
                 shape = MaterialTheme.shapes.small
             ) {
                 Image(
@@ -58,7 +60,7 @@ fun TarotCardListItem(
                     ),
                     contentDescription = card.name,
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Fit
                 )
             }
 
