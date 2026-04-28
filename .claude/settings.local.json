@@ -16,7 +16,8 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "WebFetch(domain:commons.wikimedia.org)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "WebFetch(domain:luciellaes.itch.io)"
     ],
     "deny": [],
     "ask": []
