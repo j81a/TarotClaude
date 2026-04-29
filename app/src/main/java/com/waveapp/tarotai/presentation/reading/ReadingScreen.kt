@@ -1,0 +1,311 @@
+package com.waveapp.tarotai.presentation.reading
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.waveapp.tarotai.R
+import com.waveapp.tarotai.domain.model.CardOrientation
+import com.waveapp.tarotai.domain.model.DrawnCard
+import com.waveapp.tarotai.domain.model.LayoutType
+import com.waveapp.tarotai.domain.model.SpreadType
+import com.waveapp.tarotai.presentation.reading.viewmodel.ReadingUiState
+import com.waveapp.tarotai.presentation.reading.viewmodel.ReadingViewModel
+
+/**
+ * Pantalla que muestra la tirada realizada con las cartas seleccionadas.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReadingScreen(
+    spreadType: SpreadType,
+    question: String?,
+    onNavigateBack: () -> Unit,
+    viewModel: ReadingViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Realizar tirada cuando se carga la pantalla
+    LaunchedEffect(spreadType, question) {
+        viewModel.performReading(spreadType, question)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.reading_screen_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.nav_back)
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        when (val state = uiState) {
+            is ReadingUiState.Loading -> {
+                LoadingContent(modifier = Modifier.padding(paddingValues))
+            }
+            is ReadingUiState.Success -> {
+                ReadingContent(
+                    reading = state.reading,
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            is ReadingUiState.Error -> {
+                ErrorContent(
+                    message = state.message,
+                    onRetry = { viewModel.performReading(spreadType, question) },
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
+            is ReadingUiState.Idle -> {
+                // No mostrar nada en estado Idle
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReadingContent(
+    reading: com.waveapp.tarotai.domain.model.TarotReading,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Mostrar pregunta si existe
+        reading.question?.let { question ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Tu pregunta:",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = question,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+        }
+
+        // Mostrar layout según el tipo
+        val config = com.waveapp.tarotai.domain.model.SpreadConfiguration.fromType(reading.spreadType)
+
+        when (config.layout) {
+            LayoutType.HORIZONTAL -> {
+                HorizontalCardsLayout(drawnCards = reading.drawnCards)
+            }
+            LayoutType.CROSS -> {
+                CrossCardsLayout(drawnCards = reading.drawnCards)
+            }
+        }
+    }
+}
+
+/**
+ * Layout horizontal para cartas (tiradas Simple, Yes/No, Present, Tendency).
+ */
+@Composable
+private fun HorizontalCardsLayout(drawnCards: List<DrawnCard>) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        drawnCards.forEach { drawnCard ->
+            DrawnCardItem(drawnCard = drawnCard)
+        }
+    }
+}
+
+/**
+ * Layout en cruz para tirada Cross.
+ * Posiciones: 0-Izquierda, 1-Derecha, 2-Arriba, 3-Abajo, 4-Centro
+ */
+@Composable
+private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Arriba (posición 2)
+        if (drawnCards.size > 2) {
+            DrawnCardItem(drawnCard = drawnCards[2], modifier = Modifier.width(200.dp))
+        }
+
+        // Fila central: Izquierda, Centro, Derecha
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Izquierda (posición 0)
+            if (drawnCards.isNotEmpty()) {
+                DrawnCardItem(drawnCard = drawnCards[0], modifier = Modifier.width(120.dp))
+            }
+
+            // Centro (posición 4)
+            if (drawnCards.size > 4) {
+                DrawnCardItem(drawnCard = drawnCards[4], modifier = Modifier.width(120.dp))
+            }
+
+            // Derecha (posición 1)
+            if (drawnCards.size > 1) {
+                DrawnCardItem(drawnCard = drawnCards[1], modifier = Modifier.width(120.dp))
+            }
+        }
+
+        // Abajo (posición 3)
+        if (drawnCards.size > 3) {
+            DrawnCardItem(drawnCard = drawnCards[3], modifier = Modifier.width(200.dp))
+        }
+    }
+}
+
+/**
+ * Item individual de carta en la tirada.
+ */
+@Composable
+private fun DrawnCardItem(
+    drawnCard: DrawnCard,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Nombre de la posición
+            Text(
+                text = drawnCard.positionName,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Imagen de la carta
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
+                Image(
+                    painter = painterResource(
+                        id = getDrawableResourceId(drawnCard.card.imagePath)
+                    ),
+                    contentDescription = drawnCard.card.name,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (drawnCard.orientation == CardOrientation.REVERSED) {
+                                Modifier.rotate(180f)
+                            } else {
+                                Modifier
+                            }
+                        ),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Nombre de la carta
+            Text(
+                text = drawnCard.card.name,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            // Orientación
+            Text(
+                text = if (drawnCard.orientation == CardOrientation.UPRIGHT) {
+                    stringResource(R.string.orientation_upright)
+                } else {
+                    stringResource(R.string.orientation_reversed)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/**
+ * Helper para obtener ID de drawable desde nombre.
+ */
+@Composable
+private fun getDrawableResourceId(imagePath: String): Int {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    return context.resources.getIdentifier(
+        imagePath,
+        "drawable",
+        context.packageName
+    ).takeIf { it != 0 } ?: R.drawable.ic_launcher_foreground
+}
+
+@Composable
+private fun LoadingContent(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun ErrorContent(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error
+            )
+            Button(onClick = onRetry) {
+                Text(stringResource(R.string.retry))
+            }
+        }
+    }
+}

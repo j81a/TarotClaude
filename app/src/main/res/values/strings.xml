@@ -54,12 +54,33 @@
     <string name="card_symbolism_title">Simbolismo</string>
     <string name="card_image_placeholder">Imagen de carta</string>
 
-    <!-- Tipos de lectura (para futuras implementaciones) -->
-    <string name="reading_type_one_card">Carta del Día</string>
+    <!-- Tipos de lectura -->
+    <string name="reading_type_selection_title">Elige tu tirada</string>
+    <string name="reading_type_simple">Carta Simple</string>
+    <string name="reading_type_simple_desc">Una carta para orientación general</string>
     <string name="reading_type_yes_no">Sí o No</string>
-    <string name="reading_type_present">Presente (3 cartas)</string>
-    <string name="reading_type_tendency">Tendencia (3 cartas)</string>
-    <string name="reading_type_cross">Cruz (5 cartas)</string>
+    <string name="reading_type_yes_no_desc">Una carta para responder tu pregunta</string>
+    <string name="reading_type_present">Presente</string>
+    <string name="reading_type_present_desc">3 cartas sobre tu situación actual</string>
+    <string name="reading_type_tendency">Tendencia</string>
+    <string name="reading_type_tendency_desc">3 cartas sobre pasado, presente y futuro</string>
+    <string name="reading_type_cross">Cruz</string>
+    <string name="reading_type_cross_desc">5 cartas en disposición de cruz</string>
+
+    <!-- Pantalla de pregunta -->
+    <string name="question_screen_title">Tu pregunta</string>
+    <string name="question_hint">Escribe tu pregunta aquí…</string>
+    <string name="question_continue">Continuar</string>
+    <string name="question_min_length">La pregunta debe tener al menos 10 caracteres</string>
+
+    <!-- Pantalla de lectura -->
+    <string name="reading_screen_title">Tu tirada</string>
+    <string name="reading_reveal_cards">Revelar cartas</string>
+    <string name="reading_card_position">Posición: %1$s</string>
+
+    <!-- Orientaciones de carta -->
+    <string name="orientation_upright">Normal</string>
+    <string name="orientation_reversed">Invertida</string>
 
     <!-- Mensajes de estado (para futuras implementaciones) -->
     <string name="loading">Cargando…</string>

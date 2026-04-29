@@ -39,25 +39,32 @@ sealed class Screen(val route: String) {
 
     /**
      * Pantalla de selección del tipo de lectura.
-     * El usuario elige entre: 1 carta, Sí/No, Presente, Tendencia, Cruz.
+     * El usuario elige entre: Simple, Sí/No, Presente, Tendencia, Cruz.
      */
-    data object ReadingSelection : Screen("reading_selection")
+    data object SpreadTypeSelection : Screen("spread_type_selection")
+
+    /**
+     * Pantalla de ingreso de pregunta.
+     * Requiere el tipo de tirada como argumento.
+     */
+    data object Question : Screen("question/{spreadType}") {
+        fun createRoute(spreadType: String) = "question/$spreadType"
+    }
 
     /**
      * Pantalla de lectura activa.
-     * Muestra las cartas seleccionadas y su interpretación.
-     * Requiere el tipo de lectura como argumento.
-     *
-     * Ejemplo: "reading/yes_no" para lectura de Sí/No.
+     * Muestra las cartas seleccionadas.
+     * Requiere tipo de tirada y pregunta (opcional).
      */
-    data object Reading : Screen("reading/{readingType}") {
-        /**
-         * Crea la ruta completa con el tipo de lectura.
-         * @param readingType: Tipo de lectura (ej: "one_card", "yes_no", etc.)
-         * @return Ruta navegable, ej: "reading/yes_no"
-         */
-        fun createRoute(readingType: String) = "reading/$readingType"
+    data object Reading : Screen("reading/{spreadType}?question={question}") {
+        fun createRoute(spreadType: String, question: String?) =
+            "reading/$spreadType?question=${question ?: ""}"
     }
+
+    /**
+     * Deprecated: Mantener para compatibilidad.
+     */
+    data object ReadingSelection : Screen("reading_selection")
 
     /**
      * Pantalla de configuración.
