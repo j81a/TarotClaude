@@ -8,8 +8,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.waveapp.tarotai.R
+import com.waveapp.tarotai.domain.model.SpreadType
 import com.waveapp.tarotai.presentation.carddetail.CardDetailScreen
 import com.waveapp.tarotai.presentation.encyclopedia.EncyclopediaScreen
+import com.waveapp.tarotai.presentation.reading.QuestionScreen
+import com.waveapp.tarotai.presentation.reading.ReadingScreen
+import com.waveapp.tarotai.presentation.reading.SpreadTypeSelectionScreen
 import com.waveapp.tarotai.presentation.screens.HomeScreen
 
 /**
@@ -39,7 +43,7 @@ fun NavGraph(
                     navController.navigate(Screen.Encyclopedia.route)
                 },
                 onNavigateToReadingSelection = {
-                    navController.navigate(Screen.ReadingSelection.route)
+                    navController.navigate(Screen.SpreadTypeSelection.route)
                 },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
@@ -74,30 +78,70 @@ fun NavGraph(
             )
         }
 
-        // Pantalla de selección de tipo de lectura
-        composable(route = Screen.ReadingSelection.route) {
-            // TODO: Implementar ReadingSelectionScreen en Fase 3
-            PlaceholderScreen(
-                title = stringResource(R.string.placeholder_reading_selection),
-                onBack = { navController.popBackStack() }
+        // Pantalla de selección de tipo de tirada
+        composable(route = Screen.SpreadTypeSelection.route) {
+            SpreadTypeSelectionScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSpreadTypeSelected = { spreadType ->
+                    navController.navigate(Screen.Question.createRoute(spreadType.name))
+                }
+            )
+        }
+
+        // Pantalla de pregunta
+        composable(
+            route = Screen.Question.route,
+            arguments = listOf(
+                navArgument("spreadType") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val spreadTypeStr = backStackEntry.arguments?.getString("spreadType") ?: ""
+            val spreadType = try {
+                SpreadType.valueOf(spreadTypeStr)
+            } catch (e: Exception) {
+                SpreadType.SIMPLE
+            }
+
+            QuestionScreen(
+                spreadType = spreadType,
+                onNavigateBack = { navController.popBackStack() },
+                onContinue = { question ->
+                    navController.navigate(Screen.Reading.createRoute(spreadType.name, question))
+                }
             )
         }
 
         // Pantalla de lectura activa
-        // Recibe readingType como argumento de navegación
         composable(
             route = Screen.Reading.route,
             arguments = listOf(
-                navArgument("readingType") {
-                    type = NavType.StringType  // El tipo de lectura es un String
+                navArgument("spreadType") { type = NavType.StringType },
+                navArgument("question") {
+                    type = NavType.StringType
+                    nullable = true
                 }
             )
         ) { backStackEntry ->
-            val readingType = backStackEntry.arguments?.getString("readingType") ?: ""
+            val spreadTypeStr = backStackEntry.arguments?.getString("spreadType") ?: ""
+            val question = backStackEntry.arguments?.getString("question")?.takeIf { it.isNotBlank() }
 
-            // TODO: Implementar ReadingScreen en Fase 3
+            val spreadType = try {
+                SpreadType.valueOf(spreadTypeStr)
+            } catch (e: Exception) {
+                SpreadType.SIMPLE
+            }
+
+            ReadingScreen(
+                spreadType = spreadType,
+                question = question,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Mantener compatibilidad con rutas antiguas
+        composable(route = Screen.ReadingSelection.route) {
             PlaceholderScreen(
-                title = stringResource(R.string.placeholder_reading, readingType),
+                title = stringResource(R.string.placeholder_reading_selection),
                 onBack = { navController.popBackStack() }
             )
         }

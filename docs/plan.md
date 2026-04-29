@@ -81,9 +81,71 @@ com.waveapp.tarotai/
 
 ---
 
-## 2. Stack Tecnológico
+## 2. Estándares de Código
 
-### 2.1 UI y Navegación
+### 2.1 Documentación en Español
+
+**REQUERIMIENTO OBLIGATORIO:** Todo el código debe estar documentado en español.
+
+**Reglas de documentación:**
+
+1. **Clases y sealed classes:**
+   - Comentario de clase con descripción breve
+   - `@property` para cada parámetro del constructor explicando su propósito
+
+2. **Funciones y métodos:**
+   - Comentario explicando qué hace la función
+   - `@param` para cada parámetro
+   - `@return` para el valor de retorno si aplica
+
+3. **Enums:**
+   - Comentario de enum explicando el propósito
+   - Comentarios inline para cada valor si es necesario
+
+**Ejemplo correcto:**
+
+```kotlin
+/**
+ * Configuración de cada tipo de tirada.
+ * Define cuántas cartas se usan, las posiciones y el layout visual.
+ *
+ * @property type Tipo de tirada
+ * @property cardCount Cantidad de cartas en la tirada
+ * @property positions Nombres de las posiciones de cada carta
+ * @property requiresQuestion Indica si la tirada requiere una pregunta del usuario
+ * @property layout Tipo de disposición visual (horizontal o cruz)
+ */
+sealed class SpreadConfiguration(
+    val type: SpreadType,
+    val cardCount: Int,
+    val positions: List<String>,
+    val requiresQuestion: Boolean,
+    val layout: LayoutType
+) { ... }
+
+/**
+ * Realiza una tirada de tarot seleccionando cartas aleatorias.
+ *
+ * @param spreadType Tipo de tirada a realizar
+ * @param question Pregunta del usuario (opcional, según el tipo de tirada)
+ * @return Result con la tirada generada o un error
+ */
+suspend fun performReading(
+    spreadType: SpreadType,
+    question: String?
+): Result<TarotReading> { ... }
+```
+
+**Justificación:**
+- Facilita la comprensión del código por todos los desarrolladores del equipo
+- Genera documentación automática (KDoc) en español
+- Mantiene consistencia con el idioma de la aplicación
+
+---
+
+## 3. Stack Tecnológico
+
+### 3.1 UI y Navegación
 
 | Tecnología | Versión | Propósito |
 |-----------|---------|-----------|
@@ -105,7 +167,7 @@ com.waveapp.tarotai/
 - Preparado para soportar múltiples idiomas (español, inglés, etc.)
 - Los datos de las cartas (nombres, significados) también irán en recursos localizables
 
-### 2.2 Inyección de Dependencias
+### 3.2 Inyección de Dependencias
 
 | Tecnología | Versión | Propósito |
 |-----------|---------|-----------|
@@ -116,7 +178,7 @@ com.waveapp.tarotai/
 - ✅ Menos configuración que Dagger puro
 - ✅ Integración perfecta con ViewModels
 
-### 2.3 Persistencia Local
+### 3.3 Persistencia Local
 
 | Tecnología | Versión | Propósito |
 |-----------|---------|-----------|
@@ -151,7 +213,7 @@ CREATE INDEX idx_arcana_type ON tarot_cards(arcana_type);
 CREATE INDEX idx_suit ON tarot_cards(suit);
 ```
 
-### 2.4 Networking
+### 3.4 Networking
 
 | Tecnología | Versión | Propósito |
 |-----------|---------|-----------|
@@ -216,7 +278,7 @@ Formato de respuesta en JSON:
 }
 ```
 
-### 2.5 Testing
+### 3.5 Testing
 
 | Tecnología | Propósito |
 |-----------|-----------|
@@ -227,9 +289,9 @@ Formato de respuesta en JSON:
 
 ---
 
-## 3. Modelo de Datos
+## 4. Modelo de Datos
 
-### 3.1 Domain Models
+### 4.1 Domain Models
 
 ```kotlin
 // Enumeraciones (Enums)
@@ -306,7 +368,7 @@ enum class YesNoAnswer {
 }
 ```
 
-### 3.2 Configuración de Tiradas
+### 4.2 Configuración de Tiradas
 
 ```kotlin
 // Configuración de cada tipo de tirada
@@ -372,9 +434,9 @@ enum class LayoutType {
 
 ---
 
-## 4. Casos de Uso (Use Cases)
+## 5. Casos de Uso (Use Cases)
 
-### 4.1 Feature: Realizar Tirada
+### 5.1 Feature: Realizar Tirada
 
 ```kotlin
 // UC1: Obtener configuración de tirada
@@ -405,7 +467,7 @@ class GenerateInterpretationUseCase(
 }
 ```
 
-### 4.2 Feature: Enciclopedia
+### 5.2 Feature: Enciclopedia
 
 ```kotlin
 // UC4: Obtener todas las cartas
@@ -437,9 +499,9 @@ class GetCardByIdUseCase(
 
 ---
 
-## 5. Flujo de Navegación
+## 6. Flujo de Navegación
 
-### 5.1 Estructura de Pantallas
+### 6.1 Estructura de Pantallas
 
 ```
 ┌─────────────────────┐
@@ -480,7 +542,7 @@ class GetCardByIdUseCase(
               └────────────────────┘
 ```
 
-### 5.2 Rutas de Navegación
+### 6.2 Rutas de Navegación
 
 ```kotlin
 sealed class Screen(val route: String) {
@@ -496,9 +558,9 @@ sealed class Screen(val route: String) {
 
 ---
 
-## 6. Gestión de Estado
+## 7. Gestión de Estado
 
-### 6.1 Estados de UI
+### 7.1 Estados de UI
 
 **Patrón: Sealed Class para UI State**
 
@@ -553,9 +615,9 @@ class ReadingViewModel @Inject constructor(  // Constructor con dependencias iny
 
 ---
 
-## 7. Assets y Recursos
+## 8. Assets y Recursos
 
-### 7.1 Imágenes de Cartas
+### 8.1 Imágenes de Cartas
 
 **Ubicación:** `app/src/main/res/drawable/`
 
@@ -571,7 +633,7 @@ class ReadingViewModel @Inject constructor(  // Constructor con dependencias iny
 
 **Fuente:** Wikimedia Commons - Tarot de Marsella de dominio público
 
-### 7.2 Contenido de Enciclopedia
+### 8.2 Contenido de Enciclopedia
 
 **Ubicación:** `app/src/main/assets/tarot_data.json`
 
@@ -604,9 +666,9 @@ class ReadingViewModel @Inject constructor(  // Constructor con dependencias iny
 
 ---
 
-## 8. Configuración de Seguridad
+## 9. Configuración de Seguridad
 
-### 8.1 API Key de Claude
+### 9.1 API Key de Claude
 
 **Opción elegida: BuildConfig**
 
@@ -636,9 +698,9 @@ CLAUDE_API_KEY=sk-ant-api03-xxxxx
 
 ---
 
-## 9. Animaciones
+## 10. Animaciones
 
-### 9.1 Animación de Revelado de Cartas
+### 10.1 Animación de Revelado de Cartas
 
 **Enfoque: Compose Animations**
 
@@ -676,9 +738,9 @@ fun CardFlipAnimation(
 
 ---
 
-## 10. Manejo de Errores
+## 11. Manejo de Errores
 
-### 10.1 Estrategias por Capa
+### 11.1 Estrategias por Capa
 
 **Networking (API Claude):**
 - Timeout: 30 segundos
@@ -700,9 +762,9 @@ fun CardFlipAnimation(
 
 ---
 
-## 11. Performance
+## 12. Performance
 
-### 11.1 Optimizaciones
+### 12.1 Optimizaciones
 
 **Carga de imágenes:**
 - Usar Coil con caché en memoria y disco
@@ -721,9 +783,9 @@ fun CardFlipAnimation(
 
 ---
 
-## 12. Testing Strategy
+## 13. Testing Strategy
 
-### 12.1 Pirámide de Testing
+### 13.1 Pirámide de Testing
 
 ```
       ┌─────────┐
@@ -754,9 +816,9 @@ fun CardFlipAnimation(
 
 ---
 
-## 13. Dependencias (build.gradle.kts)
+## 14. Dependencias (build.gradle.kts)
 
-### 13.1 Versiones
+### 14.1 Versiones
 
 ```kotlin
 // versions.gradle.kts o libs.versions.toml
@@ -807,7 +869,7 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 
 ---
 
-## 14. Fases de Implementación
+## 15. Fases de Implementación
 
 ### Fase 1: Infraestructura Base
 1. Configurar Hilt
@@ -841,7 +903,7 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 
 ---
 
-## 15. Riesgos y Mitigaciones
+## 16. Riesgos y Mitigaciones
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |--------|--------------|---------|------------|
@@ -854,7 +916,7 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 
 ---
 
-## 16. Métricas de Éxito Técnico
+## 17. Métricas de Éxito Técnico
 
 **Criterios de aceptación técnicos:**
 
@@ -868,7 +930,7 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 
 ---
 
-## 17. Aprobación
+## 18. Aprobación
 
 Este documento requiere aprobación explícita antes de proceder con `tasks.md`.
 
