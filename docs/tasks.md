@@ -12,10 +12,10 @@
 |------|--------|-------------|----------|
 | **Fase 1: Infraestructura Base** | 4 | 0 | 0% |
 | **Fase 2: Enciclopedia** | 5 | 0 | 0% |
-| **Fase 3: Sistema de Tiradas** | 3 | 0 | 0% |
+| **Fase 3: Sistema de Tiradas** | 4 | 0 | 0% |
 | **Fase 4: Integración con IA** | 4 | 0 | 0% |
 | **Fase 5: Pulido y Testing** | 4 | 0 | 0% |
-| **TOTAL** | **20** | **0** | **0%** |
+| **TOTAL** | **21** | **0** | **0%** |
 
 ---
 
@@ -455,6 +455,63 @@ suspend operator fun invoke(spreadType: SpreadType, question: String?): Result<T
 
 ---
 
+### Tarea 3.4: Navegación desde Tirada a Detalle de Carta
+
+**Descripción**: Permitir al usuario tocar una carta en la tirada para ver su información completa, reutilizando `CardDetailScreen` con un botón adicional "Interpretar con IA" (placeholder para Fase 4).
+
+**Criterios de Aceptación**:
+- [ ] Las cartas en `ReadingScreen` son clickeables
+- [ ] Al tocar una carta navega a `CardDetailScreen` con parámetro `fromReading=true`
+- [ ] `CardDetailScreen` detecta si viene desde tirada o enciclopedia
+- [ ] Si `fromReading=true`: Muestra botón "Interpretar con IA" al final del scroll
+- [ ] Si `fromReading=false`: No muestra el botón
+- [ ] El botón por ahora solo muestra un Toast "Funcionalidad disponible en Fase 4"
+- [ ] La navegación de vuelta funciona correctamente
+- [ ] Ruta actualizada en `Screen.kt` con parámetro opcional `fromReading`
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/navigation/Screen.kt` - Agregar parámetro `fromReading`
+- `app/src/main/java/com/waveapp/tarotai/presentation/navigation/NavGraph.kt` - Parsear parámetro
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/ReadingScreen.kt` - Hacer cartas clickeables
+- `app/src/main/java/com/waveapp/tarotai/presentation/carddetail/CardDetailScreen.kt` - Mostrar botón condicional
+
+**Implementación esperada**:
+```kotlin
+// En ReadingScreen.kt
+DrawnCardItem(
+    drawnCard = drawnCard,
+    modifier = Modifier
+        .weight(1f)
+        .clickable {
+            onCardClick(drawnCard.card.id)
+        }
+)
+
+// En CardDetailScreen.kt
+@Composable
+fun CardDetailScreen(
+    cardId: Int,
+    fromReading: Boolean = false,
+    onNavigateBack: () -> Unit,
+    onInterpretWithAI: () -> Unit = {}
+) {
+    // ... contenido existente ...
+
+    if (fromReading) {
+        Button(
+            onClick = onInterpretWithAI,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Interpretar con IA")
+        }
+    }
+}
+```
+
+**Tiempo estimado**: 1.5 horas
+
+---
+
 ## 🤖 FASE 4: Integración con IA
 
 ### Tarea 4.1: Implementar Repositorio de Claude
@@ -703,10 +760,10 @@ ls -lh app/build/outputs/apk/release/
 |------|-----------------|
 | Fase 1: Infraestructura Base | 3.5 horas |
 | Fase 2: Enciclopedia | 11.5 horas |
-| Fase 3: Sistema de Tiradas | 7 horas |
+| Fase 3: Sistema de Tiradas | 8.5 horas |
 | Fase 4: Integración con IA | 7.5 horas |
 | Fase 5: Pulido y Testing | 7.5 horas |
-| **TOTAL** | **~37 horas** |
+| **TOTAL** | **~38.5 horas** |
 
 **Distribución sugerida**:
 - Sesiones de 2-3 horas

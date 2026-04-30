@@ -25,16 +25,32 @@ sealed class Screen(val route: String) {
     /**
      * Pantalla de detalle de una carta.
      * Requiere el ID de la carta como argumento en la ruta.
+     * Opcionalmente recibe fromReading para mostrar botón "Interpretar con IA".
+     * Cuando viene de tirada, también recibe posición y orientación.
      *
-     * Ejemplo: "card_detail/5" para ver la carta con ID 5.
+     * Ejemplo:
+     * - "card_detail/5" - desde enciclopedia
+     * - "card_detail/5?fromReading=true&position=Pasado&orientation=UPRIGHT" - desde tirada
      */
-    data object CardDetail : Screen("card_detail/{cardId}") {
+    data object CardDetail : Screen("card_detail/{cardId}?fromReading={fromReading}&position={position}&orientation={orientation}") {
         /**
          * Crea la ruta completa con el ID de la carta.
          * @param cardId: ID de la carta (0-77)
-         * @return Ruta navegable, ej: "card_detail/5"
+         * @param fromReading: true si se accede desde una tirada, false desde enciclopedia
+         * @param position: Nombre de la posición en la tirada (ej: "Pasado", "Presente")
+         * @param orientation: Orientación de la carta ("UPRIGHT" o "REVERSED")
+         * @return Ruta navegable
          */
-        fun createRoute(cardId: Int) = "card_detail/$cardId"
+        fun createRoute(
+            cardId: Int,
+            fromReading: Boolean = false,
+            position: String? = null,
+            orientation: String? = null
+        ) = buildString {
+            append("card_detail/$cardId?fromReading=$fromReading")
+            if (position != null) append("&position=$position")
+            if (orientation != null) append("&orientation=$orientation")
+        }
     }
 
     /**
