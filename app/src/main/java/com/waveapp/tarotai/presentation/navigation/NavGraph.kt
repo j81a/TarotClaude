@@ -1,5 +1,6 @@
 package com.waveapp.tarotai.presentation.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
@@ -106,7 +107,9 @@ fun NavGraph(
                 spreadType = spreadType,
                 onNavigateBack = { navController.popBackStack() },
                 onContinue = { question ->
-                    navController.navigate(Screen.Reading.createRoute(spreadType.name, question))
+                    val route = Screen.Reading.createRoute(spreadType.name, question)
+                    Log.d("NavGraph", "Navigating from Question to Reading with route: $route")
+                    navController.navigate(route)
                 }
             )
         }
@@ -125,11 +128,16 @@ fun NavGraph(
             val spreadTypeStr = backStackEntry.arguments?.getString("spreadType") ?: ""
             val question = backStackEntry.arguments?.getString("question")?.takeIf { it.isNotBlank() }
 
+            Log.d("NavGraph", "Reading route - spreadTypeStr: '$spreadTypeStr', question: '$question'")
+
             val spreadType = try {
                 SpreadType.valueOf(spreadTypeStr)
             } catch (e: Exception) {
+                Log.e("NavGraph", "Failed to parse spreadType: '$spreadTypeStr'", e)
                 SpreadType.SIMPLE
             }
+
+            Log.d("NavGraph", "Parsed spreadType: $spreadType")
 
             ReadingScreen(
                 spreadType = spreadType,
