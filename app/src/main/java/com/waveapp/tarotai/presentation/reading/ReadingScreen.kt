@@ -2,6 +2,7 @@ package com.waveapp.tarotai.presentation.reading
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,6 +36,7 @@ fun ReadingScreen(
     spreadType: SpreadType,
     question: String?,
     onNavigateBack: () -> Unit,
+    onCardClick: (DrawnCard) -> Unit = {},
     viewModel: ReadingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -66,6 +68,7 @@ fun ReadingScreen(
             is ReadingUiState.Success -> {
                 ReadingContent(
                     reading = state.reading,
+                    onCardClick = onCardClick,
                     modifier = Modifier.padding(paddingValues)
                 )
             }
@@ -86,6 +89,7 @@ fun ReadingScreen(
 @Composable
 private fun ReadingContent(
     reading: com.waveapp.tarotai.domain.model.TarotReading,
+    onCardClick: (DrawnCard) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Log.d("ReadingScreen", "ReadingContent: Displaying ${reading.drawnCards.size} cards")
@@ -131,10 +135,16 @@ private fun ReadingContent(
 
         when (config.layout) {
             LayoutType.HORIZONTAL -> {
-                HorizontalCardsLayout(drawnCards = reading.drawnCards)
+                HorizontalCardsLayout(
+                    drawnCards = reading.drawnCards,
+                    onCardClick = onCardClick
+                )
             }
             LayoutType.CROSS -> {
-                CrossCardsLayout(drawnCards = reading.drawnCards)
+                CrossCardsLayout(
+                    drawnCards = reading.drawnCards,
+                    onCardClick = onCardClick
+                )
             }
         }
     }
@@ -145,7 +155,10 @@ private fun ReadingContent(
  * Si hay más de 1 carta, se muestran en fila horizontal ajustándose al ancho de pantalla.
  */
 @Composable
-private fun HorizontalCardsLayout(drawnCards: List<DrawnCard>) {
+private fun HorizontalCardsLayout(
+    drawnCards: List<DrawnCard>,
+    onCardClick: (DrawnCard) -> Unit = {}
+) {
     if (drawnCards.size == 1) {
         // Una sola carta: centrada verticalmente, ancho fijo
         Column(
@@ -155,6 +168,7 @@ private fun HorizontalCardsLayout(drawnCards: List<DrawnCard>) {
         ) {
             DrawnCardItem(
                 drawnCard = drawnCards[0],
+                onCardClick = onCardClick,
                 modifier = Modifier.width(220.dp)
             )
         }
@@ -167,6 +181,7 @@ private fun HorizontalCardsLayout(drawnCards: List<DrawnCard>) {
             drawnCards.forEach { drawnCard ->
                 DrawnCardItem(
                     drawnCard = drawnCard,
+                    onCardClick = onCardClick,
                     modifier = Modifier.weight(1f) // Cada carta ocupa el mismo peso
                 )
             }
@@ -180,7 +195,10 @@ private fun HorizontalCardsLayout(drawnCards: List<DrawnCard>) {
  * Todas las cartas tienen el mismo tamaño.
  */
 @Composable
-private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
+private fun CrossCardsLayout(
+    drawnCards: List<DrawnCard>,
+    onCardClick: (DrawnCard) -> Unit = {}
+) {
     val cardWidth = 110.dp // Mismo ancho para todas las cartas (más pequeño para que quepan 3)
 
     Column(
@@ -194,6 +212,7 @@ private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
         if (drawnCards.size > 2) {
             DrawnCardItem(
                 drawnCard = drawnCards[2],
+                onCardClick = onCardClick,
                 modifier = Modifier
                     .width(cardWidth)
                     .wrapContentHeight()
@@ -210,6 +229,7 @@ private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
             if (drawnCards.isNotEmpty()) {
                 DrawnCardItem(
                     drawnCard = drawnCards[0],
+                    onCardClick = onCardClick,
                     modifier = Modifier
                         .width(cardWidth)
                         .wrapContentHeight()
@@ -220,6 +240,7 @@ private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
             if (drawnCards.size > 4) {
                 DrawnCardItem(
                     drawnCard = drawnCards[4],
+                    onCardClick = onCardClick,
                     modifier = Modifier
                         .width(cardWidth)
                         .wrapContentHeight()
@@ -230,6 +251,7 @@ private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
             if (drawnCards.size > 1) {
                 DrawnCardItem(
                     drawnCard = drawnCards[1],
+                    onCardClick = onCardClick,
                     modifier = Modifier
                         .width(cardWidth)
                         .wrapContentHeight()
@@ -241,6 +263,7 @@ private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
         if (drawnCards.size > 3) {
             DrawnCardItem(
                 drawnCard = drawnCards[3],
+                onCardClick = onCardClick,
                 modifier = Modifier
                     .width(cardWidth)
                     .wrapContentHeight()
@@ -256,10 +279,12 @@ private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
 @Composable
 private fun DrawnCardItem(
     drawnCard: DrawnCard,
+    onCardClick: (DrawnCard) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
+            .clickable { onCardClick(drawnCard) }
     ) {
         Column(
             modifier = Modifier.padding(12.dp),

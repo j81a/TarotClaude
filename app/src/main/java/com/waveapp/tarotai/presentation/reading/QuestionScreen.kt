@@ -1,6 +1,8 @@
 package com.waveapp.tarotai.presentation.reading
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -44,12 +46,14 @@ fun QuestionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .imePadding() // Ajusta el padding cuando aparece el teclado
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // Contenido superior - sin centrar, empieza desde arriba
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.weight(1f, fill = false)
             ) {
                 Text(
                     text = getInstructionText(spreadType),
@@ -80,6 +84,9 @@ fun QuestionScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botón en la parte inferior - se mueve con el teclado
             Button(
                 onClick = {
                     if (question.length >= 10) {

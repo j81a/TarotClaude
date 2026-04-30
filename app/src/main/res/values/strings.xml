@@ -97,4 +97,7 @@
     <string name="action_close">Cerrar</string>
     <string name="action_retry">Reintentar</string>
     <string name="action_share">Compartir</string>
+
+    <!-- Interpret with AI Button -->
+    <string name="interpret_with_ai_button">Interpretación en la pregunta</string>
 </resources>

@@ -296,6 +296,22 @@ Todo el código debe estar documentado en español.
 ✅ "Planifica esto y muéstrame el plan antes de codear"
 ```
 
+### 📊 Formato de respuestas del asistente
+
+**IMPORTANTE**: Todas las respuestas del asistente deben terminar con el reporte de consumo de tokens:
+
+```
+---
+
+📊 **Consumo de tokens en esta respuesta:**
+- Tokens usados en esta interacción: [cantidad solo de esta pregunta/respuesta]
+- Tokens totales acumulados: [total usado en la sesión]
+- Tokens restantes: [cantidad] de 200,000
+- Porcentaje usado: [%]
+```
+
+**Objetivo**: Aprender sobre el consumo de tokens en diferentes tipos de interacciones.
+
 ### Comandos útiles
 
 **Para el usuario:**

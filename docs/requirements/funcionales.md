@@ -155,6 +155,7 @@
 - [ ] La información está almacenada localmente (no requiere IA ni internet)
 - [ ] La lista de cartas es navegable y se puede filtrar por tipo
 - [ ] Desde una tirada realizada, el usuario puede tocar una carta para ver su detalle completo
+- [ ] Al ver el detalle desde una tirada, aparece un botón adicional "Interpretar con IA" (funcionalidad de Fase 4)
 
 ---
 
