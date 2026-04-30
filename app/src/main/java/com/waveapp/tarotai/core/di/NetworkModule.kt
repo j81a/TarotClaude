@@ -87,9 +87,8 @@ object NetworkModule {
         return Interceptor { chain ->
             val originalRequest = chain.request()
 
-            // TODO: Obtener la API key de SharedPreferences
-            // Por ahora usamos una key placeholder
-            val apiKey = "YOUR_API_KEY_HERE"
+            // Obtener la API key de BuildConfig (configurada en local.properties)
+            val apiKey = com.waveapp.tarotai.BuildConfig.CLAUDE_API_KEY
 
             val newRequest = originalRequest.newBuilder()
                 .header("x-api-key", apiKey)

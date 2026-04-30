@@ -39,7 +39,7 @@ fun ReadingScreen(
     onCardClick: (DrawnCard) -> Unit = {},
     viewModel: ReadingViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.readingUiState.collectAsState()
 
     // Realizar tirada cuando se carga la pantalla (solo una vez usando Unit como key)
     LaunchedEffect(Unit) {
