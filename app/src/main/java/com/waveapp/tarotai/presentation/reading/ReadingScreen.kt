@@ -1,6 +1,8 @@
 package com.waveapp.tarotai.presentation.reading
 
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -37,8 +39,8 @@ fun ReadingScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Realizar tirada cuando se carga la pantalla
-    LaunchedEffect(spreadType, question) {
+    // Realizar tirada cuando se carga la pantalla (solo una vez usando Unit como key)
+    LaunchedEffect(Unit) {
         viewModel.performReading(spreadType, question)
     }
 
@@ -86,6 +88,11 @@ private fun ReadingContent(
     reading: com.waveapp.tarotai.domain.model.TarotReading,
     modifier: Modifier = Modifier
 ) {
+    Log.d("ReadingScreen", "ReadingContent: Displaying ${reading.drawnCards.size} cards")
+    reading.drawnCards.forEachIndexed { index, card ->
+        Log.d("ReadingScreen", "Card $index: ${card.card.name}")
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -135,14 +142,34 @@ private fun ReadingContent(
 
 /**
  * Layout horizontal para cartas (tiradas Simple, Yes/No, Present, Tendency).
+ * Si hay más de 1 carta, se muestran en fila horizontal ajustándose al ancho de pantalla.
  */
 @Composable
 private fun HorizontalCardsLayout(drawnCards: List<DrawnCard>) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        drawnCards.forEach { drawnCard ->
-            DrawnCardItem(drawnCard = drawnCard)
+    if (drawnCards.size == 1) {
+        // Una sola carta: centrada verticalmente, ancho fijo
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            DrawnCardItem(
+                drawnCard = drawnCards[0],
+                modifier = Modifier.width(220.dp)
+            )
+        }
+    } else {
+        // Múltiples cartas: en fila horizontal, cada una ocupa el mismo espacio
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            drawnCards.forEach { drawnCard ->
+                DrawnCardItem(
+                    drawnCard = drawnCard,
+                    modifier = Modifier.weight(1f) // Cada carta ocupa el mismo peso
+                )
+            }
         }
     }
 }
@@ -150,49 +177,81 @@ private fun HorizontalCardsLayout(drawnCards: List<DrawnCard>) {
 /**
  * Layout en cruz para tirada Cross.
  * Posiciones: 0-Izquierda, 1-Derecha, 2-Arriba, 3-Abajo, 4-Centro
+ * Todas las cartas tienen el mismo tamaño.
  */
 @Composable
 private fun CrossCardsLayout(drawnCards: List<DrawnCard>) {
+    val cardWidth = 110.dp // Mismo ancho para todas las cartas (más pequeño para que quepan 3)
+
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Arriba (posición 2)
         if (drawnCards.size > 2) {
-            DrawnCardItem(drawnCard = drawnCards[2], modifier = Modifier.width(200.dp))
+            DrawnCardItem(
+                drawnCard = drawnCards[2],
+                modifier = Modifier
+                    .width(cardWidth)
+                    .wrapContentHeight()
+            )
         }
 
         // Fila central: Izquierda, Centro, Derecha
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Izquierda (posición 0)
             if (drawnCards.isNotEmpty()) {
-                DrawnCardItem(drawnCard = drawnCards[0], modifier = Modifier.width(120.dp))
+                DrawnCardItem(
+                    drawnCard = drawnCards[0],
+                    modifier = Modifier
+                        .width(cardWidth)
+                        .wrapContentHeight()
+                )
             }
 
             // Centro (posición 4)
             if (drawnCards.size > 4) {
-                DrawnCardItem(drawnCard = drawnCards[4], modifier = Modifier.width(120.dp))
+                DrawnCardItem(
+                    drawnCard = drawnCards[4],
+                    modifier = Modifier
+                        .width(cardWidth)
+                        .wrapContentHeight()
+                )
             }
 
             // Derecha (posición 1)
             if (drawnCards.size > 1) {
-                DrawnCardItem(drawnCard = drawnCards[1], modifier = Modifier.width(120.dp))
+                DrawnCardItem(
+                    drawnCard = drawnCards[1],
+                    modifier = Modifier
+                        .width(cardWidth)
+                        .wrapContentHeight()
+                )
             }
         }
 
         // Abajo (posición 3)
         if (drawnCards.size > 3) {
-            DrawnCardItem(drawnCard = drawnCards[3], modifier = Modifier.width(200.dp))
+            DrawnCardItem(
+                drawnCard = drawnCards[3],
+                modifier = Modifier
+                    .width(cardWidth)
+                    .wrapContentHeight()
+            )
         }
     }
 }
 
 /**
  * Item individual de carta en la tirada.
+ * Todas las cartas tienen la misma estructura y tamaño.
  */
 @Composable
 private fun DrawnCardItem(
@@ -200,26 +259,37 @@ private fun DrawnCardItem(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Nombre de la posición
-            Text(
-                text = drawnCard.positionName,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
+            // Nombre de la posición - Altura fija para que todas ocupen lo mismo
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .padding(horizontal = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = drawnCard.positionName,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 2,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    fontSize = androidx.compose.ui.unit.TextUnit(10f, androidx.compose.ui.unit.TextUnitType.Sp)
+                )
+            }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Imagen de la carta
+            // Imagen de la carta - Altura fija
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(160.dp)
             ) {
                 Image(
                     painter = painterResource(
@@ -239,24 +309,40 @@ private fun DrawnCardItem(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Nombre de la carta
-            Text(
-                text = drawnCard.card.name,
-                style = MaterialTheme.typography.bodyLarge
-            )
+            // Nombre de la carta - Altura fija para que todas ocupen lo mismo
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .padding(horizontal = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = drawnCard.card.name,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        fontSize = androidx.compose.ui.unit.TextUnit(11f, androidx.compose.ui.unit.TextUnitType.Sp)
+                    )
 
-            // Orientación
-            Text(
-                text = if (drawnCard.orientation == CardOrientation.UPRIGHT) {
-                    stringResource(R.string.orientation_upright)
-                } else {
-                    stringResource(R.string.orientation_reversed)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                    // Orientación
+                    Text(
+                        text = if (drawnCard.orientation == CardOrientation.UPRIGHT) {
+                            stringResource(R.string.orientation_upright)
+                        } else {
+                            stringResource(R.string.orientation_reversed)
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp)
+                    )
+                }
+            }
         }
     }
 }
