@@ -1,8 +1,8 @@
 # Fase 3: Sistema de Tiradas - COMPLETADA ✅
 
-> **Fecha de finalización:** 2026-04-29
+> **Fecha de finalización:** 2026-04-30
 >
-> **Duración:** 1 sesión de trabajo
+> **Duración:** 2 sesiones de trabajo
 >
 > **Estado:** Implementación completa y funcional
 
@@ -15,6 +15,8 @@ Se implementó completamente el **Sistema de Tiradas de Tarot** permitiendo a lo
 - Ingresar preguntas personalizadas
 - Ver cartas seleccionadas aleatoriamente con orientación (derecha/invertida)
 - Visualizar disposiciones específicas según el tipo de tirada
+- **Navegar desde la tirada al detalle de cada carta** (Tarea 3.4)
+- **Ver botón "Interpretación en la pregunta"** preparado para Fase 4
 
 ---
 
@@ -70,6 +72,33 @@ Se implementó completamente el **Sistema de Tiradas de Tarot** permitiendo a lo
 ```
 Home → SpreadTypeSelection → Question → Reading
 ```
+
+---
+
+### Tarea 3.4: Navegación desde Tirada a Detalle de Carta ✅
+
+**Descripción**: Permitir al usuario tocar una carta en la tirada para ver su información completa, con botón "Interpretación en la pregunta" preparado para Fase 4.
+
+**Archivos modificados:**
+- `Screen.kt` - Ruta CardDetail actualizada con parámetros `position` y `orientation`
+- `ReadingScreen.kt` - Cartas clickeables, callback `onCardClick` recibe `DrawnCard` completa
+- `NavGraph.kt` - Parseo de parámetros adicionales, Toast con contexto de carta
+- `CardDetailScreen.kt` - Parámetro `fromReading`, botón condicional al final
+- `QuestionScreen.kt` - Campo de pregunta al top, botón visible con teclado (imePadding)
+- `strings.xml` - String "Interpretación en la pregunta"
+
+**Implementación:**
+- Al tocar carta en tirada → navega a CardDetail con `fromReading=true`
+- Se pasan: cardId, position ("Pasado", "Presente", etc.), orientation (UPRIGHT/REVERSED)
+- CardDetail muestra botón "Interpretación en la pregunta" solo si viene de tirada
+- Por ahora botón muestra Toast con contexto disponible para Fase 4
+
+**Preparación para Fase 4:**
+- ✅ Contexto completo de carta guardado en navegación
+- ✅ Posición en tirada disponible
+- ✅ Orientación disponible
+- ✅ Pregunta original accesible desde ReadingScreen
+- ✅ UI lista para conectar con interpretación de IA
 
 ---
 
