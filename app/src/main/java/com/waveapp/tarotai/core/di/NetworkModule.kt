@@ -37,6 +37,7 @@ object NetworkModule {
 
     /**
      * Versión de la API de Claude (header requerido).
+     * Versión actual: 2023-06-01
      */
     private const val ANTHROPIC_VERSION = "2023-06-01"
 

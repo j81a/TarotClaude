@@ -24,6 +24,10 @@ import com.waveapp.tarotai.domain.model.CardOrientation
 import com.waveapp.tarotai.domain.model.DrawnCard
 import com.waveapp.tarotai.domain.model.LayoutType
 import com.waveapp.tarotai.domain.model.SpreadType
+import com.waveapp.tarotai.presentation.reading.components.CardInterpretationCard
+import com.waveapp.tarotai.presentation.reading.components.GeneralInterpretationCard
+import com.waveapp.tarotai.presentation.reading.components.YesNoAnswerCard
+import com.waveapp.tarotai.presentation.reading.viewmodel.InterpretationUiState
 import com.waveapp.tarotai.presentation.reading.viewmodel.ReadingUiState
 import com.waveapp.tarotai.presentation.reading.viewmodel.ReadingViewModel
 
@@ -90,8 +94,11 @@ fun ReadingScreen(
 private fun ReadingContent(
     reading: com.waveapp.tarotai.domain.model.TarotReading,
     onCardClick: (DrawnCard) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ReadingViewModel = hiltViewModel()
 ) {
+    val interpretationState by viewModel.interpretationUiState.collectAsState()
+
     Log.d("ReadingScreen", "ReadingContent: Displaying ${reading.drawnCards.size} cards")
     reading.drawnCards.forEachIndexed { index, card ->
         Log.d("ReadingScreen", "Card $index: ${card.card.name}")
@@ -145,6 +152,35 @@ private fun ReadingContent(
                     drawnCards = reading.drawnCards,
                     onCardClick = onCardClick
                 )
+            }
+        }
+
+        // Sección de Interpretación
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            thickness = 2.dp,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        when (val state = interpretationState) {
+            is InterpretationUiState.Loading -> {
+                InterpretationLoadingView()
+            }
+            is InterpretationUiState.Success -> {
+                InterpretationSuccessView(
+                    reading = reading,
+                    interpretation = state.interpretation,
+                    onCardClick = onCardClick
+                )
+            }
+            is InterpretationUiState.Error -> {
+                InterpretationErrorView(
+                    errorMessage = state.message,
+                    onRetry = { viewModel.retryInterpretation(reading) }
+                )
+            }
+            is InterpretationUiState.Idle -> {
+                // No mostrar nada si no se ha iniciado la interpretación
             }
         }
     }
@@ -416,6 +452,137 @@ private fun ErrorContent(
             )
             Button(onClick = onRetry) {
                 Text(stringResource(R.string.retry))
+            }
+        }
+    }
+}
+
+/**
+ * Vista de loading mientras se genera la interpretación con IA.
+ */
+@Composable
+private fun InterpretationLoadingView() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Interpretando tu tirada...",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Text(
+                text = "Esto puede tomar unos segundos",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+    }
+}
+
+/**
+ * Vista de la interpretación exitosa.
+ */
+@Composable
+private fun InterpretationSuccessView(
+    reading: com.waveapp.tarotai.domain.model.TarotReading,
+    interpretation: com.waveapp.tarotai.domain.model.Interpretation,
+    onCardClick: (DrawnCard) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Título de la sección
+        Text(
+            text = "Interpretación",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        // Si es una tirada Sí o No, mostrar la respuesta primero
+        if (interpretation.yesNoAnswer != null && interpretation.yesNoJustification != null) {
+            YesNoAnswerCard(
+                answer = interpretation.yesNoAnswer,
+                justification = interpretation.yesNoJustification
+            )
+        }
+
+        // Interpretaciones individuales
+        Text(
+            text = "Interpretación de cada carta",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        interpretation.individualInterpretations.forEach { cardInterpretation ->
+            val drawnCard = reading.drawnCards.find {
+                it.card.name == cardInterpretation.cardName
+            }
+
+            CardInterpretationCard(
+                cardInterpretation = cardInterpretation,
+                onClick = { drawnCard?.let { onCardClick(it) } }
+            )
+        }
+
+        // Interpretación general
+        Text(
+            text = "Interpretación general",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        GeneralInterpretationCard(
+            generalInterpretation = interpretation.generalInterpretation
+        )
+    }
+}
+
+/**
+ * Vista de error en la interpretación.
+ */
+@Composable
+private fun InterpretationErrorView(
+    errorMessage: String,
+    onRetry: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Error al generar interpretación",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Button(onClick = onRetry) {
+                Text("Reintentar")
             }
         }
     }

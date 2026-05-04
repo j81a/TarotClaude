@@ -17,7 +17,12 @@
       "Bash(git commit:*)",
       "WebFetch(domain:commons.wikimedia.org)",
       "Bash(python3:*)",
-      "WebFetch(domain:luciellaes.itch.io)"
+      "WebFetch(domain:luciellaes.itch.io)",
+      "Bash(xargs cat:*)",
+      "WebFetch(domain:platform.claude.com)",
+      "Bash(claude auth status:*)",
+      "Bash(claude auth login:*)",
+      "Bash(claude auth logout)"
     ],
     "deny": [],
     "ask": []

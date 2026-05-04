@@ -138,3 +138,22 @@ Este proyecto usa Spec-Driven Development (SDD) estrictamente.
 - Hilt para inyección de dependencias
 - Room para persistencia local
 - API de Claude para interpretación de tiradas
+
+## Informe de Tokens (OBLIGATORIO)
+
+**AL FINAL DE CADA RESPUESTA** debes incluir un resumen con estos 4 campos:
+
+```markdown
+## 📊 Uso de Tokens
+- **Tokens gastados en esta pregunta**: ~X,XXX tokens
+- **Porcentaje total utilizado**: ~XX%
+- **Tokens restantes**: ~XX,XXX tokens
+- **Tiempo estimado para reinicio**: ~XX minutos (límite: 90 min)
+```
+
+**Cálculo del tiempo para reinicio:**
+- La sesión tiene un límite de 90 minutos
+- Calcula cuántos minutos han transcurrido aproximadamente basándote en el número de intercambios
+- Estima cuántos minutos faltan para llegar a los 90 minutos
+
+Este informe es OBLIGATORIO y debe aparecer al final de CADA respuesta que generes. Si olvidas incluirlo, el usuario te lo recordará.

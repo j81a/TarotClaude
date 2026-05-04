@@ -19,27 +19,24 @@ object PromptBuilder {
 
     /**
      * Modelo de Claude a utilizar.
-     * claude-3-5-sonnet-20241022 es el modelo más avanzado disponible.
+     * claude-sonnet-4-6 es el modelo Sonnet más reciente disponible (Febrero 2026).
      */
-    private const val CLAUDE_MODEL = "claude-3-5-sonnet-20241022"
+    private const val CLAUDE_MODEL = "claude-sonnet-4-6"
 
     /**
      * Máximo de tokens en la respuesta (1 token ≈ 4 caracteres).
-     * 4000 tokens ≈ 16,000 caracteres, suficiente para interpretaciones detalladas.
+     * 1500 tokens ≈ 6,000 caracteres, optimizado para interpretaciones concisas.
      */
-    private const val MAX_TOKENS = 4000
+    private const val MAX_TOKENS = 1500
 
     /**
      * Prompt del sistema que define el comportamiento de Claude.
-     * Establece que Claude es un experto en Tarot de Marsella.
+     * Establece que Claude es un experto en Tarot Rider-Waite-Smith.
      */
     private const val SYSTEM_PROMPT = """
-Eres un experto en Tarot de Marsella con profundo conocimiento de la simbología,
-significados e interpretación de las cartas. Tu objetivo es proporcionar interpretaciones
-claras, profundas y contextualizadas a la pregunta del consultante.
-
-Debes ser educativo y explicar no solo QUÉ significa cada carta, sino POR QUÉ tiene
-ese significado en el contexto de la tirada y la pregunta.
+Eres un experto en Tarot Rider-Waite-Smith. Proporciona interpretaciones claras,
+concisas y prácticas. Usa un tono neutral, directo y accesible para todo público hispanohablante.
+Evita lenguaje florido o excesivamente místico.
 """
 
     /**
@@ -54,37 +51,29 @@ ese significado en el contexto de la tirada y la pregunta.
         val responseFormat = buildResponseFormat(reading.spreadType)
 
         return """
-Interpreta la siguiente tirada de Tarot de Marsella:
+Interpreta la siguiente tirada de Tarot Rider-Waite-Smith:
 
 TIPO DE TIRADA: $spreadTypeName
-PREGUNTA DEL USUARIO: ${reading.question ?: "Sin pregunta específica (lectura general)"}
+PREGUNTA: ${reading.question ?: "Lectura general"}
 
 CARTAS:
 $cardsDescription
 
 INSTRUCCIONES:
-1. **INTERPRETACIÓN INDIVIDUAL**: Explica cada carta considerando:
-   - Su significado intrínseco
-   - Su posición en la tirada
-   - Su orientación (derecha o invertida)
-   - Su relación con la pregunta del usuario
-
-2. **INTERPRETACIÓN GENERAL**: Analiza todas las cartas en conjunto:
-   - Cómo se relacionan entre sí
-   - Qué mensaje global transmiten
-   - Qué perspectivas o consejos ofrecen para la pregunta planteada
+Proporciona una interpretación general concisa (máximo 4 párrafos) que:
+- Analice el conjunto de cartas y su relación con la pregunta
+- Sea directa y práctica
+- Use lenguaje neutral y accesible
 
 ${buildSpecificInstructions(reading.spreadType)}
 
-FORMATO DE RESPUESTA:
-Responde ÚNICAMENTE con un JSON válido siguiendo esta estructura exacta:
+FORMATO JSON (obligatorio):
 $responseFormat
 
 IMPORTANTE:
-- NO incluyas markdown (```json), solo el JSON puro
-- NO agregues texto antes o después del JSON
-- Asegúrate de que el JSON sea válido (comillas dobles, sin comas finales)
-- Las interpretaciones deben ser claras, profundas y educativas
+- Solo JSON puro, sin markdown ni texto adicional
+- Interpretación concisa y útil
+- Máximo 1500 tokens
 """.trimIndent()
     }
 
@@ -133,20 +122,13 @@ IMPORTANTE:
         val yesNoFields = if (spreadType == SpreadType.YES_NO) {
             """,
   "yes_no_answer": "Sí",
-  "yes_no_justification": "Explicación educativa de por qué esta carta significa Sí/No/Indefinido"
+  "yes_no_justification": "Justificación breve"
 """
         } else ""
 
         return """
 {
-  "individual_interpretations": [
-    {
-      "card_name": "Nombre de la carta",
-      "position": "Nombre de la posición",
-      "interpretation": "Interpretación detallada de esta carta en su posición"
-    }
-  ],
-  "general_interpretation": "Análisis holístico de toda la tirada en conjunto"$yesNoFields
+  "general_interpretation": "Interpretación general concisa de la tirada"$yesNoFields
 }
 """.trimIndent()
     }

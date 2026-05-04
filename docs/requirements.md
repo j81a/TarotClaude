@@ -9,7 +9,7 @@
 ## 1. Visión del Producto
 
 ### 1.1 Propósito
-TarotAI es una aplicación Android que permite realizar tiradas de Tarot de Marsella con interpretaciones generadas por IA, combinando reflexión personal con aprendizaje sobre simbología del tarot.
+TarotAI es una aplicación Android que permite realizar tiradas de Tarot Rider-Waite-Smith con interpretaciones generadas por IA, combinando reflexión personal con aprendizaje sobre simbología del tarot.
 
 ### 1.2 Usuarios Objetivo
 - Público general interesado en tarot
@@ -19,7 +19,7 @@ TarotAI es una aplicación Android que permite realizar tiradas de Tarot de Mars
 ### 1.3 Valor Principal
 La app ofrece dos experiencias complementarias:
 1. **Reflexión personal**: Responder preguntas mediante tiradas interpretadas por IA
-2. **Aprendizaje**: Estudiar el significado de cada carta del Tarot de Marsella
+2. **Aprendizaje**: Estudiar el significado de cada carta del Tarot Rider-Waite-Smith
 
 ---
 
@@ -120,7 +120,7 @@ El usuario quiere aprender sobre el significado de las cartas sin necesidad de r
 **Dado** que el usuario quiere estudiar una carta específica
 **Cuando** accede a la enciclopedia de cartas
 **Entonces** debe poder:
-1. Ver la lista completa de las 78 cartas del Tarot de Marsella
+1. Ver la lista completa de las 78 cartas del Tarot Rider-Waite-Smith
 2. Seleccionar cualquier carta para ver su información detallada
 3. Acceder a esta información incluso sin conexión a internet
 
@@ -129,7 +129,7 @@ El usuario quiere aprender sobre el significado de las cartas sin necesidad de r
 Cada carta debe incluir (almacenado localmente):
 
 1. **Nombre**: Nombre completo de la carta (ej: "El Loco", "As de Copas")
-2. **Imagen**: Representación visual del Tarot de Marsella
+2. **Imagen**: Representación visual del Tarot Rider-Waite-Smith
 3. **Significado General**: Descripción del arquetipo o concepto que representa
 4. **Significado en Posición Derecha**: Interpretación cuando aparece normal
 5. **Significado en Posición Invertida**: Interpretación cuando aparece al revés
@@ -137,7 +137,7 @@ Cada carta debe incluir (almacenado localmente):
 7. **Palabras Clave**: Lista de 5-8 conceptos principales asociados a la carta
 
 #### Criterios de Aceptación
-- [ ] Todas las 78 cartas del Tarot de Marsella están disponibles:
+- [ ] Todas las 78 cartas del Tarot Rider-Waite-Smith están disponibles:
   - 22 Arcanos Mayores (0-XXI)
   - 56 Arcanos Menores (Bastos, Copas, Espadas, Oros - del As al 10 + 4 figuras cada uno)
 - [ ] La información está almacenada localmente (no requiere IA ni internet)
@@ -155,13 +155,13 @@ Cada carta debe incluir (almacenado localmente):
 La experiencia debe ser inmersiva y visualmente atractiva, emulando la experiencia de una tirada real de cartas.
 
 #### Requisitos Visuales
-- Las cartas deben mostrarse como imágenes del Tarot de Marsella tradicional
+- Las cartas deben mostrarse como imágenes del Tarot Rider-Waite-Smith tradicional
 - Durante la tirada, debe haber una animación de "robar" o "revelar" cartas
 - Las cartas invertidas deben mostrarse visualmente rotadas 180°
 - El diseño debe evocar una atmósfera mística pero moderna (no recargada)
 
 #### Criterios de Aceptación
-- [ ] Las cartas se muestran con las imágenes reales del Tarot de Marsella
+- [ ] Las cartas se muestran con las imágenes reales del Tarot Rider-Waite-Smith
 - [ ] Existe alguna animación al revelar las cartas (no aparecen instantáneamente)
 - [ ] Las cartas invertidas se muestran claramente rotadas
 - [ ] La interfaz es usable y clara en pantallas de diferentes tamaños
@@ -182,7 +182,7 @@ Las siguientes funcionalidades **NO** forman parte de la versión inicial:
 
 ### 4.2 Dependencias Externas
 - **API de Claude**: Requerida para generar interpretaciones contextualizadas
-- **Imágenes de dominio público**: Necesarias las 78 cartas del Tarot de Marsella
+- **Imágenes de dominio público**: Necesarias las 78 cartas del Tarot Rider-Waite-Smith
 
 ### 4.3 Plataforma
 - **Exclusivamente Android** (SDK mínimo 24 - Android 7.0)
@@ -208,7 +208,7 @@ Las siguientes funcionalidades **NO** forman parte de la versión inicial:
 
 ### 6.1 Imágenes del Tarot
 - **Estado**: Por conseguir
-- **Requisito**: 78 imágenes de dominio público del Tarot de Marsella
+- **Requisito**: 78 imágenes de dominio público del Tarot Rider-Waite-Smith
 - **Fuentes potenciales**: Wikimedia Commons, proyectos de tarot libres
 - **Decisión pendiente**: Seleccionar el conjunto específico de imágenes a utilizar
 
@@ -231,7 +231,7 @@ Las siguientes funcionalidades **NO** forman parte de la versión inicial:
 | **Tirada** | Acción de seleccionar y colocar cartas para realizar una consulta |
 | **Posición** | Ubicación específica de una carta en una tirada (ej: pasado, presente) |
 | **Carta Invertida** | Carta que aparece rotada 180°, con significado diferente al normal |
-| **Tarot de Marsella** | Una de las barajas de tarot más antiguas y tradicionales |
+| **Tarot Rider-Waite-Smith** | Baraja de tarot creada en 1909, una de las más populares y con imágenes en todos los arcanos |
 
 ---
 
