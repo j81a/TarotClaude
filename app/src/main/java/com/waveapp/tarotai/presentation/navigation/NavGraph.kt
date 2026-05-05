@@ -68,45 +68,16 @@ fun NavGraph(
 
         // Pantalla de detalle de carta
         // Recibe cardId como argumento de navegación
-        // Opcionalmente recibe fromReading para mostrar botón "Interpretar con IA"
-        // Cuando viene de tirada también recibe position y orientation
         composable(
             route = Screen.CardDetail.route,
             arguments = listOf(
                 navArgument("cardId") {
                     type = NavType.IntType  // El ID es un entero
-                },
-                navArgument("fromReading") {
-                    type = NavType.BoolType
-                    defaultValue = false
-                },
-                navArgument("position") {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument("orientation") {
-                    type = NavType.StringType
-                    nullable = true
                 }
             )
-        ) { backStackEntry ->
-            val fromReading = backStackEntry.arguments?.getBoolean("fromReading") ?: false
-            val position = backStackEntry.arguments?.getString("position")
-            val orientation = backStackEntry.arguments?.getString("orientation")
-            val context = LocalContext.current
-
+        ) {
             CardDetailScreen(
-                onNavigateBack = { navController.popBackStack() },
-                fromReading = fromReading,
-                onInterpretWithAI = {
-                    // Por ahora solo mostramos el contexto que tenemos
-                    val message = buildString {
-                        append("Funcionalidad disponible en Fase 4\n")
-                        if (position != null) append("Posición: $position\n")
-                        if (orientation != null) append("Orientación: $orientation")
-                    }
-                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -176,12 +147,7 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onCardClick = { drawnCard ->
                     navController.navigate(
-                        Screen.CardDetail.createRoute(
-                            cardId = drawnCard.card.id,
-                            fromReading = true,
-                            position = drawnCard.positionName,
-                            orientation = drawnCard.orientation.name
-                        )
+                        Screen.CardDetail.createRoute(cardId = drawnCard.card.id)
                     )
                 }
             )

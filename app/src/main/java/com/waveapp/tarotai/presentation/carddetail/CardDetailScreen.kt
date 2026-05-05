@@ -29,7 +29,7 @@ import com.waveapp.tarotai.presentation.carddetail.viewmodel.CardDetailViewModel
  * Pantalla de detalle de una carta del tarot.
  *
  * Muestra toda la información de una carta:
- * - Imagen (placeholder por ahora)
+ * - Imagen
  * - Nombre
  * - Tipo de arcano y palo
  * - Significado general
@@ -39,16 +39,12 @@ import com.waveapp.tarotai.presentation.carddetail.viewmodel.CardDetailViewModel
  * - Palabras clave
  *
  * @param onNavigateBack Callback para volver atrás
- * @param fromReading Indica si se accede desde una tirada (muestra botón IA)
- * @param onInterpretWithAI Callback cuando se toca "Interpretar con IA" (solo si fromReading=true)
  * @param viewModel ViewModel inyectado por Hilt
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardDetailScreen(
     onNavigateBack: () -> Unit,
-    fromReading: Boolean = false,
-    onInterpretWithAI: () -> Unit = {},
     viewModel: CardDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -80,8 +76,6 @@ fun CardDetailScreen(
             is CardDetailUiState.Success -> {
                 CardDetailContent(
                     card = state.card,
-                    fromReading = fromReading,
-                    onInterpretWithAI = onInterpretWithAI,
                     modifier = Modifier.padding(paddingValues)
                 )
             }
@@ -102,8 +96,6 @@ fun CardDetailScreen(
 @Composable
 private fun CardDetailContent(
     card: TarotCard,
-    fromReading: Boolean = false,
-    onInterpretWithAI: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -194,18 +186,6 @@ private fun CardDetailContent(
                 text = card.symbolism,
                 style = MaterialTheme.typography.bodyMedium
             )
-        }
-
-        // Botón "Interpretar con IA" solo si viene desde una tirada
-        if (fromReading) {
-            Button(
-                onClick = onInterpretWithAI,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(stringResource(R.string.interpret_with_ai_button))
-            }
         }
     }
 }
