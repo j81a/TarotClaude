@@ -45,9 +45,12 @@ fun ReadingScreen(
 ) {
     val uiState by viewModel.readingUiState.collectAsState()
 
-    // Realizar tirada cuando se carga la pantalla (solo una vez usando Unit como key)
+    // Realizar tirada solo si no hay una tirada ya cargada
+    // Esto evita que se regenere la tirada al volver de CardDetail
     LaunchedEffect(Unit) {
-        viewModel.performReading(spreadType, question)
+        if (uiState is ReadingUiState.Idle) {
+            viewModel.performReading(spreadType, question)
+        }
     }
 
     Scaffold(
@@ -505,13 +508,6 @@ private fun InterpretationSuccessView(
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Título de la sección
-        Text(
-            text = "Interpretación",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
-
         // Si es una tirada Sí o No, mostrar la respuesta primero
         if (interpretation.yesNoAnswer != null && interpretation.yesNoJustification != null) {
             YesNoAnswerCard(
@@ -520,29 +516,7 @@ private fun InterpretationSuccessView(
             )
         }
 
-        // Interpretaciones individuales
-        Text(
-            text = "Interpretación de cada carta",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        interpretation.individualInterpretations.forEach { cardInterpretation ->
-            val drawnCard = reading.drawnCards.find {
-                it.card.name == cardInterpretation.cardName
-            }
-
-            CardInterpretationCard(
-                cardInterpretation = cardInterpretation,
-                onClick = { drawnCard?.let { onCardClick(it) } }
-            )
-        }
-
         // Interpretación general
-        Text(
-            text = "Interpretación general",
-            style = MaterialTheme.typography.titleMedium
-        )
-
         GeneralInterpretationCard(
             generalInterpretation = interpretation.generalInterpretation
         )
