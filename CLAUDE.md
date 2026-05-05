@@ -17,25 +17,35 @@ This project uses Gradle with Kotlin DSL (`.gradle.kts` files) and centralized d
 
 ### Common Build Commands
 
+⚠️ **IMPORTANTE - NO EJECUTAR AUTOMÁTICAMENTE**:
+- **NO ejecutes** `./gradlew assembleDebug`, `./gradlew installDebug` ni comandos de build **sin permiso explícito del usuario**
+- **Razón**: Estos comandos consumen tokens y tiempo. El usuario prefiere ejecutarlos manualmente.
+- **Excepción**: Solo ejecutar si el usuario lo pide explícitamente con frases como "compila", "instala", "build", etc.
+
 ```bash
-# Build the project (debug and release variants)
+# Build the project (debug and release variants) - ⚠️ NO EJECUTAR AUTOMÁTICAMENTE
 ./gradlew build
 
-# Assemble debug APK
+# Assemble debug APK - ⚠️ NO EJECUTAR AUTOMÁTICAMENTE
 ./gradlew assembleDebug
 
-# Assemble release APK
+# Assemble release APK - ⚠️ NO EJECUTAR AUTOMÁTICAMENTE
 ./gradlew assembleRelease
 
 # Clean build artifacts
 ./gradlew clean
 
-# Install debug build on connected device/emulator
+# Install debug build on connected device/emulator - ⚠️ NO EJECUTAR AUTOMÁTICAMENTE
 ./gradlew installDebug
 
 # Uninstall all variants
 ./gradlew uninstallAll
 ```
+
+**Workflow recomendado**:
+1. Claude hace cambios en el código
+2. Claude informa al usuario qué cambió
+3. **El usuario** ejecuta manualmente `./gradlew assembleDebug && ./gradlew installDebug`
 
 ### Testing Commands
 
@@ -139,21 +149,23 @@ Este proyecto usa Spec-Driven Development (SDD) estrictamente.
 - Room para persistencia local
 - API de Claude para interpretación de tiradas
 
-## Informe de Tokens (OBLIGATORIO)
+## Informe de Rate Limit de API (OBLIGATORIO)
 
-**AL FINAL DE CADA RESPUESTA** debes incluir un resumen con estos 4 campos:
+**AL FINAL DE CADA RESPUESTA** debes incluir una estimación del estado del rate limit de Claude API:
 
 ```markdown
-## 📊 Uso de Tokens
-- **Tokens gastados en esta pregunta**: ~X,XXX tokens
-- **Porcentaje total utilizado**: ~XX%
-- **Tokens restantes**: ~XX,XXX tokens
-- **Tiempo estimado para reinicio**: ~XX minutos (límite: 90 min)
+## ⚠️ Estimación de Bloqueo de API
+
+**Uso en esta sesión**: ~XXXk tokens
+**Riesgo de bloqueo**: Bajo/Moderado/Alto
+**Ventana deslizante se reinicia aproximadamente**: ~HH:MM AM/PM
 ```
 
-**Cálculo del tiempo para reinicio:**
-- La sesión tiene un límite de 90 minutos
-- Calcula cuántos minutos han transcurrido aproximadamente basándote en el número de intercambios
-- Estima cuántos minutos faltan para llegar a los 90 minutos
+**Notas importantes:**
+- Los tokens de las herramientas (como `assembleDebug`) también cuentan para el rate limit
+- **NO ejecutes comandos de build (`./gradlew assembleDebug`, `installDebug`, etc.) automáticamente**
+- El rate limit es de ~5 horas de ventana deslizante
+- Si el uso supera ~150k tokens en esta sesión, el riesgo es Alto
+- La hora de reinicio es aproximada (5 horas desde que el usuario empezó a usar Claude hoy)
 
-Este informe es OBLIGATORIO y debe aparecer al final de CADA respuesta que generes. Si olvidas incluirlo, el usuario te lo recordará.
+Este informe es OBLIGATORIO y debe aparecer al final de CADA respuesta que generes.

@@ -13,9 +13,9 @@
 | **Fase 1: Infraestructura Base** | 4 | 4 | ✅ 100% |
 | **Fase 2: Enciclopedia** | 5 | 5 | ✅ 100% |
 | **Fase 3: Sistema de Tiradas** | 4 | 4 | ✅ 100% |
-| **Fase 4: Integración con IA** | 4 | 4 | ✅ 100% |
+| **Fase 4: Integración con IA** | 5 | 4 | 🔄 80% |
 | **Fase 5: Pulido y Testing** | 4 | 0 | ⏳ 0% |
-| **TOTAL** | **21** | **17** | **🚀 81%** |
+| **TOTAL** | **22** | **17** | **🚀 77%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -636,6 +636,75 @@ fun buildPrompt(reading: TarotReading): String {
 - Modificar `ReadingViewModel.kt` para generar interpretación
 
 **Tiempo estimado**: 2.5 horas
+
+---
+
+### Tarea 4.5: Implementar Interpretación Individual de Carta desde Tirada
+
+**Descripción**: Conectar el botón "Interpretación en la pregunta" del CardDetailScreen para generar una interpretación contextual de UNA carta específica dentro de la tirada actual.
+
+**Contexto**: Actualmente el botón existe pero solo muestra un Toast. Esta funcionalidad permite al usuario profundizar en el significado de una carta específica sin necesidad de interpretar toda la tirada nuevamente.
+
+**Criterios de Aceptación**:
+- [ ] Nuevo método en `ClaudeRepository`: `interpretSingleCard(card, position, orientation, question)`
+- [ ] Nuevo prompt en `PromptBuilder`: `buildSingleCardPrompt()`
+- [ ] Nuevo Use Case: `InterpretSingleCardUseCase`
+- [ ] El botón "Interpretación en la pregunta" abre un Dialog o nueva pantalla
+- [ ] Se genera interpretación contextual de la carta en relación a:
+  - La pregunta original de la tirada
+  - Su posición en la tirada
+  - Su orientación
+- [ ] Indicador de carga durante la generación
+- [ ] Manejo de errores con botón "Reintentar"
+- [ ] Costos optimizados: ~800 tokens máximo por interpretación
+
+**Archivos a crear**:
+- `domain/usecase/InterpretSingleCardUseCase.kt`
+- `presentation/carddetail/SingleCardInterpretationDialog.kt`
+
+**Archivos a modificar**:
+- `data/remote/prompt/PromptBuilder.kt` - Agregar `buildSingleCardPrompt()`
+- `domain/repository/ClaudeRepository.kt` - Agregar método
+- `data/repository/ClaudeRepositoryImpl.kt` - Implementar método
+- `presentation/carddetail/CardDetailScreen.kt` - Conectar botón con funcionalidad
+- `presentation/carddetail/viewmodel/CardDetailViewModel.kt` - Agregar estado y lógica
+
+**Prompt esperado** (~300 tokens input):
+```kotlin
+fun buildSingleCardPrompt(
+    card: TarotCard,
+    position: String,
+    orientation: CardOrientation,
+    question: String
+): String {
+    return """
+Interpreta esta carta del Tarot Rider-Waite-Smith en el contexto de la pregunta:
+
+CARTA: ${card.name}
+POSICIÓN EN TIRADA: $position
+ORIENTACIÓN: ${if (orientation == UPRIGHT) "Derecha" else "Invertida"}
+PREGUNTA ORIGINAL: $question
+
+Proporciona una interpretación concisa (2-3 párrafos) que explique:
+- Qué significa esta carta en esta posición específica
+- Cómo responde a la pregunta del consultante
+- Qué mensaje o consejo ofrece
+
+Formato JSON:
+{
+  "interpretation": "Interpretación concisa de la carta"
+}
+"""
+}
+```
+
+**Estimación de costos**:
+- Input: ~300 tokens
+- Output: ~800 tokens (máximo)
+- Costo por interpretación: ~$0.004 USD
+- Más económico que la tirada completa
+
+**Tiempo estimado**: 2 horas
 
 ---
 

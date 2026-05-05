@@ -19,10 +19,11 @@ object PromptBuilder {
 
     /**
      * Modelo de Claude a utilizar.
-     * claude-sonnet-4-6 es el modelo Sonnet más reciente disponible (Febrero 2026).
+     * claude-haiku-4-5-20251001 es Haiku 4.5 (más rápido y económico, ~75% más barato que Sonnet).
+     * Alternativa: claude-sonnet-4-6 (mejor calidad narrativa, más caro).
      */
-    private const val CLAUDE_MODEL = "claude-sonnet-4-6"
-
+    private const val CLAUDE_MODEL = "claude-haiku-4-5-20251001"
+    //private const val CLAUDE_MODEL = "claude-sonnet-4-6"
     /**
      * Máximo de tokens en la respuesta (1 token ≈ 4 caracteres).
      * 1500 tokens ≈ 6,000 caracteres, optimizado para interpretaciones concisas.

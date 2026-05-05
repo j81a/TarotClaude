@@ -172,25 +172,6 @@ private fun InterpretationContent(
             )
         }
 
-        // Interpretaciones individuales de cada carta
-        Text(
-            text = "Interpretación de cada carta",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        interpretation.individualInterpretations.forEach { cardInterpretation ->
-            // Buscar la carta correspondiente en la tirada para obtener su ID
-            val drawnCard = reading.drawnCards.find {
-                it.card.name == cardInterpretation.cardName
-            }
-
-            CardInterpretationCard(
-                cardInterpretation = cardInterpretation,
-                onClick = { drawnCard?.let { onCardClick(it.card.id) } }
-            )
-        }
-
         // Interpretación general
         Text(
             text = "Interpretación general",

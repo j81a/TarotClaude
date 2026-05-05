@@ -78,8 +78,18 @@ class ClaudeRepositoryImpl @Inject constructor(
 
             Log.d(TAG, "Respuesta recibida de Claude:\n$responseText")
 
-            // 5. Parsear JSON a Interpretation
-            val interpretation = InterpretationMapper.parseInterpretation(responseText)
+            // 5. Limpiar markdown del JSON (Claude a veces lo envuelve en ```json...```)
+            val cleanedJson = responseText
+                .trim()
+                .removePrefix("```json")
+                .removePrefix("```")
+                .removeSuffix("```")
+                .trim()
+
+            Log.d(TAG, "JSON limpio:\n$cleanedJson")
+
+            // 6. Parsear JSON a Interpretation
+            val interpretation = InterpretationMapper.parseInterpretation(cleanedJson)
             Log.d(TAG, "Interpretación parseada exitosamente")
 
             Result.success(interpretation)

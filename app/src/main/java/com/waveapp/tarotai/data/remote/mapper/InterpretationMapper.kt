@@ -38,7 +38,7 @@ object InterpretationMapper {
     /**
      * DTO que mapea el JSON de respuesta de Claude.
      *
-     * @property individualInterpretations Lista de interpretaciones individuales
+     * @property individualInterpretations Lista de interpretaciones individuales (opcional)
      * @property generalInterpretation Interpretación general de la tirada
      * @property yesNoAnswer Respuesta Sí/No (opcional, solo para tiradas YES_NO)
      * @property yesNoJustification Justificación de la respuesta (opcional)
@@ -46,7 +46,7 @@ object InterpretationMapper {
     @Serializable
     private data class InterpretationDto(
         @SerialName("individual_interpretations")
-        val individualInterpretations: List<CardInterpretationDto>,
+        val individualInterpretations: List<CardInterpretationDto>? = null,
 
         @SerialName("general_interpretation")
         val generalInterpretation: String,
@@ -62,7 +62,7 @@ object InterpretationMapper {
          */
         fun toDomain(): Interpretation {
             return Interpretation(
-                individualInterpretations = individualInterpretations.map { it.toDomain() },
+                individualInterpretations = individualInterpretations?.map { it.toDomain() } ?: emptyList(),
                 generalInterpretation = generalInterpretation,
                 yesNoAnswer = yesNoAnswer?.let { parseYesNoAnswer(it) },
                 yesNoJustification = yesNoJustification
