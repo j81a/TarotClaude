@@ -3,9 +3,9 @@ package com.waveapp.tarotai
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.navigation.compose.rememberNavController
+import com.waveapp.tarotai.core.ui.theme.TarotAITheme
 import com.waveapp.tarotai.presentation.navigation.NavGraph
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,7 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
  *
  * Esta Activity configura:
  * - Jetpack Compose como sistema de UI
- * - Material3 como sistema de diseño
+ * - TarotAITheme como tema personalizado
  * - NavController para navegación entre pantallas
  */
 @AndroidEntryPoint
@@ -27,8 +27,8 @@ class MainActivity : ComponentActivity() {
 
         // setContent: Configura Compose como el sistema de UI de esta Activity
         setContent {
-            // MaterialTheme: Aplica el tema de Material Design 3
-            MaterialTheme {
+            // TarotAITheme: Aplica el tema personalizado místico de la app
+            TarotAITheme {
                 // Surface: Contenedor base que aplica el color de fondo del tema
                 Surface {
                     // rememberNavController: Crea y recuerda el controlador de navegación

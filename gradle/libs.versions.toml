@@ -28,6 +28,11 @@ composeBom = "2024.12.01"
 composeNavigation = "2.8.5"
 activityCompose = "1.9.3"
 
+# Testing - Librerías para tests unitarios
+mockk = "1.13.13"
+coroutinesTest = "1.9.0"
+turbine = "1.2.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -67,6 +72,11 @@ compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-mani
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigation" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+
+# Testing - Librerías para tests unitarios y de integración
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
