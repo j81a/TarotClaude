@@ -1,27 +1,46 @@
 # Requisitos del Proyecto - TarotAI
 
+## Versiones
+
+### v1.0.0 (Lanzamiento Inicial) ✅
+- Realización de tiradas automáticas
+- Interpretación por IA
+- Enciclopedia de cartas offline
+
+### v1.1.0 (En desarrollo) ⏳
+- **Historial de lecturas guardadas**
+- **Carga manual de tiradas** (para tarotistas profesionales)
+
+---
+
 ## Introducción
 
-TarotAI es una aplicación Android que permite realizar tiradas de Tarot de Marsella con interpretaciones generadas por IA, combinando reflexión personal con aprendizaje sobre simbología del tarot.
+TarotAI es una aplicación Android que permite realizar tiradas de Tarot Rider-Waite-Smith con interpretaciones generadas por IA, combinando reflexión personal con aprendizaje sobre simbología del tarot.
 
 ### Propósito
 Ofrecer dos experiencias complementarias:
 1. **Reflexión personal**: Responder preguntas mediante tiradas interpretadas por IA
-2. **Aprendizaje**: Estudiar el significado de cada carta del Tarot de Marsella
+2. **Aprendizaje**: Estudiar el significado de cada carta del Tarot Rider-Waite-Smith
 
 ### Usuarios Objetivo
 - Público general interesado en tarot
 - Estudiantes de tarot que desean aprender
 - Usuarios que buscan reflexión personal mediante las cartas
+- **🆕 Tarotistas profesionales** que necesitan herramientas de gestión de consultas
 
 ---
 
 ## Tabla de Contenidos
 
-1. [Requisitos Funcionales](./funcionales.md) - 10 requisitos
+### Requisitos v1.0.0 ✅
+1. [Requisitos Funcionales](./funcionales.md) - RF-01 a RF-10
 2. [Requisitos No Funcionales](./no-funcionales.md) - 5 requisitos
 3. [UI/UX](./ui-ux.md) - Especificaciones visuales
 4. [Criterios de Aceptación](./criterios-aceptacion.md) - Validación de requisitos
+
+### Requisitos v1.1.0 🆕
+5. [Historial de Lecturas Guardadas](./historial.md) - RF-11
+6. [Carga Manual de Tiradas](./carga-manual.md) - RF-12
 
 ---
 
@@ -29,15 +48,15 @@ Ofrecer dos experiencias complementarias:
 
 ### Cuantitativo de Requisitos
 
-| Categoría | Cantidad |
-|-----------|----------|
-| **Requisitos Funcionales** | 10 |
-| **Requisitos No Funcionales** | 5 |
-| **Total** | 15 |
+| Categoría | v1.0.0 | v1.1.0 | Total |
+|-----------|--------|--------|-------|
+| **Requisitos Funcionales** | 10 | +2 | **12** |
+| **Requisitos No Funcionales** | 5 | - | **5** |
+| **Total** | 15 | +2 | **17** |
 
 ### Funcionalidades Core
 
-**3 pilares principales:**
+**v1.0.0 - 3 pilares principales:**
 
 1. **Realización de Tiradas** (5 tipos disponibles)
    - Carta Simple (1 carta)
@@ -56,39 +75,59 @@ Ofrecer dos experiencias complementarias:
    - Disponible sin conexión a internet
    - Información completa de cada carta
 
+**v1.1.0 - 2 nuevas funcionalidades profesionales:**
+
+4. **Historial de Lecturas Guardadas** 🆕
+   - Guardar lecturas con nombre de consultante
+   - Agregar y editar notas personales
+   - Revisión de interpretaciones pasadas
+   - Persistencia en base de datos local
+
+5. **Carga Manual de Tiradas** 🆕
+   - Cargar cartas de tiradas físicas
+   - Selección manual de cada carta y orientación
+   - Interpretación por IA de cartas físicas
+   - Ideal para tarotistas profesionales
+
 ### Restricciones Clave
 
 **Plataforma**
 - Exclusivamente Android (SDK mínimo 24 - Android 7.0)
 - Orientación vertical (portrait)
 
-**Fuera del Alcance (MVP)**
+**Fuera del Alcance (v1.1.0)**
 - Sistema de usuarios y autenticación
-- Historial de tiradas guardadas
-- Backend propio
+- Backend propio (sincronización en la nube)
 - Compartir en redes sociales
 - Sistema de favoritos
+- Exportar historial en PDF/imagen
 
 ### Criterios de Éxito
 
-**Funcionales**
-- Usuario completa tirada en menos de 2 minutos
-- Usuario consulta información de cartas sin tirada
-- Interpretaciones coherentes con la pregunta
+**Funcionales (v1.0.0)**
+- ✅ Usuario completa tirada en menos de 2 minutos
+- ✅ Usuario consulta información de cartas sin tirada
+- ✅ Interpretaciones coherentes con la pregunta
+
+**Funcionales (v1.1.0)**
+- ⏳ Usuario puede guardar y revisar lecturas pasadas
+- ⏳ Usuario puede cargar tiradas físicas para interpretación
+- ⏳ Tarotistas profesionales adoptan la app como herramienta de trabajo
 
 **No Funcionales**
-- App funciona sin conexión para enciclopedia
-- Generación de IA en menos de 30 segundos
-- Imágenes cargan en menos de 2 segundos
+- ✅ App funciona sin conexión para enciclopedia
+- ✅ Generación de IA en menos de 30 segundos
+- ✅ Imágenes cargan en menos de 2 segundos
 
 ---
 
 ## Información Adicional
 
 - **Fuente de verdad**: Este documento define QUÉ construir y POR QUÉ, no el CÓMO
-- **Última actualización**: 2026-04-24
-- **Estado**: ⏳ Pendiente de revisión
+- **Última actualización**: 2026-05-06
+- **Versión actual en desarrollo**: v1.1.0
+- **Estado**: ⏳ Pendiente de revisión (v1.1.0)
 
 ---
 
-*Documento generado automáticamente desde `requirements.md`*
+*Documento actualizado con estructura fraccionada para optimización de tokens*

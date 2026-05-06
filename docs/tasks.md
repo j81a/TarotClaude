@@ -8,14 +8,25 @@
 
 ## 📊 Estado General
 
+### v1.0.0 ✅
 | Fase | Tareas | Completadas | Progreso |
 |------|--------|-------------|----------|
 | **Fase 1: Infraestructura Base** | 4 | 4 | ✅ 100% |
 | **Fase 2: Enciclopedia** | 5 | 5 | ✅ 100% |
 | **Fase 3: Sistema de Tiradas** | 4 | 4 | ✅ 100% |
 | **Fase 4: Integración con IA** | 4 | 4 | ✅ 100% |
-| **Fase 5: Pulido y Testing** | 4 | 3 | ✅ 75% |
-| **TOTAL** | **21** | **20** | **🚀 95%** |
+| **Fase 5: Pulido y Testing** | 4 | 4 | ✅ 100% |
+| **Subtotal v1.0.0** | **21** | **21** | **✅ 100%** |
+
+### v1.1.0 ⏳
+| Fase | Tareas | Completadas | Progreso |
+|------|--------|-------------|----------|
+| **Fase 6: Historial de Lecturas** | 5 | 0 | ⏳ 0% |
+| **Fase 7: Carga Manual de Tiradas** | 6 | 0 | ⏳ 0% |
+| **Subtotal v1.1.0** | **11** | **0** | **⏳ 0%** |
+
+### Total General
+| **TOTAL** | **32** | **21** | **🚀 66%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -816,8 +827,61 @@ Una tarea se considera completada cuando:
 
 ---
 
+---
+
+## 📚 FASE 6: Historial de Lecturas Guardadas (v1.1.0) 🆕
+
+Ver detalles completos en: [docs/fases/fase6-historial.md](fases/fase6-historial.md)
+
+### Resumen de Tareas
+
+- **Tarea 6.1**: Actualizar Base de Datos (Room) - 1.5h
+- **Tarea 6.2**: Actualizar QuestionScreen (Reutilización) - 2h
+- **Tarea 6.3**: Implementar Domain Layer de Historial - 2h
+- **Tarea 6.4**: Implementar UI de Historial - 3h
+- **Tarea 6.5**: Implementar UI de Detalle con Notas Editables - 3.5h
+
+**Total Fase 6: ~12 horas**
+
+---
+
+## 🎴 FASE 7: Carga Manual de Tiradas (v1.1.0) 🆕
+
+Ver detalles completos en: [docs/fases/fase7-carga-manual.md](fases/fase7-carga-manual.md)
+
+### Resumen de Tareas
+
+- **Tarea 7.1**: Implementar Domain Layer de Carga Manual - 2h
+- **Tarea 7.2**: Actualizar TarotCardRepository - 1h
+- **Tarea 7.3**: Implementar ManualLoadScreen - 3h
+- **Tarea 7.4**: Implementar CardSelectorScreen - 3.5h
+- **Tarea 7.5**: Integrar Interpretación de Carga Manual - 1.5h
+- **Tarea 7.6**: Integrar con Flujo Principal - 2h
+
+**Total Fase 7: ~13 horas**
+
+---
+
+## 📊 Estimación Total de Tiempo (Actualizado v1.1.0)
+
+| Fase | Tiempo Estimado |
+|------|-----------------|
+| Fase 1: Infraestructura Base | 3.5 horas |
+| Fase 2: Enciclopedia | 11.5 horas |
+| Fase 3: Sistema de Tiradas | 8.5 horas |
+| Fase 4: Integración con IA | 7.5 horas |
+| Fase 5: Pulido y Testing | 7.5 horas |
+| **Subtotal v1.0.0** | **38.5 horas** ✅ |
+| Fase 6: Historial de Lecturas | 12 horas |
+| Fase 7: Carga Manual | 13 horas |
+| **Subtotal v1.1.0** | **25 horas** ⏳ |
+| **TOTAL GENERAL** | **~63.5 horas** |
+
+---
+
 ## 🚦 Próximo Paso
 
-**Empezar con Tarea 1.1: Configurar Hilt**
+**v1.0.0 completada** ✅
+**Siguiente: Fase 6 - Tarea 6.1: Actualizar Base de Datos (Room)**
 
-¿Listo para comenzar la implementación? 🚀
+¿Listo para implementar v1.1.0? 🚀

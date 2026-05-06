@@ -1,18 +1,36 @@
 # Plan de Implementación - TarotAI
 
 > **Documento de arquitectura y decisiones técnicas**
-> Define CÓMO implementar los requisitos definidos en `requirements.md`
-> Última actualización: 2026-04-29
+> Define CÓMO implementar los requisitos definidos en `requirements/`
+> Última actualización: 2026-05-06
+
+## Versiones
+
+### v1.0.0 (Completada) ✅
+- Tiradas automáticas
+- Interpretación por IA
+- Enciclopedia offline
+
+### v1.1.0 (En desarrollo) ⏳
+- Historial de lecturas guardadas
+- Carga manual de tiradas
+- Reutilización de pantallas (QuestionScreen compartida)
+
+---
 
 ## Introducción
 
 Este documento proporciona una guía técnica completa para la implementación de TarotAI, una aplicación móvil Android que combina un sistema de tiradas de tarot con interpretaciones potenciadas por inteligencia artificial. La arquitectura está diseñada siguiendo patrones reconocidos como MVVM y Clean Architecture para garantizar mantenibilidad, testabilidad y escalabilidad.
+
+**v1.1.0** agrega funcionalidades profesionales manteniendo coherencia UX mediante reutilización inteligente de componentes existentes.
 
 El documento cubre decisiones tecnológicas fundamentales, patrones de arquitectura, estructura del código, gestión del estado, seguridad, y estrategias de testing. Cada sección proporciona justificaciones claras y ejemplos prácticos para facilitar la comprensión e implementación consistente.
 
 Este es un documento vivo que sirve como referencia durante todo el ciclo de desarrollo y debe consultarse regularmente para asegurar que todas las decisiones técnicas se mantienen consistentes.
 
 ## Tabla de Contenidos
+
+### Plan Base (v1.0.0) ✅
 
 1. **[Arquitectura General](./01-arquitectura.md)** - MVVM, Clean Architecture, estructura modular del proyecto
 2. **[Estándares de Código](./02-estandares.md)** - Documentación en español, convenciones de naming, formato
@@ -31,3 +49,7 @@ Este es un documento vivo que sirve como referencia durante todo el ciclo de des
 15. **[Fases de Implementación](./15-fases.md)** - Roadmap de desarrollo, milestones
 16. **[Riesgos y Mitigaciones](./16-riesgos.md)** - Análisis de riesgos, planes de contingencia
 17. **[Métricas de Éxito Técnico](./17-metricas.md)** - Criterios de aceptación técnicos, KPIs
+
+### Cambios de Versión
+
+18. **[Cambios de v1.1.0](./18-v1.1.0.md)** 🆕 - Historial, Carga Manual, decisiones arquitecturales

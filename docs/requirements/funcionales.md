@@ -22,22 +22,35 @@
 
 ---
 
-## RF-02: Formular Pregunta
+## RF-02: Formular Pregunta y Datos del Consultante (Actualizado v1.1.0) 🔄
 
-**Descripción**: El usuario puede ingresar una pregunta de texto libre para contextualizar su tirada.
+**Descripción**: El usuario puede ingresar una pregunta de texto libre y opcionalmente el nombre del consultante para contextualizar su tirada.
 
-**Contexto**: La IA necesita la pregunta del usuario para generar interpretaciones personalizadas.
+**Contexto**: La IA necesita la pregunta del usuario para generar interpretaciones personalizadas. Además, para poder guardar lecturas en el historial (RF-11), es útil capturar el nombre del consultante desde el inicio.
 
 **Comportamiento esperado**:
 - Campo de entrada de texto para la pregunta
+- **Nuevo**: Toggle "Esta lectura es para alguien más"
+- **Nuevo**: Campo de nombre del consultante (visible cuando toggle está ON)
 - Validación de entrada (mínimo 10 caracteres)
 - Pregunta obligatoria para todas las tiradas excepto "Carta Simple"
+
+**Modos de Operación**:
+
+| Modo | Toggle | Campo Consultante | Uso |
+|------|--------|-------------------|-----|
+| **Automático** | Opcional (OFF por defecto) | Visible solo si toggle ON | Tirada normal para uno mismo o para otro |
+| **Manual** | Forzado a ON | Siempre visible y obligatorio | Carga manual requiere consultante |
 
 **Criterios de Aceptación**:
 - [ ] El usuario puede ingresar una pregunta de texto (mínimo 10 caracteres)
 - [ ] La pregunta es obligatoria para todas las tiradas excepto "Carta Simple"
 - [ ] Se muestra mensaje de error si la pregunta es muy corta
-- [ ] La pregunta se mantiene durante todo el proceso de tirada
+- [ ] **Nuevo**: Existe toggle "Esta lectura es para alguien más"
+- [ ] **Nuevo**: Campo consultante visible solo cuando toggle está ON (modo automático)
+- [ ] **Nuevo**: En modo manual (`isManualLoad=true`), toggle forzado a ON y campo obligatorio
+- [ ] **Nuevo**: Validación: consultante mínimo 2 caracteres, máximo 100
+- [ ] La pregunta y consultante se mantienen durante todo el proceso de tirada
 
 ---
 
@@ -198,9 +211,78 @@
 
 ---
 
+---
+
+## RF-11: Historial de Lecturas Guardadas (v1.1.0) 🆕
+
+**Descripción**: El usuario puede guardar lecturas con nombre de consultante y agregar notas personales.
+
+**Contexto**: Los tarotistas profesionales necesitan llevar un registro de las consultas realizadas para realizar seguimiento de consultantes y revisar interpretaciones pasadas.
+
+**Comportamiento esperado**:
+- Guardar lectura después de interpretación
+- Asignar nombre de consultante (obligatorio)
+- Acceder al historial desde menú principal
+- Ver lista de lecturas ordenadas por fecha
+- Agregar y editar notas en lecturas guardadas
+- Ver interpretación completa de lecturas pasadas
+
+**Criterios de Aceptación**:
+- [ ] Botón "Guardar Lectura" visible después de interpretación
+- [ ] Diálogo solicita nombre de consultante (obligatorio, mín 2 caracteres)
+- [ ] Opción "Historial" en menú principal
+- [ ] Historial muestra lecturas ordenadas por fecha descendente
+- [ ] Cada entrada muestra: consultante, fecha, tipo de tirada, pregunta
+- [ ] Al tocar lectura, se ve detalle completo con interpretación
+- [ ] Campo "Notas Personales" editable en detalle de lectura
+- [ ] Notas se guardan automáticamente (sin botón "Guardar")
+- [ ] Lecturas persisten entre sesiones
+- [ ] Cartas en detalle son clickeables → CardDetailScreen
+
+**Documentación completa**: Ver [historial.md](./historial.md)
+
+---
+
+## RF-12: Carga Manual de Tiradas (v1.1.0) 🆕
+
+**Descripción**: El usuario puede cargar manualmente las cartas de una tirada física para obtener interpretación por IA.
+
+**Contexto**: Los tarotistas profesionales realizan lecturas con mazos físicos y necesitan que la app interprete las cartas que ellos seleccionaron manualmente.
+
+**Comportamiento esperado**:
+- Opción "Cargar Lectura" desde menú principal
+- Seleccionar tipo de tirada y datos (consultante, pregunta)
+- Pantalla muestra cartas boca abajo con ícono "+"
+- Al tocar "+", abre selector de cartas con filtros excluyentes
+- Seleccionar carta y orientación (Derecha/Invertida)
+- Editar cartas antes de interpretar
+- Botón "Interpretar" habilitado cuando todas las cartas están cargadas
+- Después de interpretación, comportamiento idéntico a tirada automática
+
+**Criterios de Aceptación**:
+- [ ] Opción "Cargar Lectura" en menú principal
+- [ ] Primera pantalla pide: tipo de tirada, consultante, pregunta
+- [ ] Segunda pantalla muestra N cartas boca abajo (según tipo de tirada)
+- [ ] Cada carta tiene ícono "+" visible
+- [ ] Al tocar "+", abre selector con filtros excluyentes (Todos/Mayores/Menores por palo)
+- [ ] Los filtros son excluyentes (solo uno activo a la vez)
+- [ ] Al seleccionar carta, pregunta orientación (Derecha/Invertida)
+- [ ] Cartas ya seleccionadas no son clickeables en el selector
+- [ ] Se pueden cambiar cartas ya cargadas antes de interpretar
+- [ ] Botón "Interpretar" deshabilitado si faltan cartas
+- [ ] Una vez interpretada, las cartas ya no se pueden editar
+- [ ] Tocar carta interpretada → CardDetailScreen
+- [ ] La lectura se puede guardar en historial igual que tirada automática
+
+**Documentación completa**: Ver [carga-manual.md](./carga-manual.md)
+
+---
+
 ## Resumen
 
-**Total de Requisitos Funcionales: 10**
+**Total de Requisitos Funcionales: 12**
+
+### v1.0.0 ✅
 
 | ID | Requisito | Prioridad |
 |----|-----------|-----------|
@@ -215,6 +297,13 @@
 | RF-09 | Información Detallada de Cartas | Media |
 | RF-10 | Cargar Imágenes de Cartas | Alta |
 
+### v1.1.0 🆕
+
+| ID | Requisito | Prioridad |
+|----|-----------|-----------|
+| RF-11 | Historial de Lecturas Guardadas | Alta |
+| RF-12 | Carga Manual de Tiradas | Alta |
+
 ---
 
-*Documento generado automáticamente desde `requirements.md`*
+*Documento actualizado para v1.1.0 - Última actualización: 2026-05-06*

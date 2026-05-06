@@ -132,9 +132,21 @@ To add new dependencies, update `gradle/libs.versions.toml` first, then referenc
 Este proyecto usa Spec-Driven Development (SDD) estrictamente.
 
 ### Documentos de especificación (en orden)
-1. docs/requirements.md — qué construir (fuente de verdad)
-2. docs/plan.md — arquitectura y decisiones técnicas
-3. docs/tasks.md — tareas atómicas con checklist
+1. **docs/requirements/** — qué construir (fuente de verdad, estructura fraccionada)
+   - Lee `docs/requirements/index.md` primero para el overview
+   - Luego consulta los archivos específicos según necesites
+2. **docs/plan/** — arquitectura y decisiones técnicas (estructura fraccionada)
+   - Lee `docs/plan/index.md` primero para el overview
+   - Luego consulta los archivos específicos según necesites
+3. **docs/tasks.md** — tareas atómicas con checklist (archivo único)
+
+### Estructura fraccionada para optimizar tokens
+⚠️ **IMPORTANTE**: Este proyecto usa estructura fraccionada en `requirements/` y `plan/`
+- **NO leas** `docs/requirements.md` (archivo antiguo, desactualizado)
+- **SÍ lee** `docs/requirements/index.md` y archivos específicos en esa carpeta
+- **NO leas** `docs/plan.md` (archivo antiguo, desactualizado)
+- **SÍ lee** `docs/plan/index.md` y archivos específicos en esa carpeta
+- Esto ahorra tokens y mejora performance en sesiones largas
 
 ### Reglas obligatorias
 - Nunca escribir código sin tener aprobados los 3 documentos anteriores

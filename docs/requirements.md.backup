@@ -2,7 +2,20 @@
 
 > **Fuente de verdad del proyecto**
 > Este documento define QUÉ construir y POR QUÉ, no el CÓMO.
-> Última actualización: 2026-04-24
+> Última actualización: 2026-05-05
+
+---
+
+## Versiones
+
+### v1.0.0 (Lanzamiento Inicial) ✅
+- Realización de tiradas automáticas
+- Interpretación por IA
+- Enciclopedia de cartas offline
+
+### v1.1.0 (En desarrollo) ⏳
+- **Historial de lecturas guardadas**
+- **Carga manual de tiradas** (para tarotistas profesionales)
 
 ---
 
@@ -145,6 +158,151 @@ Cada carta debe incluir (almacenado localmente):
 - [ ] La lista de cartas es navegable y se puede filtrar por tipo (Arcanos Mayores/Menores)
 - [ ] Desde una tirada realizada, el usuario puede tocar una carta para ver su detalle completo
 
+### 2.4 Historial de Lecturas Guardadas (v1.1.0) 🆕
+
+#### Contexto
+Los tarotistas necesitan llevar un registro de las consultas realizadas para realizar seguimiento de consultantes, revisar interpretaciones pasadas y agregar notas reflexivas posteriores. Esta funcionalidad convierte la app en una herramienta profesional de gestión de consultas.
+
+#### Comportamiento Esperado
+
+**Dado** que el usuario ha realizado una tirada
+**Cuando** accede a guardar la lectura
+**Entonces** debe poder:
+1. Asignar un nombre de consultante a la lectura
+2. Ver la lectura guardada en el historial
+3. Acceder al historial desde el menú principal
+4. Agregar notas a una lectura guardada
+5. Editar las notas existentes en cualquier momento
+6. Ver la interpretación completa de lecturas pasadas
+
+#### Datos de una Lectura Guardada
+
+Cada lectura en el historial debe incluir:
+
+1. **Fecha y hora**: Timestamp de cuándo se realizó la tirada
+2. **Nombre del consultante**: Campo de texto libre (obligatorio para guardar)
+3. **Tipo de tirada**: Cuál de los 5 tipos fue utilizado
+4. **Pregunta**: La pregunta formulada por el consultante
+5. **Cartas seleccionadas**: Las cartas que salieron (con posición y orientación)
+6. **Interpretación completa**: La interpretación generada por la IA
+7. **Notas personales**: Campo de texto libre para que el tarotista agregue observaciones
+
+#### Pantalla de Historial
+
+La pantalla de historial debe mostrar:
+- Lista cronológica de lecturas (más reciente primero)
+- Para cada entrada mostrar:
+  - Nombre del consultante
+  - Fecha (formato: "DD/MM/YYYY - HH:MM")
+  - Tipo de tirada
+  - Pregunta (truncada si es muy larga)
+- Al tocar una lectura → Ver detalle completo
+- Botón para agregar/editar notas visible en el detalle
+
+#### Gestión de Notas
+
+**Comportamiento de notas**:
+- Campo de texto multilinea
+- Se puede agregar nota al ver el detalle de una lectura guardada
+- Se puede editar una nota existente en cualquier momento
+- Las notas se guardan automáticamente
+- No hay límite de caracteres (razonable: hasta 2000 caracteres)
+
+#### Criterios de Aceptación
+- [ ] Al completar una tirada con interpretación, se puede guardar con nombre de consultante
+- [ ] El nombre del consultante es obligatorio para guardar (mínimo 2 caracteres)
+- [ ] Existe una opción "Historial" en el menú principal (HomeScreen)
+- [ ] El historial muestra todas las lecturas guardadas ordenadas por fecha descendente
+- [ ] Al tocar una lectura se ve: fecha, consultante, pregunta, cartas, interpretación y notas
+- [ ] Existe un campo "Notas" en el detalle de la lectura
+- [ ] Las notas se pueden agregar y editar desde el detalle
+- [ ] Las notas se guardan en base de datos local (Room)
+- [ ] Las lecturas se persisten entre sesiones de la app
+- [ ] Desde el detalle de una lectura guardada, tocar una carta abre CardDetailScreen
+
+### 2.5 Carga Manual de Tiradas (v1.1.0) 🆕
+
+#### Contexto
+Los tarotistas profesionales realizan lecturas con mazos físicos y necesitan que la app interprete las cartas que ellos seleccionaron manualmente. Este flujo permite usar la IA para interpretación sin perder el ritual personal de tirar cartas físicamente.
+
+**Caso de uso real**: Un tarotista tiene un consultante presencial, tira las cartas con su mazo físico, y luego usa la app para generar la interpretación en lugar de hacerlo mentalmente.
+
+#### Comportamiento Esperado
+
+**Dado** que el usuario quiere cargar una tirada realizada físicamente
+**Cuando** accede a "Cargar Lectura" desde el menú principal
+**Entonces** debe poder:
+1. Seleccionar el tipo de tirada (mismos 5 tipos)
+2. Ingresar nombre del consultante
+3. Ingresar la pregunta
+4. Seleccionar manualmente cada carta en el orden correcto
+5. Ver las cartas cargadas boca abajo inicialmente
+6. Modificar cartas antes de interpretar
+7. Solicitar interpretación una vez cargadas todas las cartas
+8. Ver la interpretación como en una tirada normal
+
+#### Flujo de Pantallas
+
+**1. Pantalla de Configuración (QuestionScreen adaptada)**
+- Seleccionar tipo de tirada
+- Campo: Nombre del consultante (obligatorio)
+- Campo: Pregunta (obligatorio para todas excepto "Carta Simple")
+- Botón "Continuar" → Va a pantalla de carga de cartas
+
+**2. Pantalla de Carga de Cartas (nueva)**
+- Muestra la cantidad de cartas según el tipo de tirada
+- Cada posición inicialmente muestra una carta boca abajo
+- Cada carta tiene un ícono "+" o "Editar"
+- Al tocar el "+" → Abre selector de cartas
+- Muestra botón "Interpretar" (deshabilitado hasta cargar todas)
+- Mientras no esté interpretado, se puede cambiar cualquier carta
+
+**3. Selector de Cartas (nuevo)**
+- Similar a EncyclopediaScreen pero con filtros excluyentes
+- **Filtros disponibles** (solo uno activo a la vez):
+  - Todos (sin filtro)
+  - Arcanos Mayores
+  - Arcanos Menores: Bastos
+  - Arcanos Menores: Copas
+  - Arcanos Menores: Espadas
+  - Arcanos Menores: Oros
+- Grid de cartas con imágenes
+- Al tocar una carta → Pregunta orientación (Derecha/Invertida)
+- Confirmar → Carta se carga en la posición correspondiente
+
+**4. Pantalla de Interpretación**
+- Una vez interpretada, funciona exactamente igual que una tirada normal
+- El botón "Interpretar" ya no es visible
+- Las cartas ya no se pueden cambiar
+- Tocar una carta → CardDetailScreen
+- Se puede guardar en el historial con los mismos datos
+
+#### Diferencias con Nueva Lectura
+
+| Aspecto | Nueva Lectura | Cargar Lectura |
+|---------|---------------|----------------|
+| Selección de cartas | Automática (aleatoria) | Manual (tarotista elige) |
+| Momento de interpretación | Inmediato después de revelar | Tras botón "Interpretar" |
+| Edición de cartas | No se puede | Sí, antes de interpretar |
+| Orientación de cartas | Automática (50/50) | Manual (tarotista elige) |
+| Animaciones | Revelar cartas | Cargar cartas |
+
+#### Criterios de Aceptación
+- [ ] Existe opción "Cargar Lectura" en el menú principal (HomeScreen)
+- [ ] Primera pantalla pide: tipo de tirada, nombre consultante, pregunta
+- [ ] Segunda pantalla muestra N cartas boca abajo (según tipo de tirada)
+- [ ] Cada carta tiene icono "+" o "Editar" visible
+- [ ] Al tocar "+" abre selector con filtros de tipo de carta
+- [ ] Los filtros son excluyentes (solo uno activo a la vez)
+- [ ] Al seleccionar una carta, pregunta orientación (Derecha/Invertida)
+- [ ] La carta seleccionada se muestra en su posición
+- [ ] El botón "Interpretar" está deshabilitado si faltan cartas
+- [ ] Se pueden cambiar cartas ya cargadas antes de interpretar
+- [ ] Al presionar "Interpretar" se llama a la API de Claude
+- [ ] Una vez interpretada, las cartas ya no se pueden editar
+- [ ] Tocar una carta interpretada → CardDetailScreen (igual que tirada normal)
+- [ ] La lectura cargada se puede guardar en historial igual que una tirada normal
+
 ---
 
 ## 3. Interfaz Gráfica
@@ -170,15 +328,16 @@ La experiencia debe ser inmersiva y visualmente atractiva, emulando la experienc
 
 ## 4. Restricciones y Alcance
 
-### 4.1 Fuera del Alcance (MVP)
-Las siguientes funcionalidades **NO** forman parte de la versión inicial:
+### 4.1 Fuera del Alcance (v1.1.0)
+Las siguientes funcionalidades **NO** están planificadas para v1.1.0:
 - Sistema de usuarios y autenticación
-- Historial de tiradas guardadas
-- Backend propio
+- Backend propio (sincronización en la nube)
 - Compartir resultados en redes sociales
 - Tiradas colaborativas
-- Sistema de favoritos
-- Personalización de mazos
+- Sistema de favoritos de cartas
+- Personalización de mazos (temas de cartas alternativos)
+- Exportar historial en PDF/imagen
+- Búsqueda avanzada en historial
 
 ### 4.2 Dependencias Externas
 - **API de Claude**: Requerida para generar interpretaciones contextualizadas
