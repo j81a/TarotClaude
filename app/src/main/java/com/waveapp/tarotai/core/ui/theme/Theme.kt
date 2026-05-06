@@ -11,38 +11,38 @@ import androidx.compose.ui.graphics.Color
  * Esquema de colores oscuro de TarotAI (tema principal).
  *
  * Define los colores para el modo oscuro siguiendo Material Design 3.
- * Este es el tema por defecto ya que evoca el misterio del tarot.
+ * Basado en la paleta "Mystic Teal" personalizada.
  */
 private val DarkColorScheme = darkColorScheme(
-    // Colores primarios - Azul brillante sobre fondo oscuro (alto contraste)
-    primary = BluePrimary,
-    onPrimary = Color(0xFF001D35),         // Azul muy oscuro para texto sobre azul
-    primaryContainer = BlueDark,
-    onPrimaryContainer = TextPrimary,
+    // Colores primarios - Verde Menta Brillante (máxima legibilidad)
+    primary = TealPrimary,                 // #00DF82 - Verde menta brillante
+    onPrimary = Color(0xFF001A12),         // Negro verdoso para texto sobre verde
+    primaryContainer = TealDark,           // #03624C - Verde azulado oscuro
+    onPrimaryContainer = TextPrimary,      // Blanco puro
 
-    // Colores secundarios - Dorado cálido
-    secondary = GoldPrimary,
-    onSecondary = Color(0xFF1A1A1A),       // Gris oscuro para texto sobre dorado
-    secondaryContainer = GoldDark,
-    onSecondaryContainer = TextPrimary,
+    // Colores secundarios - Turquesa vibrante
+    secondary = TurquoisePrimary,          // Turquesa vibrante
+    onSecondary = Color(0xFF001A12),       // Negro verdoso
+    secondaryContainer = TurquoiseDark,    // Turquesa oscuro
+    onSecondaryContainer = TextPrimary,    // Blanco puro
 
-    // Colores terciarios - Azul claro
-    tertiary = BlueLight,
-    onTertiary = Color(0xFF001D35),
-    tertiaryContainer = BlueDark,
+    // Colores terciarios - Verde claro
+    tertiary = TealLight,                  // Verde menta más claro
+    onTertiary = Color(0xFF001A12),
+    tertiaryContainer = TealDark,
     onTertiaryContainer = TextPrimary,
 
-    // Fondo y superficie - Azul medianoche
-    background = DarkBackground,
-    onBackground = TextPrimary,
-    surface = DarkSurface,
-    onSurface = TextPrimary,
-    surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = TextSecondary,
+    // Fondo y superficie - Negro Verdoso
+    background = DarkBackground,           // #030F0F - Negro verdoso profundo
+    onBackground = TextPrimary,            // Blanco puro
+    surface = DarkSurface,                 // Gris verdoso muy oscuro
+    onSurface = TextPrimary,               // Blanco puro
+    surfaceVariant = DarkSurfaceVariant,   // Gris verdoso oscuro
+    onSurfaceVariant = TextSecondary,      // Gris verdoso claro
 
     // Otros
     error = ErrorColor,
-    onError = Color(0xFF1A1A1A),
+    onError = Color(0xFFFFFFFF),
     outline = TextTertiary,
     outlineVariant = DarkSurfaceVariant,
     scrim = DarkBackground
@@ -55,15 +55,15 @@ private val DarkColorScheme = darkColorScheme(
  * Actualmente no se usa, pero está disponible para futuras versiones.
  */
 private val LightColorScheme = lightColorScheme(
-    primary = BlueDark,
+    primary = TealDark,
     onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = BlueLight,
-    onPrimaryContainer = Color(0xFF001D35),
+    primaryContainer = TealLight,
+    onPrimaryContainer = Color(0xFF001A12),
 
-    secondary = GoldDark,
-    onSecondary = Color(0xFF1A1A1A),
-    secondaryContainer = GoldLight,
-    onSecondaryContainer = Color(0xFF1A1A1A),
+    secondary = TurquoiseDark,
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = TurquoiseLight,
+    onSecondaryContainer = Color(0xFF001A12),
 
     background = Color(0xFFFCFCFC),
     onBackground = Color(0xFF1A1A1A),
