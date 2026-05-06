@@ -1,5 +1,7 @@
 package com.waveapp.tarotai.domain.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Interpretación individual de una carta en una tirada.
  *
@@ -12,6 +14,7 @@ package com.waveapp.tarotai.domain.model
  * @property position Nombre de la posición de la carta en la tirada (ej: "Pasado", "Presente")
  * @property interpretation Texto explicativo de la interpretación de la carta
  */
+@Serializable
 data class CardInterpretation(
     val cardName: String,
     val position: String,

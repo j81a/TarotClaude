@@ -62,9 +62,14 @@ sealed class Screen(val route: String) {
     /**
      * Pantalla de ingreso de pregunta.
      * Requiere el tipo de tirada como argumento.
+     *
+     * v1.1.0: Agregado parámetro isManualLoad para reutilizar en carga manual.
+     * - isManualLoad = false: Tirada automática (consultante opcional)
+     * - isManualLoad = true: Carga manual (consultante obligatorio)
      */
-    data object Question : Screen("question/{spreadType}") {
-        fun createRoute(spreadType: String) = "question/$spreadType"
+    data object Question : Screen("question/{spreadType}?isManualLoad={isManualLoad}") {
+        fun createRoute(spreadType: String, isManualLoad: Boolean = false) =
+            "question/$spreadType?isManualLoad=$isManualLoad"
     }
 
     /**

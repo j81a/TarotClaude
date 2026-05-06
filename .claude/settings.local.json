@@ -23,7 +23,8 @@
       "Bash(claude auth status:*)",
       "Bash(claude auth login:*)",
       "Bash(claude auth logout)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

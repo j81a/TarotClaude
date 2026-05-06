@@ -92,13 +92,20 @@ fun NavGraph(
         }
 
         // Pantalla de pregunta
+        // v1.1.0: Agregado parámetro isManualLoad para reutilización
         composable(
             route = Screen.Question.route,
             arguments = listOf(
-                navArgument("spreadType") { type = NavType.StringType }
+                navArgument("spreadType") { type = NavType.StringType },
+                navArgument("isManualLoad") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
             )
         ) { backStackEntry ->
             val spreadTypeStr = backStackEntry.arguments?.getString("spreadType") ?: ""
+            val isManualLoad = backStackEntry.arguments?.getBoolean("isManualLoad") ?: false
+
             val spreadType = try {
                 SpreadType.valueOf(spreadTypeStr)
             } catch (e: Exception) {
@@ -107,10 +114,13 @@ fun NavGraph(
 
             QuestionScreen(
                 spreadType = spreadType,
+                isManualLoad = isManualLoad,
                 onNavigateBack = { navController.popBackStack() },
-                onContinue = { question ->
+                onContinue = { question, consultantName ->
+                    // TODO v1.1.0: Si isManualLoad=true, navegar a ManualLoadScreen
+                    // Por ahora, solo navega a Reading (flujo automático)
                     val route = Screen.Reading.createRoute(spreadType.name, question)
-                    Log.d("NavGraph", "Navigating from Question to Reading with route: $route")
+                    Log.d("NavGraph", "Navigating from Question to Reading with route: $route, consultant: $consultantName")
                     navController.navigate(route)
                 }
             )

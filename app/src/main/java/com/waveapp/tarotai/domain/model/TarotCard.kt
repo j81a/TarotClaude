@@ -1,5 +1,7 @@
 package com.waveapp.tarotai.domain.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Modelo de dominio para una carta del tarot.
  *
@@ -17,6 +19,7 @@ package com.waveapp.tarotai.domain.model
  * @param symbolism Explicación del simbolismo de la carta
  * @param keywords Lista de palabras clave asociadas
  */
+@Serializable
 data class TarotCard(
     val id: Int,
     val name: String,
@@ -33,6 +36,7 @@ data class TarotCard(
 /**
  * Tipo de arcano: Mayor o Menor.
  */
+@Serializable
 enum class ArcanaType {
     MAJOR,  // Arcanos Mayores (0-21)
     MINOR   // Arcanos Menores (22-77)
@@ -41,6 +45,7 @@ enum class ArcanaType {
 /**
  * Palos de los Arcanos Menores.
  */
+@Serializable
 enum class Suit {
     WANDS,      // Bastos
     CUPS,       // Copas

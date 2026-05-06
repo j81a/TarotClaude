@@ -16,16 +16,35 @@ import com.waveapp.tarotai.domain.model.SpreadType
 
 /**
  * Pantalla para ingresar una pregunta antes de realizar la tirada.
+ *
+ * v1.1.0: Reutilizada para flujo automático y manual.
+ * - En modo automático (isManualLoad = false):
+ *   - Toggle consultante OFF por defecto (usuario puede activarlo)
+ *   - Campo consultante visible solo si toggle ON
+ * - En modo manual (isManualLoad = true):
+ *   - Toggle forzado a ON (no desactivable)
+ *   - Campo consultante siempre visible y obligatorio
+ *
+ * @param spreadType Tipo de tirada seleccionada
+ * @param isManualLoad true si es carga manual, false si es tirada automática
+ * @param onNavigateBack Callback para navegación atrás
+ * @param onContinue Callback al continuar con (question, consultantName)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionScreen(
     spreadType: SpreadType,
+    isManualLoad: Boolean = false,
     onNavigateBack: () -> Unit,
-    onContinue: (String?) -> Unit
+    onContinue: (question: String?, consultantName: String?) -> Unit
 ) {
     var question by remember { mutableStateOf("") }
-    var showError by remember { mutableStateOf(false) }
+    var showQuestionError by remember { mutableStateOf(false) }
+
+    // v1.1.0: Estados para consultante
+    var isForSomeoneElse by remember { mutableStateOf(isManualLoad) } // En manual, siempre ON
+    var consultantName by remember { mutableStateOf("") }
+    var showConsultantError by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -65,22 +84,86 @@ fun QuestionScreen(
                     value = question,
                     onValueChange = {
                         question = it
-                        showError = false
+                        showQuestionError = false
                     },
                     label = { Text(stringResource(R.string.question_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     maxLines = 5,
-                    isError = showError
+                    isError = showQuestionError
                 )
 
-                if (showError) {
+                if (showQuestionError) {
                     Text(
                         text = stringResource(R.string.question_min_length),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 4.dp)
                     )
+                }
+
+                // v1.1.0: Toggle y campo consultante
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (isManualLoad) {
+                            "Nombre del consultante (obligatorio)"
+                        } else {
+                            "Esta lectura es para alguien más"
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Switch(
+                        checked = isForSomeoneElse,
+                        onCheckedChange = {
+                            if (!isManualLoad) { // Solo permitir cambio en modo automático
+                                isForSomeoneElse = it
+                                if (!it) {
+                                    consultantName = ""
+                                    showConsultantError = false
+                                }
+                            }
+                        },
+                        enabled = !isManualLoad // Deshabilitado en modo manual
+                    )
+                }
+
+                // Campo consultante visible condicionalmente
+                if (isForSomeoneElse) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = consultantName,
+                        onValueChange = {
+                            if (it.length <= 100) { // Máximo 100 caracteres
+                                consultantName = it
+                                showConsultantError = false
+                            }
+                        },
+                        label = { Text("Nombre del consultante") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = showConsultantError,
+                        supportingText = {
+                            Text("${consultantName.length}/100 caracteres")
+                        }
+                    )
+
+                    if (showConsultantError) {
+                        Text(
+                            text = "El nombre debe tener entre 2 y 100 caracteres",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                 }
             }
 
@@ -89,10 +172,26 @@ fun QuestionScreen(
             // Botón en la parte inferior - se mueve con el teclado
             Button(
                 onClick = {
-                    if (question.length >= 10) {
-                        onContinue(question)
+                    // Validar pregunta
+                    val isQuestionValid = question.length >= 10
+                    showQuestionError = !isQuestionValid
+
+                    // Validar consultante si el toggle está activado
+                    val isConsultantValid = if (isForSomeoneElse) {
+                        consultantName.trim().length in 2..100
                     } else {
-                        showError = true
+                        true // No se requiere consultante
+                    }
+                    showConsultantError = !isConsultantValid
+
+                    // Continuar solo si todas las validaciones pasan
+                    if (isQuestionValid && isConsultantValid) {
+                        val finalConsultant = if (isForSomeoneElse && consultantName.isNotBlank()) {
+                            consultantName.trim()
+                        } else {
+                            null
+                        }
+                        onContinue(question, finalConsultant)
                     }
                 },
                 modifier = Modifier

@@ -1,5 +1,7 @@
 package com.waveapp.tarotai.domain.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Respuesta binaria para tiradas de tipo "Sí o No".
  *
@@ -8,6 +10,7 @@ package com.waveapp.tarotai.domain.model
  * - NO: Respuesta negativa
  * - UNCLEAR: No se puede determinar una respuesta clara
  */
+@Serializable
 enum class YesNoAnswer {
     /** Respuesta afirmativa */
     YES,

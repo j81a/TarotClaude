@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Seguridad: No subir archivos con API Keys
+gradle.properties

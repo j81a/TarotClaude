@@ -1,5 +1,7 @@
 package com.waveapp.tarotai.domain.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Interpretación completa de una tirada de tarot.
  *
@@ -13,6 +15,7 @@ package com.waveapp.tarotai.domain.model
  * @property yesNoAnswer Respuesta binaria (solo para tiradas YES_NO, null en otros casos)
  * @property yesNoJustification Explicación educativa de por qué la carta significa esa respuesta (solo para YES_NO)
  */
+@Serializable
 data class Interpretation(
     val individualInterpretations: List<CardInterpretation>,
     val generalInterpretation: String,

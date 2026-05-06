@@ -1,5 +1,7 @@
 package com.waveapp.tarotai.domain.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Representa una carta seleccionada en una tirada.
  *
@@ -8,6 +10,7 @@ package com.waveapp.tarotai.domain.model
  * @property positionName Nombre de la posición ("Pasado", "Presente", etc.)
  * @property orientation Orientación de la carta (derecha o invertida)
  */
+@Serializable
 data class DrawnCard(
     val card: TarotCard,
     val position: Int,

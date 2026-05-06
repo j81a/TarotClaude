@@ -2,7 +2,9 @@ package com.waveapp.tarotai.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.waveapp.tarotai.data.local.dao.ReadingHistoryDao
 import com.waveapp.tarotai.data.local.dao.TarotCardDao
+import com.waveapp.tarotai.data.local.database.MIGRATION_1_2
 import com.waveapp.tarotai.data.local.database.TarotDatabase
 import dagger.Module
 import dagger.Provides
@@ -17,7 +19,9 @@ import javax.inject.Singleton
  * @Module: Marca esta clase como un módulo de Hilt que provee dependencias.
  * @InstallIn(SingletonComponent::class): Indica que estas dependencias vivirán mientras viva la app.
  *
- * Este módulo se encarga de crear e inyectar la base de datos y el DAO en toda la aplicación.
+ * Este módulo se encarga de crear e inyectar la base de datos y los DAOs en toda la aplicación.
+ *
+ * v1.1.0: Agregada migración 1→2 y ReadingHistoryDao
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,6 +38,9 @@ object DatabaseModule {
      * - context: Contexto de Android necesario para crear la DB
      * - TarotDatabase::class.java: Clase de la base de datos
      * - "tarot_database": Nombre del archivo SQLite
+     * - addMigrations(): Agrega migraciones para preservar datos al actualizar
+     *
+     * v1.1.0: Agregada MIGRATION_1_2 para tabla reading_history
      */
     @Provides
     @Singleton
@@ -44,7 +51,9 @@ object DatabaseModule {
             context,
             TarotDatabase::class.java,
             "tarot_database"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)  // 🆕 Migración v1→v2
+            .build()
     }
 
     /**
@@ -59,5 +68,19 @@ object DatabaseModule {
     @Provides
     fun provideCardDao(database: TarotDatabase): TarotCardDao {
         return database.cardDao()
+    }
+
+    /**
+     * Provee el DAO para acceder al historial de lecturas.
+     *
+     * @Provides: Indica que este método provee una dependencia.
+     * @param database: Instancia de TarotDatabase (inyectada automáticamente por Hilt)
+     * @return ReadingHistoryDao para hacer queries a la tabla reading_history
+     *
+     * @since v1.1.0
+     */
+    @Provides
+    fun provideReadingHistoryDao(database: TarotDatabase): ReadingHistoryDao {
+        return database.readingHistoryDao()
     }
 }
