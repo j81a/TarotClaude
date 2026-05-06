@@ -14,6 +14,8 @@ import com.waveapp.tarotai.R
 import com.waveapp.tarotai.domain.model.SpreadType
 import com.waveapp.tarotai.presentation.carddetail.CardDetailScreen
 import com.waveapp.tarotai.presentation.encyclopedia.EncyclopediaScreen
+import com.waveapp.tarotai.presentation.history.HistoryScreen
+import com.waveapp.tarotai.presentation.history.ReadingDetailScreen
 import com.waveapp.tarotai.presentation.reading.QuestionScreen
 import com.waveapp.tarotai.presentation.reading.ReadingScreen
 import com.waveapp.tarotai.presentation.reading.SpreadTypeSelectionScreen
@@ -180,12 +182,31 @@ fun NavGraph(
             )
         }
 
-        // Pantalla de historial de lecturas
+        // Pantalla de historial de lecturas (v1.1.0)
         composable(route = Screen.History.route) {
-            // TODO: Implementar HistoryScreen en Fase 5
-            PlaceholderScreen(
-                title = stringResource(R.string.placeholder_history),
-                onBack = { navController.popBackStack() }
+            HistoryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onReadingClick = { readingId ->
+                    navController.navigate(Screen.ReadingDetail.createRoute(readingId))
+                },
+                onNewReading = {
+                    navController.navigate(Screen.SpreadTypeSelection.route)
+                }
+            )
+        }
+
+        // Pantalla de detalle de lectura guardada (v1.1.0)
+        composable(
+            route = Screen.ReadingDetail.route,
+            arguments = listOf(
+                navArgument("readingId") { type = NavType.LongType }
+            )
+        ) {
+            ReadingDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onCardClick = { cardId ->
+                    navController.navigate(Screen.CardDetail.createRoute(cardId))
+                }
             )
         }
     }

@@ -96,6 +96,18 @@ sealed class Screen(val route: String) {
     /**
      * Pantalla de historial de lecturas.
      * Muestra todas las lecturas guardadas anteriormente.
+     *
+     * @since v1.1.0
      */
     data object History : Screen("history")
+
+    /**
+     * Pantalla de detalle de una lectura guardada.
+     * Muestra toda la información de la lectura y permite editar notas.
+     *
+     * @since v1.1.0
+     */
+    data object ReadingDetail : Screen("reading_detail/{readingId}") {
+        fun createRoute(readingId: Long) = "reading_detail/$readingId"
+    }
 }

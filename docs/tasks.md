@@ -21,12 +21,12 @@
 ### v1.1.0 ⏳
 | Fase | Tareas | Completadas | Progreso |
 |------|--------|-------------|----------|
-| **Fase 6: Historial de Lecturas** | 5 | 2 | ⏳ 40% |
+| **Fase 6: Historial de Lecturas** | 5 | 5 | ✅ 100% |
 | **Fase 7: Carga Manual de Tiradas** | 6 | 0 | ⏳ 0% |
-| **Subtotal v1.1.0** | **11** | **2** | **⏳ 18%** |
+| **Subtotal v1.1.0** | **11** | **5** | **⏳ 45%** |
 
 ### Total General
-| **TOTAL** | **32** | **23** | **🚀 72%** |
+| **TOTAL** | **32** | **26** | **🚀 81%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -882,7 +882,11 @@ Ver detalles completos en: [docs/fases/fase7-carga-manual.md](fases/fase7-carga-
 ## 🚦 Próximo Paso
 
 **v1.0.0 completada** ✅
-**Fase 6 - En progreso** ⏳
+**Fase 6 - COMPLETADA** ✅
 - ✅ Tarea 6.1: Actualizar Base de Datos (Room)
 - ✅ Tarea 6.2: Actualizar QuestionScreen (Reutilización)
-- **Siguiente: Tarea 6.3: Implementar Domain Layer de Historial**
+- ✅ Tarea 6.3: Implementar Domain Layer de Historial
+- ✅ Tarea 6.4: Implementar UI de Historial
+- ✅ Tarea 6.5: Implementar UI de Detalle con Notas
+
+**Siguiente: Fase 7 - Tarea 7.1: Implementar Domain Layer de Carga Manual**
