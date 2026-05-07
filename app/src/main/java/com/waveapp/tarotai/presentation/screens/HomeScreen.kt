@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,13 +36,15 @@ import com.waveapp.tarotai.R
  * @OptIn(ExperimentalMaterial3Api::class): Usamos APIs experimentales de Material3.
  *
  * Muestra el menú principal con opciones para:
- * - Iniciar una lectura del tarot
+ * - Iniciar una lectura del tarot (automática)
+ * - Cargar una lectura manual (de tirada física)
  * - Ver la enciclopedia de cartas
  * - Ver historial de lecturas
  * - Ir a configuración
  *
  * @param onNavigateToEncyclopedia: Lambda ejecutada al presionar "Enciclopedia"
  * @param onNavigateToReadingSelection: Lambda ejecutada al presionar "Nueva Lectura"
+ * @param onNavigateToManualLoad: Lambda ejecutada al presionar "Cargar Lectura Manual"
  * @param onNavigateToSettings: Lambda ejecutada al presionar "Configuración"
  * @param onNavigateToHistory: Lambda ejecutada al presionar "Historial"
  */
@@ -50,6 +53,7 @@ import com.waveapp.tarotai.R
 fun HomeScreen(
     onNavigateToEncyclopedia: () -> Unit,
     onNavigateToReadingSelection: () -> Unit,
+    onNavigateToManualLoad: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToHistory: () -> Unit
 ) {
@@ -100,6 +104,21 @@ fun HomeScreen(
                     modifier = Modifier.padding(end = 8.dp)
                 )
                 Text(stringResource(R.string.home_new_reading))
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Botón: Cargar Lectura Manual
+            OutlinedButton(
+                onClick = onNavigateToManualLoad,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Upload,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text("Cargar Lectura Manual")
             }
 
             Spacer(modifier = Modifier.height(16.dp))

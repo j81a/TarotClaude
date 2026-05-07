@@ -56,8 +56,11 @@ sealed class Screen(val route: String) {
     /**
      * Pantalla de selección del tipo de lectura.
      * El usuario elige entre: Simple, Sí/No, Presente, Tendencia, Cruz.
+     * Opcional: isManualLoad indica si es para carga manual o tirada automática.
      */
-    data object SpreadTypeSelection : Screen("spread_type_selection")
+    data object SpreadTypeSelection : Screen("spread_type_selection?isManualLoad={isManualLoad}") {
+        fun createRoute(isManualLoad: Boolean = false) = "spread_type_selection?isManualLoad=$isManualLoad"
+    }
 
     /**
      * Pantalla de ingreso de pregunta.

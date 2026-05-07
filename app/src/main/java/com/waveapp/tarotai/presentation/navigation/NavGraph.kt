@@ -51,7 +51,11 @@ fun NavGraph(
                     navController.navigate(Screen.Encyclopedia.route)
                 },
                 onNavigateToReadingSelection = {
-                    navController.navigate(Screen.SpreadTypeSelection.route)
+                    navController.navigate(Screen.SpreadTypeSelection.createRoute(isManualLoad = false))
+                },
+                onNavigateToManualLoad = {
+                    // Navegar a SpreadTypeSelection con flag de carga manual
+                    navController.navigate(Screen.SpreadTypeSelection.createRoute(isManualLoad = true))
                 },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
@@ -87,11 +91,23 @@ fun NavGraph(
         }
 
         // Pantalla de selección de tipo de tirada
-        composable(route = Screen.SpreadTypeSelection.route) {
+        composable(
+            route = Screen.SpreadTypeSelection.route,
+            arguments = listOf(
+                navArgument("isManualLoad") {
+                    type = NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { backStackEntry ->
+            val isManualLoad = backStackEntry.arguments?.getBoolean("isManualLoad") ?: false
+
             SpreadTypeSelectionScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onSpreadTypeSelected = { spreadType ->
-                    navController.navigate(Screen.Question.createRoute(spreadType.name))
+                    navController.navigate(
+                        Screen.Question.createRoute(spreadType.name, isManualLoad)
+                    )
                 }
             )
         }
@@ -122,11 +138,21 @@ fun NavGraph(
                 isManualLoad = isManualLoad,
                 onNavigateBack = { navController.popBackStack() },
                 onContinue = { question, consultantName ->
-                    // TODO v1.1.0: Si isManualLoad=true, navegar a ManualLoadScreen
-                    // Por ahora, solo navega a Reading (flujo automático)
-                    val route = Screen.Reading.createRoute(spreadType.name, question)
-                    Log.d("NavGraph", "Navigating from Question to Reading with route: $route, consultant: $consultantName")
-                    navController.navigate(route)
+                    if (isManualLoad) {
+                        // Flujo de carga manual: navegar a ManualLoadScreen
+                        val route = Screen.ManualLoad.createRoute(
+                            spreadType = spreadType.name,
+                            question = question,
+                            consultantName = consultantName ?: ""
+                        )
+                        Log.d("NavGraph", "Navigating to ManualLoadScreen: $route")
+                        navController.navigate(route)
+                    } else {
+                        // Flujo automático: navegar a ReadingScreen
+                        val route = Screen.Reading.createRoute(spreadType.name, question)
+                        Log.d("NavGraph", "Navigating to ReadingScreen: $route, consultant: $consultantName")
+                        navController.navigate(route)
+                    }
                 }
             )
         }
@@ -193,7 +219,7 @@ fun NavGraph(
                     navController.navigate(Screen.ReadingDetail.createRoute(readingId))
                 },
                 onNewReading = {
-                    navController.navigate(Screen.SpreadTypeSelection.route)
+                    navController.navigate(Screen.SpreadTypeSelection.createRoute(isManualLoad = false))
                 }
             )
         }
