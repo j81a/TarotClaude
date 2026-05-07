@@ -230,9 +230,12 @@ fun NavGraph(
                 onNavigateToCardSelector = { positionIndex ->
                     navController.navigate(Screen.CardSelector.createRoute(positionIndex))
                 },
-                onNavigateToInterpretation = {
-                    // TODO: Navigate to interpretation screen when ready
-                    navController.popBackStack()
+                onNavigateToReadingDetail = { readingId ->
+                    // Navegar al detalle de la lectura guardada
+                    navController.navigate(Screen.ReadingDetail.createRoute(readingId)) {
+                        // Limpiar el back stack hasta ManualLoad (exclusivo)
+                        popUpTo(Screen.ManualLoad.route) { inclusive = true }
+                    }
                 }
             )
         }

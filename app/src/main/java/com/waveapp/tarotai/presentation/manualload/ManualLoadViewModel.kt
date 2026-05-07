@@ -8,6 +8,8 @@ import com.waveapp.tarotai.domain.model.ManualLoadConfiguration
 import com.waveapp.tarotai.domain.model.ManualLoadState
 import com.waveapp.tarotai.domain.model.SpreadType
 import com.waveapp.tarotai.domain.model.TarotCard
+import com.waveapp.tarotai.domain.model.ReadingHistory
+import com.waveapp.tarotai.domain.usecase.history.SaveReadingUseCase
 import com.waveapp.tarotai.domain.usecase.manualload.AddCardToManualLoadUseCase
 import com.waveapp.tarotai.domain.usecase.manualload.GenerateInterpretationFromManualLoadUseCase
 import com.waveapp.tarotai.domain.usecase.manualload.RemoveCardFromManualLoadUseCase
@@ -37,6 +39,7 @@ import javax.inject.Inject
  * @param addCardToManualLoadUseCase Agregar carta a la configuración
  * @param removeCardFromManualLoadUseCase Remover carta de la configuración
  * @param generateInterpretationFromManualLoadUseCase Generar interpretación final
+ * @param saveReadingUseCase Guardar la lectura en el historial
  *
  * @since v1.1.0
  */
@@ -45,7 +48,8 @@ class ManualLoadViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val addCardToManualLoadUseCase: AddCardToManualLoadUseCase,
     private val removeCardFromManualLoadUseCase: RemoveCardFromManualLoadUseCase,
-    private val generateInterpretationFromManualLoadUseCase: GenerateInterpretationFromManualLoadUseCase
+    private val generateInterpretationFromManualLoadUseCase: GenerateInterpretationFromManualLoadUseCase,
+    private val saveReadingUseCase: SaveReadingUseCase
 ) : ViewModel() {
 
     // Obtener parámetros de navegación
@@ -81,6 +85,10 @@ class ManualLoadViewModel @Inject constructor(
     // Flag para navegación (se setea cuando interpretación se genera exitosamente)
     private val _interpretationGenerated = MutableStateFlow<com.waveapp.tarotai.domain.model.Interpretation?>(null)
     val interpretationGenerated: StateFlow<com.waveapp.tarotai.domain.model.Interpretation?> = _interpretationGenerated.asStateFlow()
+
+    // ID de la lectura guardada (para navegar al detalle)
+    private val _savedReadingId = MutableStateFlow<Long?>(null)
+    val savedReadingId: StateFlow<Long?> = _savedReadingId.asStateFlow()
 
     /**
      * Agrega una carta a una posición específica.
@@ -137,7 +145,7 @@ class ManualLoadViewModel @Inject constructor(
     }
 
     /**
-     * Genera la interpretación de la tirada manual.
+     * Genera la interpretación de la tirada manual y la guarda en el historial.
      * Solo se ejecuta si la configuración está completa.
      */
     fun generateInterpretation() {
@@ -150,12 +158,39 @@ class ManualLoadViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
 
-            val result = generateInterpretationFromManualLoadUseCase(_configuration.value)
+            // 1. Generar interpretación
+            val interpretationResult = generateInterpretationFromManualLoadUseCase(_configuration.value)
 
-            result.fold(
+            interpretationResult.fold(
                 onSuccess = { interpretation ->
                     _interpretationGenerated.value = interpretation
-                    _isLoading.value = false
+
+                    // 2. Guardar la lectura en el historial
+                    val reading = ReadingHistory(
+                        id = 0, // Se genera automáticamente
+                        timestamp = System.currentTimeMillis(),
+                        consultantName = _configuration.value.consultantName,
+                        spreadType = _configuration.value.spreadType,
+                        question = _configuration.value.question,
+                        drawnCards = _configuration.value.state.toDrawnCards(),
+                        interpretation = interpretation,
+                        notes = null
+                    )
+
+                    val saveResult = saveReadingUseCase(reading)
+
+                    saveResult.fold(
+                        onSuccess = { readingId ->
+                            _savedReadingId.value = readingId
+                            _isLoading.value = false
+                        },
+                        onFailure = { saveException ->
+                            // La interpretación se generó, pero falló el guardado
+                            // Aún así navegar, pero mostrar warning
+                            _error.value = "Interpretación generada, pero no se pudo guardar: ${saveException.message}"
+                            _isLoading.value = false
+                        }
+                    )
                 },
                 onFailure = { exception ->
                     _error.value = exception.message ?: "Error al generar la interpretación"
@@ -177,5 +212,12 @@ class ManualLoadViewModel @Inject constructor(
      */
     fun clearInterpretationGenerated() {
         _interpretationGenerated.value = null
+    }
+
+    /**
+     * Resetea el ID de lectura guardada (después de navegar).
+     */
+    fun clearSavedReadingId() {
+        _savedReadingId.value = null
     }
 }
