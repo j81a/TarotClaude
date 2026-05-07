@@ -1,6 +1,7 @@
 package com.waveapp.tarotai.domain.usecase.manualload
 
 import com.waveapp.tarotai.domain.model.ManualLoadConfiguration
+import com.waveapp.tarotai.domain.model.SpreadConfiguration
 import javax.inject.Inject
 
 /**
@@ -93,8 +94,9 @@ class ValidateManualLoadConfigUseCase @Inject constructor() {
         }
 
         // Validar que las posiciones sean consecutivas y comiencen en 0
+        val spreadConfig = SpreadConfiguration.fromType(config.spreadType)
         val positions = config.state.selectedCards.map { it.positionIndex }.sorted()
-        val expectedPositions = (0 until config.spreadType.positions.size).toList()
+        val expectedPositions = (0 until spreadConfig.cardCount).toList()
         if (positions != expectedPositions) {
             return Result.failure(
                 IllegalStateException(

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.waveapp.tarotai.domain.model.CardOrientation
 import com.waveapp.tarotai.domain.model.ManualLoadConfiguration
 import com.waveapp.tarotai.domain.model.ManualLoadState
+import com.waveapp.tarotai.domain.model.SpreadConfiguration
 import com.waveapp.tarotai.domain.model.SpreadType
 import com.waveapp.tarotai.domain.model.TarotCard
 import com.waveapp.tarotai.domain.model.ReadingHistory
@@ -98,7 +99,8 @@ class ManualLoadViewModel @Inject constructor(
      * @param orientation Orientación de la carta física
      */
     fun addCard(card: TarotCard, positionIndex: Int, orientation: CardOrientation) {
-        val positionName = spreadType.positions[positionIndex]
+        val spreadConfig = SpreadConfiguration.fromType(spreadType)
+        val positionName = spreadConfig.positions[positionIndex]
         val currentState = _configuration.value.state
 
         val result = addCardToManualLoadUseCase(

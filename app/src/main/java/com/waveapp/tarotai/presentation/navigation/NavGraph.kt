@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.waveapp.tarotai.R
+import com.waveapp.tarotai.domain.model.SpreadConfiguration
 import com.waveapp.tarotai.domain.model.SpreadType
 import com.waveapp.tarotai.presentation.carddetail.CardDetailScreen
 import com.waveapp.tarotai.presentation.cardselector.CardSelectorScreen
@@ -281,7 +282,8 @@ fun NavGraph(
 
             val positionIndex = backStackEntry.arguments?.getInt("positionIndex") ?: 0
             val configuration by sharedViewModel.configuration.collectAsState()
-            val positionName = configuration.spreadType.positions[positionIndex]
+            val spreadConfig = SpreadConfiguration.fromType(configuration.spreadType)
+            val positionName = spreadConfig.positions[positionIndex]
 
             CardSelectorScreen(
                 positionName = positionName,

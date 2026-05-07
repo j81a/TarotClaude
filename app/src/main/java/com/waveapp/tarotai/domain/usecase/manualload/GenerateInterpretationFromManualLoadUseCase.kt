@@ -2,6 +2,7 @@ package com.waveapp.tarotai.domain.usecase.manualload
 
 import com.waveapp.tarotai.domain.model.Interpretation
 import com.waveapp.tarotai.domain.model.ManualLoadConfiguration
+import com.waveapp.tarotai.domain.model.SpreadConfiguration
 import com.waveapp.tarotai.domain.usecase.interpretation.GenerateInterpretationUseCase
 import javax.inject.Inject
 
@@ -59,7 +60,8 @@ class GenerateInterpretationFromManualLoadUseCase @Inject constructor(
         }
 
         // 3. Verificar que la cantidad de cartas coincide con el spread type
-        val requiredCards = config.spreadType.positions.size
+        val spreadConfig = SpreadConfiguration.fromType(config.spreadType)
+        val requiredCards = spreadConfig.cardCount
         if (drawnCards.size != requiredCards) {
             return Result.failure(
                 IllegalStateException(

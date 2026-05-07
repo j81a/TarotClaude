@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.waveapp.tarotai.domain.model.CardOrientation
 import com.waveapp.tarotai.domain.model.ManualLoadCard
+import com.waveapp.tarotai.domain.model.SpreadConfiguration
 
 /**
  * Pantalla de carga manual de tirada.
@@ -118,7 +119,8 @@ fun ManualLoadScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            configuration.spreadType.positions.forEachIndexed { index, positionName ->
+            val spreadConfig = SpreadConfiguration.fromType(configuration.spreadType)
+            spreadConfig.positions.forEachIndexed { index, positionName ->
                 val cardAtPosition = configuration.getCardAtPosition(index)
 
                 CardPositionItem(

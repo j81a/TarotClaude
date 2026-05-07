@@ -30,8 +30,8 @@ data class ManualLoadConfiguration(
      * @return true si todas las posiciones requeridas tienen cartas asignadas
      */
     fun isComplete(): Boolean {
-        val requiredPositions = spreadType.positions.size
-        return state.selectedCards.size == requiredPositions
+        val config = SpreadConfiguration.fromType(spreadType)
+        return state.selectedCards.size == config.cardCount
     }
 
     /**
@@ -39,7 +39,8 @@ data class ManualLoadConfiguration(
      * @return Par de (cartas seleccionadas, cartas requeridas)
      */
     fun getProgress(): Pair<Int, Int> {
-        return Pair(state.selectedCards.size, spreadType.positions.size)
+        val config = SpreadConfiguration.fromType(spreadType)
+        return Pair(state.selectedCards.size, config.cardCount)
     }
 
     /**
@@ -54,9 +55,9 @@ data class ManualLoadConfiguration(
     /**
      * Obtiene la carta asignada a una posición específica.
      * @param positionIndex Índice de la posición (0-based)
-     * @return DrawnCard si existe, null si no
+     * @return ManualLoadCard si existe, null si no
      */
-    fun getCardAtPosition(positionIndex: Int): DrawnCard? {
+    fun getCardAtPosition(positionIndex: Int): ManualLoadCard? {
         return state.selectedCards.find { it.positionIndex == positionIndex }
     }
 }
