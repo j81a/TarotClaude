@@ -115,8 +115,9 @@ data class ManualLoadCard(
     fun toDrawnCard(): DrawnCard {
         return DrawnCard(
             card = card,
-            orientation = orientation,
-            positionName = positionName
+            position = positionIndex,
+            positionName = positionName,
+            orientation = orientation
         )
     }
 }

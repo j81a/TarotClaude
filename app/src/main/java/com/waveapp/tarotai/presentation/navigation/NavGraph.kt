@@ -3,6 +3,9 @@ package com.waveapp.tarotai.presentation.navigation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
@@ -24,6 +27,7 @@ import com.waveapp.tarotai.presentation.reading.QuestionScreen
 import com.waveapp.tarotai.presentation.reading.ReadingScreen
 import com.waveapp.tarotai.presentation.reading.SpreadTypeSelectionScreen
 import com.waveapp.tarotai.presentation.screens.HomeScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
  * NavGraph: Define el grafo de navegación de la aplicación.
@@ -278,7 +282,7 @@ fun NavGraph(
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Screen.ManualLoad.route)
             }
-            val sharedViewModel: ManualLoadViewModel = androidx.lifecycle.viewmodel.compose.viewModel(parentEntry)
+            val sharedViewModel: ManualLoadViewModel = viewModel(parentEntry)
 
             val positionIndex = backStackEntry.arguments?.getInt("positionIndex") ?: 0
             val configuration by sharedViewModel.configuration.collectAsState()

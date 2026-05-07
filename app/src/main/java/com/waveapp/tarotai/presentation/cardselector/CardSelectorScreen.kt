@@ -2,10 +2,12 @@ package com.waveapp.tarotai.presentation.cardselector
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -183,29 +185,26 @@ private fun FilterChipsRow(
     onFilterSelected: (CardFilter) -> Unit
 ) {
     val filters = CardFilter.getAllFilters()
+    val scrollState = rememberScrollState()
 
-    androidx.compose.foundation.horizontalScroll(
-        state = androidx.compose.foundation.rememberScrollState()
-    ).let { scrollState ->
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(scrollState)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            filters.forEach { filter ->
-                FilterChip(
-                    selected = selectedFilter == filter,
-                    onClick = { onFilterSelected(filter) },
-                    label = {
-                        Text(
-                            text = "${filter.getDisplayName()} (${filter.getCardCount()})",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                )
-            }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        filters.forEach { filter ->
+            FilterChip(
+                selected = selectedFilter == filter,
+                onClick = { onFilterSelected(filter) },
+                label = {
+                    Text(
+                        text = "${filter.getDisplayName()} (${filter.getCardCount()})",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            )
         }
     }
 }

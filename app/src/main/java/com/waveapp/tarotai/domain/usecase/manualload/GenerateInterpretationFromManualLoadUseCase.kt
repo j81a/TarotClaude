@@ -3,7 +3,9 @@ package com.waveapp.tarotai.domain.usecase.manualload
 import com.waveapp.tarotai.domain.model.Interpretation
 import com.waveapp.tarotai.domain.model.ManualLoadConfiguration
 import com.waveapp.tarotai.domain.model.SpreadConfiguration
-import com.waveapp.tarotai.domain.usecase.interpretation.GenerateInterpretationUseCase
+import com.waveapp.tarotai.domain.model.TarotReading
+import com.waveapp.tarotai.domain.usecase.GenerateInterpretationUseCase
+import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -70,13 +72,18 @@ class GenerateInterpretationFromManualLoadUseCase @Inject constructor(
             )
         }
 
-        // 4. Generar interpretación usando el caso de uso general
+        // 4. Crear TarotReading a partir de la configuración manual
+        val reading = TarotReading(
+            id = UUID.randomUUID().toString(),
+            spreadType = config.spreadType,
+            question = config.question,
+            drawnCards = drawnCards,
+            timestamp = System.currentTimeMillis()
+        )
+
+        // 5. Generar interpretación usando el caso de uso general
         return try {
-            generateInterpretationUseCase(
-                spreadType = config.spreadType,
-                drawnCards = drawnCards,
-                question = config.question
-            )
+            generateInterpretationUseCase(reading)
         } catch (e: Exception) {
             Result.failure(
                 RuntimeException(
