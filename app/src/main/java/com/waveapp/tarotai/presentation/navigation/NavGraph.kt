@@ -13,10 +13,12 @@ import androidx.navigation.navArgument
 import com.waveapp.tarotai.R
 import com.waveapp.tarotai.domain.model.SpreadType
 import com.waveapp.tarotai.presentation.carddetail.CardDetailScreen
+import com.waveapp.tarotai.presentation.cardselector.CardSelectorScreen
 import com.waveapp.tarotai.presentation.encyclopedia.EncyclopediaScreen
 import com.waveapp.tarotai.presentation.history.HistoryScreen
 import com.waveapp.tarotai.presentation.history.ReadingDetailScreen
 import com.waveapp.tarotai.presentation.manualload.ManualLoadScreen
+import com.waveapp.tarotai.presentation.manualload.ManualLoadViewModel
 import com.waveapp.tarotai.presentation.reading.QuestionScreen
 import com.waveapp.tarotai.presentation.reading.ReadingScreen
 import com.waveapp.tarotai.presentation.reading.SpreadTypeSelectionScreen
@@ -236,6 +238,31 @@ fun NavGraph(
         }
 
         // Pantalla de selección de carta (v1.1.0)
-        // TODO: Implement in Tarea 7.4
+        composable(
+            route = Screen.CardSelector.route,
+            arguments = listOf(
+                navArgument("positionIndex") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            // Obtener el ViewModel compartido del parent ManualLoadScreen
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.ManualLoad.route)
+            }
+            val sharedViewModel: ManualLoadViewModel = androidx.lifecycle.viewmodel.compose.viewModel(parentEntry)
+
+            val positionIndex = backStackEntry.arguments?.getInt("positionIndex") ?: 0
+            val configuration by sharedViewModel.configuration.collectAsState()
+            val positionName = configuration.spreadType.positions[positionIndex]
+
+            CardSelectorScreen(
+                positionName = positionName,
+                manualLoadState = configuration.state,
+                onCardSelected = { card, orientation ->
+                    sharedViewModel.addCard(card, positionIndex, orientation)
+                    navController.popBackStack()
+                },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }
