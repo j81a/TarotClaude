@@ -22,18 +22,18 @@ import com.waveapp.tarotai.domain.model.YesNoAnswer
  * Muestra:
  * - Respuesta clara y destacada (Sí / No / Indefinido)
  * - Icono visual según la respuesta
- * - Justificación educativa de por qué la carta significa esa respuesta
+ * - Justificación educativa de por qué la carta significa esa respuesta (opcional)
  *
- * Este componente cumple el objetivo educativo de enseñar al usuario
- * POR QUÉ una carta específica se interpreta como Sí, No o Indefinido.
+ * v1.2.0: justification es opcional. Si es null, no se muestra la sección "¿Por qué?"
+ * para evitar redundancia con el mensaje general de la tirada.
  *
  * @param answer Respuesta binaria (YES, NO, UNCLEAR)
- * @param justification Explicación educativa de la respuesta
+ * @param justification Explicación educativa de la respuesta (nullable desde v1.2.0)
  */
 @Composable
 fun YesNoAnswerCard(
     answer: YesNoAnswer,
-    justification: String,
+    justification: String?,
     modifier: Modifier = Modifier
 ) {
     val (answerText, answerIcon, answerColor) = when (answer) {
@@ -97,43 +97,45 @@ fun YesNoAnswerCard(
                 )
             }
 
-            // Divider
-            HorizontalDivider(
-                color = answerColor.copy(alpha = 0.3f),
-                thickness = 2.dp
-            )
-
-            // Sección: ¿Por qué?
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "¿Por qué esta respuesta?",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+            // Sección: ¿Por qué? (v1.2.0: opcional, solo si hay justification)
+            justification?.let { text ->
+                // Divider
+                HorizontalDivider(
+                    color = answerColor.copy(alpha = 0.3f),
+                    thickness = 2.dp
                 )
 
-                Text(
-                    text = justification,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "¿Por qué esta respuesta?",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
-            // Nota educativa
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                shape = MaterialTheme.shapes.small
-            ) {
-                Text(
-                    text = "Esta interpretación te ayuda a entender el simbolismo de la carta en contexto.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(12.dp),
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Light
-                )
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // Nota educativa
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        text = "Esta interpretación te ayuda a entender el simbolismo de la carta en contexto.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(12.dp),
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Light
+                    )
+                }
             }
         }
     }

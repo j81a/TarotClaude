@@ -25,6 +25,11 @@ import com.waveapp.tarotai.domain.model.SpreadType
  *   - Toggle forzado a ON (no desactivable)
  *   - Campo consultante siempre visible y obligatorio
  *
+ * v1.2.0: Mejorado manejo del teclado
+ * - Botón "Continuar" fijo sobre el teclado (bottomBar)
+ * - Contenido con scroll para que campos sean visibles cuando se editan
+ * - imePadding() para ajustar automáticamente el layout
+ *
  * @param spreadType Tipo de tirada seleccionada
  * @param isManualLoad true si es carga manual, false si es tirada automática
  * @param onNavigateBack Callback para navegación atrás
@@ -65,14 +70,13 @@ fun QuestionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .imePadding() // Ajusta el padding cuando aparece el teclado
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Contenido superior - sin centrar, empieza desde arriba
+            // Contenido scrolleable
             Column(
-                modifier = Modifier.weight(1f, fill = false)
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
             ) {
                 Text(
                     text = getInstructionText(spreadType),
@@ -167,9 +171,7 @@ fun QuestionScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Botón en la parte inferior - se mueve con el teclado
+            // Botón fijo en el fondo
             Button(
                 onClick = {
                     // Validar pregunta
@@ -196,7 +198,8 @@ fun QuestionScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .padding(16.dp)
+                    .imePadding()
             ) {
                 Text(stringResource(R.string.question_continue))
             }

@@ -79,10 +79,11 @@ sealed class Screen(val route: String) {
      * Pantalla de lectura activa.
      * Muestra las cartas seleccionadas.
      * Requiere tipo de tirada y pregunta (opcional).
+     * v1.2.0: Agregado consultantName para guardado directo.
      */
-    data object Reading : Screen("reading/{spreadType}?question={question}") {
-        fun createRoute(spreadType: String, question: String?) =
-            "reading/$spreadType?question=${question ?: ""}"
+    data object Reading : Screen("reading/{spreadType}?question={question}&consultantName={consultantName}") {
+        fun createRoute(spreadType: String, question: String?, consultantName: String?) =
+            "reading/$spreadType?question=${question ?: ""}&consultantName=${consultantName ?: ""}"
     }
 
     /**

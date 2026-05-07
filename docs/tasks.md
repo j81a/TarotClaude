@@ -25,8 +25,14 @@
 | **Fase 7: Carga Manual de Tiradas** | 6 | 6 | ✅ 100% |
 | **Subtotal v1.1.0** | **11** | **11** | **✅ 100%** |
 
+### v1.2.0 (EN PROGRESO) 🔄
+| Fase | Tareas | Completadas | Progreso |
+|------|--------|-------------|----------|
+| **Fase 8: Mejoras de UX** | 5 | 0 | ⏳ 0% |
+| **Subtotal v1.2.0** | **5** | **0** | **⏳ 0%** |
+
 ### Total General
-| **TOTAL** | **32** | **32** | **🎉 100%** |
+| **TOTAL** | **37** | **32** | **📊 86%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -862,7 +868,275 @@ Ver detalles completos en: [docs/fases/fase7-carga-manual.md](fases/fase7-carga-
 
 ---
 
-## 📊 Estimación Total de Tiempo (Actualizado v1.1.0)
+## 🎨 FASE 8: Mejoras de UX (v1.2.0)
+
+### Tarea 8.1: Fix QuestionScreen - Manejo Correcto del Teclado ⏳
+
+**Descripción**: Mejorar el layout de QuestionScreen para manejar correctamente el teclado desplegado.
+
+**Problema Actual**:
+- Cuando el teclado está desplegado, los campos no quedan visibles
+- El botón "Continuar" queda oculto detrás del teclado
+- No hay scroll en el contenido
+
+**Solución**:
+- Botón "Continuar" fijo sobre el teclado (usando Scaffold con bottomBar)
+- Contenido con scroll (Column + verticalScroll + Modifier.imePadding())
+- Campo activo siempre visible cuando se edita
+
+**Criterios de Aceptación**:
+- [ ] El botón "Continuar" queda fijo sobre el teclado cuando este se despliega
+- [ ] El contenido de la pantalla tiene scroll
+- [ ] Cuando el cursor está en "Pregunta", ese campo se ve completo
+- [ ] Cuando el cursor está en "Nombre", ese campo se ve completo
+- [ ] El layout funciona correctamente en diferentes tamaños de pantalla
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/QuestionScreen.kt`
+
+**Cambios técnicos**:
+```kotlin
+// Usar Scaffold con bottomBar para botón fijo
+Scaffold(
+    bottomBar = {
+        Surface(shadowElevation = 8.dp) {
+            Button(
+                onClick = { ... },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .imePadding()
+            ) { Text("Continuar") }
+        }
+    }
+) { paddingValues ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(paddingValues)
+            .imePadding()
+    ) {
+        // Contenido con scroll
+    }
+}
+```
+
+**Tiempo estimado**: 2 horas
+
+---
+
+### Tarea 8.2: Implementar Guardado Manual en Historial ⏳
+
+**Descripción**: Cambiar de guardado automático a guardado manual con botón explícito.
+
+**Problema Actual**:
+- Las lecturas se guardan automáticamente
+- No hay control del usuario sobre qué lecturas guardar
+- El historial se llena con lecturas de prueba
+
+**Solución**:
+- Agregar botón "Guardar en Historial" en ReadingScreen (después de la interpretación)
+- Agregar botón "Guardar en Historial" en ReadingDetailScreen (para lecturas manuales)
+- Remover guardado automático
+- Mostrar confirmación cuando se guarda
+
+**Criterios de Aceptación**:
+- [ ] ReadingScreen tiene botón "Guardar en Historial" visible después de la interpretación
+- [ ] Al presionar el botón, se guarda la lectura en historial
+- [ ] Se muestra un Snackbar de confirmación "Lectura guardada"
+- [ ] El botón desaparece o se deshabilita después de guardar
+- [ ] ManualLoadViewModel NO guarda automáticamente
+- [ ] ReadingDetailScreen tiene botón para guardar lectura manual
+- [ ] El flujo funciona tanto para tiradas automáticas como manuales
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/ReadingScreen.kt`
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/viewmodel/ReadingViewModel.kt`
+- `app/src/main/java/com/waveapp/tarotai/presentation/history/ReadingDetailScreen.kt`
+- `app/src/main/java/com/waveapp/tarotai/presentation/manualload/ManualLoadViewModel.kt`
+
+**Cambios técnicos**:
+```kotlin
+// En ReadingViewModel, agregar:
+fun saveToHistory() {
+    viewModelScope.launch {
+        val reading = ReadingHistory(...)
+        saveReadingUseCase(reading)
+        _readingSaved.value = true
+    }
+}
+
+// En ReadingScreen, agregar después de la interpretación:
+if (interpretation != null && !readingSaved) {
+    Button(
+        onClick = { viewModel.saveToHistory() },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Icon(Icons.Default.Save, null)
+        Spacer(Modifier.width(8.dp))
+        Text("Guardar en Historial")
+    }
+}
+```
+
+**Tiempo estimado**: 3 horas
+
+---
+
+### Tarea 8.3: Agregar Botones de Cierre Rápido (X) ⏳
+
+**Descripción**: Agregar botón X en la TopAppBar de todas las pantallas secundarias para volver al Home.
+
+**Problema Actual**:
+- Solo hay botón "Atrás" que navega a la pantalla anterior
+- Para volver al inicio hay que retroceder múltiples veces
+- No hay forma rápida de cancelar el flujo y volver al Home
+
+**Solución**:
+- Agregar IconButton con icono X (Close) en todas las TopAppBar
+- Al presionar, navegar directamente al Home con popUpTo
+
+**Criterios de Aceptación**:
+- [ ] Todas las pantallas (excepto Home) tienen botón X arriba a la derecha
+- [ ] Al presionar X, se vuelve directamente al Home
+- [ ] El back stack se limpia correctamente
+- [ ] Lista de pantallas a modificar:
+  - [ ] EncyclopediaScreen
+  - [ ] CardDetailScreen
+  - [ ] SpreadTypeSelectionScreen
+  - [ ] QuestionScreen
+  - [ ] ReadingScreen
+  - [ ] HistoryScreen
+  - [ ] ReadingDetailScreen
+  - [ ] ManualLoadScreen
+  - [ ] CardSelectorScreen
+
+**Archivos a modificar**:
+- Todos los screens listados arriba
+
+**Cambios técnicos**:
+```kotlin
+// En cada TopAppBar, agregar:
+actions = {
+    IconButton(onClick = {
+        navController.navigate(Screen.Home.route) {
+            popUpTo(Screen.Home.route) { inclusive = false }
+        }
+    }) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Volver al inicio"
+        )
+    }
+}
+```
+
+**Tiempo estimado**: 2 horas
+
+---
+
+### Tarea 8.4: Remover Botón + del HistoryScreen ⏳
+
+**Descripción**: Eliminar el botón "+" (Nueva Lectura) del HistoryScreen.
+
+**Problema Actual**:
+- El botón + en HistoryScreen sugiere que se pueden agregar lecturas desde ahí
+- Es confuso porque las lecturas se agregan desde ReadingScreen
+- Inconsistente con el nuevo flujo de guardado manual
+
+**Solución**:
+- Remover el parámetro `onNewReading` de HistoryScreen
+- Remover el FloatingActionButton
+- Actualizar la navegación en NavGraph
+
+**Criterios de Aceptación**:
+- [ ] HistoryScreen NO tiene botón flotante +
+- [ ] La navegación desde NavGraph no pasa `onNewReading`
+- [ ] El código compila sin errores
+- [ ] La UI del historial se ve limpia sin el FAB
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/history/HistoryScreen.kt`
+- `app/src/main/java/com/waveapp/tarotai/presentation/navigation/NavGraph.kt`
+
+**Cambios técnicos**:
+```kotlin
+// ANTES:
+@Composable
+fun HistoryScreen(
+    onNavigateBack: () -> Unit,
+    onReadingClick: (Long) -> Unit,
+    onNewReading: () -> Unit, // REMOVER
+    viewModel: HistoryViewModel = hiltViewModel()
+)
+
+// DESPUÉS:
+@Composable
+fun HistoryScreen(
+    onNavigateBack: () -> Unit,
+    onReadingClick: (Long) -> Unit,
+    viewModel: HistoryViewModel = hiltViewModel()
+)
+
+// Remover el FAB del Scaffold
+```
+
+**Tiempo estimado**: 30 minutos
+
+---
+
+### Tarea 8.5: Verificar y Corregir Guardado en Historial ⏳
+
+**Descripción**: Verificar que el guardado en historial funciona correctamente y corregir bugs.
+
+**Problema Actual**:
+- Las lecturas no se están guardando en ningún momento
+- Incluso con el botón + no se agregan al historial
+- Puede haber un problema en SaveReadingUseCase o en el Repository
+
+**Tareas de Verificación**:
+1. Verificar que SaveReadingUseCase funciona correctamente
+2. Verificar que ReadingHistoryDao está insertando datos
+3. Verificar que las conversiones de entidad están correctas
+4. Agregar logs para debugging
+5. Probar guardado manualmente con datos de prueba
+
+**Criterios de Aceptación**:
+- [ ] SaveReadingUseCase guarda correctamente en Room
+- [ ] El DAO inserta y retorna el ID correctamente
+- [ ] GetAllReadingsUseCase recupera las lecturas guardadas
+- [ ] La UI de HistoryScreen muestra las lecturas guardadas
+- [ ] Los datos persisten después de cerrar la app
+- [ ] Se pueden abrir los detalles de una lectura guardada
+
+**Archivos a verificar/modificar**:
+- `app/src/main/java/com/waveapp/tarotai/domain/usecase/history/SaveReadingUseCase.kt`
+- `app/src/main/java/com/waveapp/tarotai/data/repository/ReadingHistoryRepositoryImpl.kt`
+- `app/src/main/java/com/waveapp/tarotai/data/local/dao/ReadingHistoryDao.kt`
+- `app/src/main/java/com/waveapp/tarotai/data/local/mapper/ReadingHistoryMapper.kt`
+
+**Debugging a agregar**:
+```kotlin
+// En SaveReadingUseCase
+Log.d("SaveReading", "Intentando guardar: ${reading.consultantName}")
+val result = repository.saveReading(reading)
+Log.d("SaveReading", "Guardado con ID: $result")
+
+// En ReadingHistoryDao
+@Insert(onConflict = OnConflictStrategy.REPLACE)
+suspend fun insert(reading: ReadingHistoryEntity): Long
+```
+
+**Tiempo estimado**: 2.5 horas
+
+---
+
+**Total Fase 8: ~10 horas**
+
+---
+
+## 📊 Estimación Total de Tiempo (Actualizado v1.2.0)
 
 | Fase | Tiempo Estimado |
 |------|-----------------|
@@ -874,19 +1148,23 @@ Ver detalles completos en: [docs/fases/fase7-carga-manual.md](fases/fase7-carga-
 | **Subtotal v1.0.0** | **38.5 horas** ✅ |
 | Fase 6: Historial de Lecturas | 12 horas |
 | Fase 7: Carga Manual | 13 horas |
-| **Subtotal v1.1.0** | **25 horas** ⏳ |
-| **TOTAL GENERAL** | **~63.5 horas** |
+| **Subtotal v1.1.0** | **25 horas** ✅ |
+| Fase 8: Mejoras de UX | 10 horas |
+| **Subtotal v1.2.0** | **10 horas** ⏳ |
+| **TOTAL GENERAL** | **~73.5 horas** |
 
 ---
 
 ## 🚦 Próximo Paso
 
 **v1.0.0 completada** ✅
-**Fase 6 - COMPLETADA** ✅
-- ✅ Tarea 6.1: Actualizar Base de Datos (Room)
-- ✅ Tarea 6.2: Actualizar QuestionScreen (Reutilización)
-- ✅ Tarea 6.3: Implementar Domain Layer de Historial
-- ✅ Tarea 6.4: Implementar UI de Historial
-- ✅ Tarea 6.5: Implementar UI de Detalle con Notas
+**v1.1.0 completada** ✅
 
-**Siguiente: Fase 7 - Tarea 7.1: Implementar Domain Layer de Carga Manual**
+**Fase 8 - EN PROGRESO** ⏳
+- ⏳ Tarea 8.1: Fix QuestionScreen - Manejo Correcto del Teclado
+- ⏳ Tarea 8.2: Implementar Guardado Manual en Historial
+- ⏳ Tarea 8.3: Agregar Botones de Cierre Rápido (X)
+- ⏳ Tarea 8.4: Remover Botón + del HistoryScreen
+- ⏳ Tarea 8.5: Verificar y Corregir Guardado en Historial
+
+**Siguiente: Tarea 8.1 - Fix QuestionScreen - Manejo Correcto del Teclado**

@@ -2,11 +2,13 @@ package com.waveapp.tarotai.presentation.reading.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.waveapp.tarotai.domain.model.ReadingHistory
 import com.waveapp.tarotai.domain.model.SpreadType
 import com.waveapp.tarotai.domain.model.TarotReading
 import com.waveapp.tarotai.domain.usecase.GenerateInterpretationUseCase
 import com.waveapp.tarotai.domain.usecase.GetSpreadConfigurationUseCase
 import com.waveapp.tarotai.domain.usecase.PerformReadingUseCase
+import com.waveapp.tarotai.domain.usecase.history.SaveReadingUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +33,8 @@ import javax.inject.Inject
 class ReadingViewModel @Inject constructor(
     private val performReadingUseCase: PerformReadingUseCase,
     private val getSpreadConfigurationUseCase: GetSpreadConfigurationUseCase,
-    private val generateInterpretationUseCase: GenerateInterpretationUseCase
+    private val generateInterpretationUseCase: GenerateInterpretationUseCase,
+    private val saveReadingUseCase: SaveReadingUseCase
 ) : ViewModel() {
 
     // Estado de la tirada de cartas
@@ -41,6 +44,10 @@ class ReadingViewModel @Inject constructor(
     // Estado de la interpretación por IA
     private val _interpretationUiState = MutableStateFlow<InterpretationUiState>(InterpretationUiState.Idle)
     val interpretationUiState: StateFlow<InterpretationUiState> = _interpretationUiState.asStateFlow()
+
+    // Estado del guardado en historial (v1.2.0)
+    private val _saveState = MutableStateFlow<SaveState>(SaveState.NotSaved)
+    val saveState: StateFlow<SaveState> = _saveState.asStateFlow()
 
     /**
      * Realiza una tirada de tarot.
@@ -136,4 +143,57 @@ class ReadingViewModel @Inject constructor(
         resetReadingState()
         resetInterpretationState()
     }
+
+    /**
+     * Guarda la lectura actual en el historial (v1.2.0).
+     *
+     * @param reading Tirada de tarot a guardar
+     * @param interpretation Interpretación generada por IA
+     * @param consultantName Nombre del consultante
+     */
+    fun saveToHistory(
+        reading: TarotReading,
+        interpretation: com.waveapp.tarotai.domain.model.Interpretation,
+        consultantName: String
+    ) {
+        viewModelScope.launch {
+            _saveState.value = SaveState.Saving
+
+            val readingHistory = ReadingHistory(
+                id = 0, // Será autogenerado por Room
+                timestamp = System.currentTimeMillis(),
+                consultantName = consultantName,
+                spreadType = reading.spreadType,
+                question = reading.question,
+                drawnCards = reading.drawnCards,
+                interpretation = interpretation,
+                notes = null
+            )
+
+            val result = saveReadingUseCase(readingHistory)
+
+            _saveState.value = if (result.isSuccess) {
+                SaveState.Saved(result.getOrThrow())
+            } else {
+                SaveState.Error(result.exceptionOrNull()?.message ?: "Error al guardar la lectura")
+            }
+        }
+    }
+}
+
+/**
+ * Estados del guardado en historial (v1.2.0).
+ */
+sealed class SaveState {
+    /** No se ha guardado todavía */
+    data object NotSaved : SaveState()
+
+    /** Guardando en progreso */
+    data object Saving : SaveState()
+
+    /** Guardado exitosamente */
+    data class Saved(val readingId: Long) : SaveState()
+
+    /** Error al guardar */
+    data class Error(val message: String) : SaveState()
 }

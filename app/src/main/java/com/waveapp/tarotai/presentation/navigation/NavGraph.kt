@@ -154,7 +154,7 @@ fun NavGraph(
                         navController.navigate(route)
                     } else {
                         // Flujo automático: navegar a ReadingScreen
-                        val route = Screen.Reading.createRoute(spreadType.name, question)
+                        val route = Screen.Reading.createRoute(spreadType.name, question, consultantName)
                         Log.d("NavGraph", "Navigating to ReadingScreen: $route, consultant: $consultantName")
                         navController.navigate(route)
                     }
@@ -170,13 +170,18 @@ fun NavGraph(
                 navArgument("question") {
                     type = NavType.StringType
                     nullable = true
+                },
+                navArgument("consultantName") {
+                    type = NavType.StringType
+                    nullable = true
                 }
             )
         ) { backStackEntry ->
             val spreadTypeStr = backStackEntry.arguments?.getString("spreadType") ?: ""
             val question = backStackEntry.arguments?.getString("question")?.takeIf { it.isNotBlank() }
+            val consultantName = backStackEntry.arguments?.getString("consultantName")?.takeIf { it.isNotBlank() }
 
-            Log.d("NavGraph", "Reading route - spreadTypeStr: '$spreadTypeStr', question: '$question'")
+            Log.d("NavGraph", "Reading route - spreadTypeStr: '$spreadTypeStr', question: '$question', consultantName: '$consultantName'")
 
             val spreadType = try {
                 SpreadType.valueOf(spreadTypeStr)
@@ -190,6 +195,7 @@ fun NavGraph(
             ReadingScreen(
                 spreadType = spreadType,
                 question = question,
+                consultantName = consultantName,
                 onNavigateBack = { navController.popBackStack() },
                 onCardClick = { drawnCard ->
                     navController.navigate(
@@ -222,9 +228,6 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onReadingClick = { readingId ->
                     navController.navigate(Screen.ReadingDetail.createRoute(readingId))
-                },
-                onNewReading = {
-                    navController.navigate(Screen.SpreadTypeSelection.createRoute(isManualLoad = false))
                 }
             )
         }

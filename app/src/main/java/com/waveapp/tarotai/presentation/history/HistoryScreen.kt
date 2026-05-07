@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,22 +21,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
  * Muestra:
  * - Lista de todas las lecturas guardadas (más reciente primero)
  * - Empty state si no hay lecturas
- * - FAB para nueva lectura
  * - Navegación a los detalles de cada lectura
+ *
+ * Las lecturas se guardan cuando el usuario presiona el botón
+ * "Guardar en Historial" desde la pantalla de interpretación.
  *
  * @param onNavigateBack Callback para navegar atrás
  * @param onReadingClick Callback cuando se hace click en una lectura (recibe ID)
- * @param onNewReading Callback para crear nueva lectura
  * @param viewModel ViewModel del historial (inyectado por Hilt)
  *
  * @since v1.1.0
+ * @updated v1.2.0 - Removido botón FAB y parámetro onNewReading
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     onNavigateBack: () -> Unit,
     onReadingClick: (Long) -> Unit,
-    onNewReading: () -> Unit,
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val readings by viewModel.readings.collectAsState()
@@ -55,17 +55,6 @@ fun HistoryScreen(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNewReading,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Nueva lectura"
-                )
-            }
         }
     ) { paddingValues ->
         if (readings.isEmpty()) {

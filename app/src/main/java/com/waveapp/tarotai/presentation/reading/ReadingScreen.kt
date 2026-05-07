@@ -9,6 +9,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +19,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.waveapp.tarotai.R
 import com.waveapp.tarotai.domain.model.CardOrientation
@@ -39,6 +43,7 @@ import com.waveapp.tarotai.presentation.reading.viewmodel.ReadingViewModel
 fun ReadingScreen(
     spreadType: SpreadType,
     question: String?,
+    consultantName: String?,
     onNavigateBack: () -> Unit,
     onCardClick: (DrawnCard) -> Unit = {},
     viewModel: ReadingViewModel = hiltViewModel()
@@ -75,6 +80,7 @@ fun ReadingScreen(
             is ReadingUiState.Success -> {
                 ReadingContent(
                     reading = state.reading,
+                    consultantName = consultantName,
                     onCardClick = onCardClick,
                     modifier = Modifier.padding(paddingValues)
                 )
@@ -96,6 +102,7 @@ fun ReadingScreen(
 @Composable
 private fun ReadingContent(
     reading: com.waveapp.tarotai.domain.model.TarotReading,
+    consultantName: String?,
     onCardClick: (DrawnCard) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: ReadingViewModel = hiltViewModel()
@@ -114,8 +121,8 @@ private fun ReadingContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Mostrar pregunta si existe
-        reading.question?.let { question ->
+        // Mostrar consultante y pregunta si existen
+        if (consultantName != null || reading.question != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -123,19 +130,39 @@ private fun ReadingContent(
                 )
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "Tu pregunta:",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = question,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    // Mostrar consultante si existe
+                    consultantName?.let { name ->
+                        Text(
+                            text = "Consultante:",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
+                    // Mostrar pregunta si existe
+                    reading.question?.let { question ->
+                        if (consultantName != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                        Text(
+                            text = "Pregunta:",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = question,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         }
@@ -173,6 +200,7 @@ private fun ReadingContent(
                 InterpretationSuccessView(
                     reading = reading,
                     interpretation = state.interpretation,
+                    consultantName = consultantName,
                     onCardClick = onCardClick
                 )
             }
@@ -503,20 +531,115 @@ private fun InterpretationLoadingView() {
 private fun InterpretationSuccessView(
     reading: com.waveapp.tarotai.domain.model.TarotReading,
     interpretation: com.waveapp.tarotai.domain.model.Interpretation,
-    onCardClick: (DrawnCard) -> Unit
+    consultantName: String?,
+    onCardClick: (DrawnCard) -> Unit,
+    viewModel: ReadingViewModel = hiltViewModel()
 ) {
+    val saveState by viewModel.saveState.collectAsState()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Si es una tirada Sí o No, mostrar la respuesta primero
-        if (interpretation.yesNoAnswer != null && interpretation.yesNoJustification != null) {
+        // Si es una tirada Sí o No, mostrar la respuesta primero (sin justificación)
+        if (interpretation.yesNoAnswer != null) {
             YesNoAnswerCard(
                 answer = interpretation.yesNoAnswer,
-                justification = interpretation.yesNoJustification
+                justification = null // v1.2.0: No mostrar justificación (redundante)
             )
         }
 
-        // Interpretación general
+        // Botón de guardar en historial (v1.2.0) - ANTES del mensaje
+        // Solo mostrar si hay consultante
+        consultantName?.let { name ->
+            when (saveState) {
+                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.NotSaved -> {
+                    Button(
+                        onClick = {
+                            viewModel.saveToHistory(reading, interpretation, name)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("Guardar en Historial")
+                    }
+                }
+                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saving -> {
+                    Button(
+                        onClick = {},
+                        enabled = false,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 8.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Text("Guardando...")
+                    }
+                }
+                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saved -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(end = 12.dp)
+                            )
+                            Text(
+                                text = "Lectura guardada en el historial",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Error -> {
+                    val error = saveState as com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Error
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "Error al guardar: ${error.message}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextButton(onClick = {
+                                viewModel.saveToHistory(reading, interpretation, name)
+                            }) {
+                                Text("Reintentar")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Interpretación general - DESPUÉS del botón de guardar
         GeneralInterpretationCard(
             generalInterpretation = interpretation.generalInterpretation
         )
@@ -553,7 +676,7 @@ private fun InterpretationErrorView(
                 text = errorMessage,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
             Button(onClick = onRetry) {
                 Text("Reintentar")
@@ -561,3 +684,4 @@ private fun InterpretationErrorView(
         }
     }
 }
+

@@ -7,9 +7,12 @@
 - Interpretación por IA
 - Enciclopedia de cartas offline
 
-### v1.1.0 (En desarrollo) ⏳
+### v1.1.0 ✅
 - **Historial de lecturas guardadas**
 - **Carga manual de tiradas** (para tarotistas profesionales)
+
+### v1.2.0 (En desarrollo) ⏳
+- **Mejoras de UX** - Corrección de problemas de usabilidad identificados en testing
 
 ---
 
@@ -38,9 +41,12 @@ Ofrecer dos experiencias complementarias:
 3. [UI/UX](./ui-ux.md) - Especificaciones visuales
 4. [Criterios de Aceptación](./criterios-aceptacion.md) - Validación de requisitos
 
-### Requisitos v1.1.0 🆕
+### Requisitos v1.1.0 ✅
 5. [Historial de Lecturas Guardadas](./historial.md) - RF-11
 6. [Carga Manual de Tiradas](./carga-manual.md) - RF-12
+
+### Requisitos v1.2.0 ⏳
+7. [Mejoras de UX](./mejoras-ux.md) - RF-13 a RF-17
 
 ---
 
