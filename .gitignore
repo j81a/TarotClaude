@@ -16,3 +16,6 @@ local.properties
 
 # Seguridad: No subir archivos con API Keys
 gradle.properties
+
+# Claude Code settings locales
+.claude/settings.local.json
