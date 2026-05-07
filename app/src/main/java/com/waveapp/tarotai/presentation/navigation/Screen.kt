@@ -110,4 +110,25 @@ sealed class Screen(val route: String) {
     data object ReadingDetail : Screen("reading_detail/{readingId}") {
         fun createRoute(readingId: Long) = "reading_detail/$readingId"
     }
+
+    /**
+     * Pantalla de carga manual de tirada.
+     * Permite seleccionar cartas manualmente para una tirada física.
+     *
+     * @since v1.1.0
+     */
+    data object ManualLoad : Screen("manual_load/{spreadType}?question={question}&consultantName={consultantName}") {
+        fun createRoute(spreadType: String, question: String?, consultantName: String) =
+            "manual_load/$spreadType?question=${question ?: ""}&consultantName=$consultantName"
+    }
+
+    /**
+     * Pantalla de selección de carta para carga manual.
+     * Muestra todas las cartas disponibles con filtros.
+     *
+     * @since v1.1.0
+     */
+    data object CardSelector : Screen("card_selector/{positionIndex}") {
+        fun createRoute(positionIndex: Int) = "card_selector/$positionIndex"
+    }
 }

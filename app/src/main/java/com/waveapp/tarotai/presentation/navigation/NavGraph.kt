@@ -16,6 +16,7 @@ import com.waveapp.tarotai.presentation.carddetail.CardDetailScreen
 import com.waveapp.tarotai.presentation.encyclopedia.EncyclopediaScreen
 import com.waveapp.tarotai.presentation.history.HistoryScreen
 import com.waveapp.tarotai.presentation.history.ReadingDetailScreen
+import com.waveapp.tarotai.presentation.manualload.ManualLoadScreen
 import com.waveapp.tarotai.presentation.reading.QuestionScreen
 import com.waveapp.tarotai.presentation.reading.ReadingScreen
 import com.waveapp.tarotai.presentation.reading.SpreadTypeSelectionScreen
@@ -209,5 +210,32 @@ fun NavGraph(
                 }
             )
         }
+
+        // Pantalla de carga manual de tirada (v1.1.0)
+        composable(
+            route = Screen.ManualLoad.route,
+            arguments = listOf(
+                navArgument("spreadType") { type = NavType.StringType },
+                navArgument("question") {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument("consultantName") { type = NavType.StringType }
+            )
+        ) {
+            ManualLoadScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCardSelector = { positionIndex ->
+                    navController.navigate(Screen.CardSelector.createRoute(positionIndex))
+                },
+                onNavigateToInterpretation = {
+                    // TODO: Navigate to interpretation screen when ready
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Pantalla de selección de carta (v1.1.0)
+        // TODO: Implement in Tarea 7.4
     }
 }
