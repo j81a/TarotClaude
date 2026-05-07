@@ -35,8 +35,8 @@ class GetAvailableCardsUseCase @Inject constructor(
         filter: CardFilter = CardFilter.ALL
     ): Result<List<TarotCard>> {
         return try {
-            // Obtener todas las cartas del repositorio
-            val allCardsResult = tarotCardRepository.getAllCards()
+            // Obtener todas las cartas del repositorio (una sola vez)
+            val allCardsResult = tarotCardRepository.getAllCardsOnce()
 
             allCardsResult.fold(
                 onSuccess = { allCards ->
@@ -75,7 +75,7 @@ class GetAvailableCardsUseCase @Inject constructor(
      */
     suspend fun getAvailableCount(filter: CardFilter = CardFilter.ALL): Result<Int> {
         return try {
-            val allCardsResult = tarotCardRepository.getAllCards()
+            val allCardsResult = tarotCardRepository.getAllCardsOnce()
 
             allCardsResult.fold(
                 onSuccess = { allCards ->

@@ -58,4 +58,13 @@ interface TarotCardRepository {
      * @return true si se inicializó, false si ya tenía datos
      */
     suspend fun initializeDatabaseIfNeeded(): Boolean
+
+    /**
+     * Obtiene todas las cartas como una lista (suspend, no Flow).
+     * Útil para operaciones que requieren el set completo de cartas de una sola vez.
+     *
+     * @return Result con la lista completa de 78 cartas o error
+     * @since v1.1.0
+     */
+    suspend fun getAllCardsOnce(): Result<List<TarotCard>>
 }

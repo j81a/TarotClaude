@@ -111,4 +111,16 @@ class TarotCardRepositoryImpl @Inject constructor(
 
         return true  // Se inicializó correctamente
     }
+
+    override suspend fun getAllCardsOnce(): Result<List<TarotCard>> {
+        return try {
+            val entities = cardDao.getAllCards()
+            val domainCards = entities.toDomainModels()
+            Result.success(domainCards)
+        } catch (e: Exception) {
+            Result.failure(
+                RuntimeException("Error al obtener las cartas: ${e.message}", e)
+            )
+        }
+    }
 }
