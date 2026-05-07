@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🌍 Idioma / Language
+
+**IMPORTANTE**: Este proyecto está en español. **SIEMPRE** debes comunicarte en español con el usuario.
+- Todos los mensajes, explicaciones y documentación deben estar en español
+- Los comentarios en el código pueden estar en español o inglés según contexto
+- Los commits y documentación técnica deben estar en español
+- Solo usa inglés si el usuario explícitamente lo solicita
+
+**IMPORTANT**: This project is in Spanish. You must **ALWAYS** communicate in Spanish with the user.
+
 ## Project Overview
 
 TarotAI is an Android application built with Kotlin and Gradle. The project uses modern Android development practices with:
