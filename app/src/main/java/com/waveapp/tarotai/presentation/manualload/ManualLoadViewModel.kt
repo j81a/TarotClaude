@@ -176,7 +176,7 @@ class ManualLoadViewModel @Inject constructor(
                         question = _configuration.value.question,
                         drawnCards = _configuration.value.state.toDrawnCards(),
                         interpretation = interpretation,
-                        notes = null
+                        notes = emptyList()
                     )
 
                     val saveResult = saveReadingUseCase(reading)

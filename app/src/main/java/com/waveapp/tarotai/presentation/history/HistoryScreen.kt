@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun HistoryScreen(
     onNavigateBack: () -> Unit,
     onReadingClick: (Long) -> Unit,
+    onNavigateToHome: () -> Unit,
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val readings by viewModel.readings.collectAsState()
@@ -51,6 +53,14 @@ fun HistoryScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
                         )
                     }
                 }

@@ -4,28 +4,33 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.waveapp.tarotai.domain.model.ReadingHistory
+import com.waveapp.tarotai.domain.model.ReadingNote
 import com.waveapp.tarotai.domain.usecase.history.GetReadingByIdUseCase
-import com.waveapp.tarotai.domain.usecase.history.UpdateReadingNotesUseCase
+import com.waveapp.tarotai.domain.usecase.history.UpdateReadingUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 /**
  * ViewModel para la pantalla de detalle de una lectura guardada.
  *
+ * v1.2.0: Refactorizado para sistema de notas mejorado:
+ * - Agregar notas individuales con timestamp
+ * - Editar notas existentes
+ * - Eliminar notas
+ *
  * Responsabilidades:
  * - Cargar los detalles de una lectura por ID
- * - Manejar la edición de notas con autosave (2 segundos de inactividad)
+ * - Manejar CRUD de notas
  * - Gestionar el estado de carga y errores
  *
  * @param savedStateHandle Para obtener el ID de la lectura de la navegación
  * @param getReadingByIdUseCase Caso de uso para obtener la lectura
- * @param updateReadingNotesUseCase Caso de uso para actualizar notas
+ * @param updateReadingUseCase Caso de uso para actualizar la lectura completa
  *
  * @since v1.1.0
  */
@@ -33,7 +38,7 @@ import javax.inject.Inject
 class ReadingDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getReadingByIdUseCase: GetReadingByIdUseCase,
-    private val updateReadingNotesUseCase: UpdateReadingNotesUseCase
+    private val updateReadingUseCase: UpdateReadingUseCase
 ) : ViewModel() {
 
     private val readingId: Long = savedStateHandle.get<Long>("readingId") ?: 0L
@@ -49,17 +54,6 @@ class ReadingDetailViewModel @Inject constructor(
     // Estado de error
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
-
-    // Estado de guardado de notas
-    private val _isSavingNotes = MutableStateFlow(false)
-    val isSavingNotes: StateFlow<Boolean> = _isSavingNotes.asStateFlow()
-
-    // Indicador visual de guardado exitoso
-    private val _notesSaved = MutableStateFlow(false)
-    val notesSaved: StateFlow<Boolean> = _notesSaved.asStateFlow()
-
-    // Job para el autosave (para cancelar si el usuario sigue escribiendo)
-    private var autoSaveJob: Job? = null
 
     init {
         loadReading()
@@ -89,55 +83,94 @@ class ReadingDetailViewModel @Inject constructor(
     }
 
     /**
-     * Maneja el cambio de las notas.
-     * Implementa autosave después de 2 segundos sin actividad.
+     * Agrega una nueva nota a la lectura.
      *
-     * @param notes Nuevo contenido de las notas
+     * @param text Texto de la nota
      */
-    fun onNotesChanged(notes: String) {
-        // Actualizar el estado local inmediatamente
-        _reading.value = _reading.value?.copy(notes = notes.ifBlank { null })
+    fun addNote(text: String) {
+        val currentReading = _reading.value ?: return
+        if (text.isBlank() || text.length > 2000) return
 
-        // Cancelar job anterior si existe
-        autoSaveJob?.cancel()
+        val newNote = ReadingNote(
+            id = UUID.randomUUID().toString(),
+            timestamp = System.currentTimeMillis(),
+            text = text.trim()
+        )
 
-        // Resetear el indicador de guardado
-        _notesSaved.value = false
+        val updatedNotes = currentReading.notes + newNote
+        val updatedReading = currentReading.copy(notes = updatedNotes)
 
-        // Iniciar nuevo job con delay de 2 segundos
-        autoSaveJob = viewModelScope.launch {
-            delay(2000) // Esperar 2 segundos de inactividad
-            saveNotes(notes)
+        // Actualizar estado local inmediatamente
+        _reading.value = updatedReading
+
+        // Guardar en repositorio
+        viewModelScope.launch {
+            val result = updateReadingUseCase(updatedReading)
+            result.onFailure { exception ->
+                _error.value = "Error al guardar nota: ${exception.message}"
+                // Revertir cambio local
+                _reading.value = currentReading
+            }
         }
     }
 
     /**
-     * Guarda las notas en el repositorio.
+     * Edita una nota existente.
+     *
+     * @param note Nota a editar
+     * @param newText Nuevo texto
      */
-    private suspend fun saveNotes(notes: String) {
-        _isSavingNotes.value = true
+    fun editNote(note: ReadingNote, newText: String) {
+        val currentReading = _reading.value ?: return
+        if (newText.isBlank() || newText.length > 2000) return
 
-        val result = updateReadingNotesUseCase(
-            id = readingId,
-            notes = notes.ifBlank { null }
+        val updatedNote = note.copy(
+            text = newText.trim(),
+            timestamp = System.currentTimeMillis() // Actualizar timestamp al editar
         )
 
-        result.fold(
-            onSuccess = {
-                _isSavingNotes.value = false
-                _notesSaved.value = true
+        val updatedNotes = currentReading.notes.map {
+            if (it.id == note.id) updatedNote else it
+        }
+        val updatedReading = currentReading.copy(notes = updatedNotes)
 
-                // Ocultar el indicador de guardado después de 2 segundos
-                viewModelScope.launch {
-                    delay(2000)
-                    _notesSaved.value = false
-                }
-            },
-            onFailure = { exception ->
-                _isSavingNotes.value = false
-                _error.value = "Error al guardar notas: ${exception.message}"
+        // Actualizar estado local inmediatamente
+        _reading.value = updatedReading
+
+        // Guardar en repositorio
+        viewModelScope.launch {
+            val result = updateReadingUseCase(updatedReading)
+            result.onFailure { exception ->
+                _error.value = "Error al editar nota: ${exception.message}"
+                // Revertir cambio local
+                _reading.value = currentReading
             }
-        )
+        }
+    }
+
+    /**
+     * Elimina una nota.
+     *
+     * @param note Nota a eliminar
+     */
+    fun deleteNote(note: ReadingNote) {
+        val currentReading = _reading.value ?: return
+
+        val updatedNotes = currentReading.notes.filter { it.id != note.id }
+        val updatedReading = currentReading.copy(notes = updatedNotes)
+
+        // Actualizar estado local inmediatamente
+        _reading.value = updatedReading
+
+        // Guardar en repositorio
+        viewModelScope.launch {
+            val result = updateReadingUseCase(updatedReading)
+            result.onFailure { exception ->
+                _error.value = "Error al eliminar nota: ${exception.message}"
+                // Revertir cambio local
+                _reading.value = currentReading
+            }
+        }
     }
 
     /**

@@ -81,10 +81,31 @@ class ReadingHistoryRepositoryImpl @Inject constructor(
      * @param id ID de la lectura a actualizar
      * @param notes Nuevas notas (puede ser null para borrar)
      * @return Result con Unit si éxito, o error si falla
+     * @deprecated Usar updateReading para mayor flexibilidad (v1.2.0+)
+     * NOTA: Comentado porque el método updateNotes en el DAO fue removido
      */
+    /*
     override suspend fun updateNotes(id: Long, notes: String?): Result<Unit> {
         return try {
             readingHistoryDao.updateNotes(id, notes)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    */
+
+    /**
+     * Actualiza una lectura completa.
+     * v1.2.0: Reemplaza updateNotes para mayor flexibilidad.
+     *
+     * @param reading Lectura actualizada
+     * @return Result con Unit si éxito, o error si falla
+     */
+    override suspend fun updateReading(reading: ReadingHistory): Result<Unit> {
+        return try {
+            val entity = reading.toEntity()
+            readingHistoryDao.updateReading(entity)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

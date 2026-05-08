@@ -4,6 +4,7 @@ import com.waveapp.tarotai.data.local.entities.ReadingHistoryEntity
 import com.waveapp.tarotai.domain.model.DrawnCard
 import com.waveapp.tarotai.domain.model.Interpretation
 import com.waveapp.tarotai.domain.model.ReadingHistory
+import com.waveapp.tarotai.domain.model.ReadingNote
 import com.waveapp.tarotai.domain.model.SpreadType
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -34,7 +35,7 @@ private val json = Json {
 /**
  * Convierte un ReadingHistoryEntity (Room) a ReadingHistory (Domain).
  *
- * Deserializa los campos JSON (drawnCardsJson, interpretationJson) a objetos.
+ * Deserializa los campos JSON (drawnCardsJson, interpretationJson, notesJson) a objetos.
  *
  * @return Modelo de dominio ReadingHistory
  */
@@ -55,6 +56,12 @@ fun ReadingHistoryEntity.toDomain(): ReadingHistory {
         )
     }
 
+    val notes: List<ReadingNote> = try {
+        json.decodeFromString(notesJson)
+    } catch (e: Exception) {
+        emptyList() // Fallback si falla la deserialización
+    }
+
     return ReadingHistory(
         id = id,
         timestamp = timestamp,
@@ -70,7 +77,7 @@ fun ReadingHistoryEntity.toDomain(): ReadingHistory {
 /**
  * Convierte un ReadingHistory (Domain) a ReadingHistoryEntity (Room).
  *
- * Serializa los campos complejos (drawnCards, interpretation) a JSON.
+ * Serializa los campos complejos (drawnCards, interpretation, notes) a JSON.
  *
  * @return Entidad de Room ReadingHistoryEntity
  */
@@ -83,6 +90,6 @@ fun ReadingHistory.toEntity(): ReadingHistoryEntity {
         question = question,
         drawnCardsJson = json.encodeToString(drawnCards),
         interpretationJson = json.encodeToString(interpretation),
-        notes = notes
+        notesJson = json.encodeToString(notes)
     )
 }

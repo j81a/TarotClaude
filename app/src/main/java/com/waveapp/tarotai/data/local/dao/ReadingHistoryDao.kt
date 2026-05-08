@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.waveapp.tarotai.data.local.entities.ReadingHistoryEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -56,9 +57,19 @@ interface ReadingHistoryDao {
      *
      * @param readingId ID de la lectura a actualizar
      * @param notes Nuevas notas (puede ser null para borrar)
+     * @deprecated Usar updateReading para mayor flexibilidad (v1.2.0+)
+     * NOTA: Comentado porque la columna "notes" no existe, usar "notesJson" con updateReading
      */
-    @Query("UPDATE reading_history SET notes = :notes WHERE id = :readingId")
-    suspend fun updateNotes(readingId: Long, notes: String?)
+    // @Query("UPDATE reading_history SET notes = :notes WHERE id = :readingId")
+    // suspend fun updateNotes(readingId: Long, notes: String?)
+
+    /**
+     * Actualiza una lectura completa (v1.2.0).
+     *
+     * @param reading Lectura actualizada (debe tener id válido)
+     */
+    @Update
+    suspend fun updateReading(reading: ReadingHistoryEntity)
 
     /**
      * Elimina una lectura del historial.

@@ -1,5 +1,23 @@
 package com.waveapp.tarotai.domain.model
 
+import kotlinx.serialization.Serializable
+
+/**
+ * Modelo de una nota individual para una lectura.
+ *
+ * @property id ID único de la nota (UUID)
+ * @property timestamp Timestamp en milisegundos de cuándo se creó la nota
+ * @property text Texto de la nota
+ *
+ * @since v1.2.0
+ */
+@Serializable
+data class ReadingNote(
+    val id: String,
+    val timestamp: Long,
+    val text: String
+)
+
 /**
  * Modelo de dominio para una lectura guardada en el historial.
  *
@@ -19,9 +37,10 @@ package com.waveapp.tarotai.domain.model
  * @property question Pregunta realizada (opcional)
  * @property drawnCards Lista de cartas tiradas con sus posiciones y orientaciones
  * @property interpretation Interpretación completa generada por IA
- * @property notes Notas personales del tarotista (editables)
+ * @property notes Lista de notas personales del tarotista (editables)
  *
  * @since v1.1.0
+ * @since v1.2.0 - Cambio de notes: String? a notes: List<ReadingNote>
  */
 data class ReadingHistory(
     val id: Long,
@@ -31,5 +50,5 @@ data class ReadingHistory(
     val question: String?,
     val drawnCards: List<DrawnCard>,
     val interpretation: Interpretation,
-    val notes: String? = null
+    val notes: List<ReadingNote> = emptyList()
 )

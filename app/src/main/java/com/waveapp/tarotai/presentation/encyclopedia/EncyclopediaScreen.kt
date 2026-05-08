@@ -3,6 +3,8 @@ package com.waveapp.tarotai.presentation.encyclopedia
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,12 +32,14 @@ import com.waveapp.tarotai.presentation.encyclopedia.viewmodel.EncyclopediaViewM
  * - Estados de loading, error, y vacío
  *
  * @param onCardClick Callback cuando se hace clic en una carta
+ * @param onNavigateToHome Callback para navegar al home (botón X)
  * @param viewModel ViewModel inyectado por Hilt
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncyclopediaScreen(
     onCardClick: (Int) -> Unit,
+    onNavigateToHome: () -> Unit,
     viewModel: EncyclopediaViewModel = hiltViewModel()
 ) {
     // Recoger estados del ViewModel
@@ -47,7 +51,15 @@ fun EncyclopediaScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.encyclopedia_title)) }
+                title = { Text(stringResource(R.string.encyclopedia_title)) },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->

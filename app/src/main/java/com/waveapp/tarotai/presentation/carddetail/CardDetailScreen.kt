@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,12 +40,14 @@ import com.waveapp.tarotai.presentation.carddetail.viewmodel.CardDetailViewModel
  * - Palabras clave
  *
  * @param onNavigateBack Callback para volver atrás
+ * @param onNavigateToHome Callback para navegar al home (botón X)
  * @param viewModel ViewModel inyectado por Hilt
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardDetailScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToHome: () -> Unit,
     viewModel: CardDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -63,6 +66,14 @@ fun CardDetailScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.nav_back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
                         )
                     }
                 }

@@ -1,34 +1,39 @@
 package com.waveapp.tarotai.presentation.history
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.waveapp.tarotai.domain.model.CardOrientation
 import com.waveapp.tarotai.domain.model.DrawnCard
+import com.waveapp.tarotai.domain.model.LayoutType
+import com.waveapp.tarotai.domain.model.ReadingNote
+import com.waveapp.tarotai.presentation.reading.components.CrossCardsLayout
+import com.waveapp.tarotai.presentation.reading.components.GeneralInterpretationCard
+import com.waveapp.tarotai.presentation.reading.components.HorizontalCardsLayout
+import com.waveapp.tarotai.presentation.reading.components.YesNoAnswerCard
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
  * Pantalla de detalle de una lectura guardada.
  *
- * Muestra:
- * - Encabezado (consultante, fecha, tipo de tirada)
- * - Pregunta completa
- * - Cartas (clickeables para ver detalle)
- * - Interpretación completa
- * - Campo de notas editable con autosave
+ * v1.2.0: Refactorizada completamente para:
+ * - Mostrar cartas en layout visual (igual que ReadingScreen)
+ * - Mostrar interpretación con cards (igual que ReadingScreen)
+ * - Sistema de notas mejorado (lista con fecha, editar/eliminar)
  *
  * @param onNavigateBack Callback para navegar atrás
  * @param onCardClick Callback cuando se hace click en una carta (recibe card ID)
@@ -41,24 +46,12 @@ import java.util.*
 fun ReadingDetailScreen(
     onNavigateBack: () -> Unit,
     onCardClick: (Int) -> Unit,
+    onNavigateToHome: () -> Unit,
     viewModel: ReadingDetailViewModel = hiltViewModel()
 ) {
     val reading by viewModel.reading.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
-    val isSavingNotes by viewModel.isSavingNotes.collectAsState()
-    val notesSaved by viewModel.notesSaved.collectAsState()
-
-    var notesText by remember { mutableStateOf("") }
-
-    // Sincronizar notas con el estado del ViewModel
-    LaunchedEffect(reading) {
-        reading?.notes?.let { notes ->
-            if (notesText.isEmpty()) {
-                notesText = notes
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -69,6 +62,14 @@ fun ReadingDetailScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
                         )
                     }
                 }
@@ -117,14 +118,10 @@ fun ReadingDetailScreen(
             reading != null -> {
                 ReadingDetailContent(
                     reading = reading!!,
-                    notesText = notesText,
-                    onNotesChanged = {
-                        notesText = it
-                        viewModel.onNotesChanged(it)
-                    },
-                    isSavingNotes = isSavingNotes,
-                    notesSaved = notesSaved,
                     onCardClick = onCardClick,
+                    onAddNote = viewModel::addNote,
+                    onEditNote = viewModel::editNote,
+                    onDeleteNote = viewModel::deleteNote,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
@@ -137,65 +134,117 @@ fun ReadingDetailScreen(
 @Composable
 private fun ReadingDetailContent(
     reading: com.waveapp.tarotai.domain.model.ReadingHistory,
-    notesText: String,
-    onNotesChanged: (String) -> Unit,
-    isSavingNotes: Boolean,
-    notesSaved: Boolean,
     onCardClick: (Int) -> Unit,
+    onAddNote: (String) -> Unit,
+    onEditNote: (ReadingNote, String) -> Unit,
+    onDeleteNote: (ReadingNote) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showNoteDialog by remember { mutableStateOf(false) }
+    var editingNote by remember { mutableStateOf<ReadingNote?>(null) }
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Encabezado
         ReadingHeader(reading = reading)
 
-        Spacer(modifier = Modifier.height(24.dp))
-
         // Pregunta
         if (!reading.question.isNullOrBlank()) {
-            SectionTitle("Pregunta")
-            Text(
-                text = reading.question,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "Pregunta:",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = reading.question,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
         }
 
-        // Cartas
+        // Cartas en layout visual
         SectionTitle("Cartas")
-        Spacer(modifier = Modifier.height(8.dp))
-        reading.drawnCards.forEach { drawnCard ->
-            DrawnCardItem(
-                drawnCard = drawnCard,
-                onClick = { onCardClick(drawnCard.card.id) }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+        val config = com.waveapp.tarotai.domain.model.SpreadConfiguration.fromType(reading.spreadType)
+        when (config.layout) {
+            LayoutType.HORIZONTAL -> {
+                HorizontalCardsLayout(
+                    drawnCards = reading.drawnCards,
+                    onCardClick = { drawnCard -> onCardClick(drawnCard.card.id) }
+                )
+            }
+            LayoutType.CROSS -> {
+                CrossCardsLayout(
+                    drawnCards = reading.drawnCards,
+                    onCardClick = { drawnCard -> onCardClick(drawnCard.card.id) }
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Interpretación
+        // Interpretación con cards
         SectionTitle("Interpretación")
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = reading.interpretation.generalInterpretation,
-            style = MaterialTheme.typography.bodyMedium
+
+        // Si es tirada Sí/No, mostrar respuesta
+        if (reading.interpretation.yesNoAnswer != null) {
+            YesNoAnswerCard(
+                answer = reading.interpretation.yesNoAnswer,
+                justification = null
+            )
+        }
+
+        // Mensaje general
+        GeneralInterpretationCard(
+            generalInterpretation = reading.interpretation.generalInterpretation
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Notas editables
+        // Notas
         SectionTitle("Notas Personales")
-        Spacer(modifier = Modifier.height(8.dp))
+        NotesSection(
+            notes = reading.notes,
+            onAddNote = {
+                editingNote = null
+                showNoteDialog = true
+            },
+            onEditNote = { note ->
+                editingNote = note
+                showNoteDialog = true
+            },
+            onDeleteNote = onDeleteNote
+        )
+    }
 
-        NotesTextField(
-            notes = notesText,
-            onNotesChanged = onNotesChanged,
-            isSaving = isSavingNotes,
-            saved = notesSaved
+    // Diálogo para agregar/editar nota
+    if (showNoteDialog) {
+        NoteDialog(
+            note = editingNote,
+            onDismiss = {
+                showNoteDialog = false
+                editingNote = null
+            },
+            onSave = { text ->
+                if (editingNote != null) {
+                    onEditNote(editingNote!!, text)
+                } else {
+                    onAddNote(text)
+                }
+                showNoteDialog = false
+                editingNote = null
+            }
         )
     }
 }
@@ -239,85 +288,165 @@ private fun SectionTitle(title: String) {
 }
 
 @Composable
-private fun DrawnCardItem(
-    drawnCard: DrawnCard,
-    onClick: () -> Unit
+private fun NotesSection(
+    notes: List<ReadingNote>,
+    onAddNote: () -> Unit,
+    onEditNote: (ReadingNote) -> Unit,
+    onDeleteNote: (ReadingNote) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // Botón agregar nota
+        OutlinedButton(
+            onClick = onAddNote,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Column {
-                Text(
-                    text = drawnCard.card.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text("Agregar Nota")
+        }
+
+        // Lista de notas
+        if (notes.isEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
+            ) {
                 Text(
-                    text = drawnCard.positionName,
-                    style = MaterialTheme.typography.bodySmall,
+                    text = "No hay notas todavía",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        } else {
+            // Ordenar notas por fecha descendente (más recientes primero)
+            notes.sortedByDescending { it.timestamp }.forEach { note ->
+                NoteItem(
+                    note = note,
+                    onEdit = { onEditNote(note) },
+                    onDelete = { onDeleteNote(note) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoteItem(
+    note: ReadingNote,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp)
+        ) {
+            // Fecha y acciones
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = formatTimestamp(note.timestamp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    IconButton(
+                        onClick = onEdit,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar nota",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Eliminar nota",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Texto de la nota
             Text(
-                text = if (drawnCard.orientation == CardOrientation.UPRIGHT) "Derecha" else "Invertida",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (drawnCard.orientation == CardOrientation.UPRIGHT)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.error
+                text = note.text,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
 }
 
 @Composable
-private fun NotesTextField(
-    notes: String,
-    onNotesChanged: (String) -> Unit,
-    isSaving: Boolean,
-    saved: Boolean
+private fun NoteDialog(
+    note: ReadingNote?,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
 ) {
-    Column {
-        OutlinedTextField(
-            value = notes,
-            onValueChange = onNotesChanged,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Agrega tus notas personales...") },
-            minLines = 5,
-            maxLines = 10,
-            supportingText = {
+    var text by remember { mutableStateOf(note?.text ?: "") }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = if (note == null) "Agregar Nota" else "Editar Nota",
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Escribe tu nota...") },
+                    minLines = 5,
+                    maxLines = 10,
+                    supportingText = {
+                        Text("${text.length}/2000 caracteres")
+                    }
+                )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("${notes.length}/2000 caracteres")
-
-                    // Indicador de guardado
-                    when {
-                        isSaving -> Text("Guardando...", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        saved -> Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Guardado",
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Guardado", color = Color(0xFF4CAF50))
-                        }
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancelar")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = { onSave(text) },
+                        enabled = text.isNotBlank() && text.length <= 2000
+                    ) {
+                        Text("Guardar")
                     }
                 }
             }
-        )
+        }
     }
 }
 

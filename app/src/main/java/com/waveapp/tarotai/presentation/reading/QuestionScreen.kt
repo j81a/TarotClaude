@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,7 +42,8 @@ fun QuestionScreen(
     spreadType: SpreadType,
     isManualLoad: Boolean = false,
     onNavigateBack: () -> Unit,
-    onContinue: (question: String?, consultantName: String?) -> Unit
+    onContinue: (question: String?, consultantName: String?) -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     var question by remember { mutableStateOf("") }
     var showQuestionError by remember { mutableStateOf(false) }
@@ -60,6 +62,14 @@ fun QuestionScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.nav_back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
                         )
                     }
                 }

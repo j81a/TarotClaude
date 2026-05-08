@@ -167,7 +167,7 @@ class ReadingViewModel @Inject constructor(
                 question = reading.question,
                 drawnCards = reading.drawnCards,
                 interpretation = interpretation,
-                notes = null
+                notes = emptyList()
             )
 
             val result = saveReadingUseCase(readingHistory)

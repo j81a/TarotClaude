@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
  * - Información básica de la lectura (timestamp, consultante, tipo de tirada, pregunta)
  * - Cartas tiradas (serializadas como JSON)
  * - Interpretación generada por IA (serializada como JSON)
- * - Notas personales del tarotista (editables)
+ * - Notas personales del tarotista (editables, serializadas como JSON)
  *
  * @property id ID autogenerado de la lectura
  * @property timestamp Timestamp en milisegundos de cuándo se realizó la lectura
@@ -20,7 +20,7 @@ import androidx.room.PrimaryKey
  * @property question Pregunta realizada (opcional, puede ser null)
  * @property drawnCardsJson JSON serializado de List<DrawnCard>
  * @property interpretationJson JSON serializado de Interpretation
- * @property notes Notas personales del tarotista (editables, opcional)
+ * @property notesJson JSON serializado de List<ReadingNote> (v1.2.0)
  */
 @Entity(
     tableName = "reading_history",
@@ -36,5 +36,5 @@ data class ReadingHistoryEntity(
     val question: String?,
     val drawnCardsJson: String,
     val interpretationJson: String,
-    val notes: String? = null
+    val notesJson: String = "[]" // v1.2.0: Lista vacía por defecto
 )

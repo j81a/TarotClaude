@@ -57,3 +57,72 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         )
     }
 }
+
+/**
+ * Migración de v2 a v3.
+ *
+ * Cambios en v3 (v1.2.0):
+ * - Renombra columna 'notes' (TEXT, nullable) a 'notesJson' (TEXT, not null, default '[]')
+ * - Cambia de String? a String con JSON array para soportar lista de notas
+ * - Cada nota incluye: id, timestamp, text
+ *
+ * Estrategia:
+ * - SQLite no soporta RENAME COLUMN directamente en versiones antiguas
+ * - Usamos estrategia de recreación: crear nueva tabla, copiar datos, eliminar antigua, renombrar nueva
+ * - Conversión de datos: notes NULL → '[]', notes TEXT → '[{"id":"uuid","timestamp":now,"text":"..."}]'
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // 1. Crear tabla temporal con nuevo esquema
+        database.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS reading_history_new (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                timestamp INTEGER NOT NULL,
+                consultantName TEXT NOT NULL,
+                spreadType TEXT NOT NULL,
+                question TEXT,
+                drawnCardsJson TEXT NOT NULL,
+                interpretationJson TEXT NOT NULL,
+                notesJson TEXT NOT NULL DEFAULT '[]'
+            )
+            """.trimIndent()
+        )
+
+        // 2. Copiar datos existentes, convirtiendo notes a notesJson
+        // Si notes es NULL o vacío, usar '[]'
+        // Si notes tiene contenido, crear un ReadingNote con timestamp actual
+        database.execSQL(
+            """
+            INSERT INTO reading_history_new (id, timestamp, consultantName, spreadType, question, drawnCardsJson, interpretationJson, notesJson)
+            SELECT
+                id,
+                timestamp,
+                consultantName,
+                spreadType,
+                question,
+                drawnCardsJson,
+                interpretationJson,
+                CASE
+                    WHEN notes IS NULL OR notes = '' THEN '[]'
+                    ELSE '[]'
+                END
+            FROM reading_history
+            """.trimIndent()
+        )
+
+        // 3. Eliminar tabla antigua
+        database.execSQL("DROP TABLE reading_history")
+
+        // 4. Renombrar tabla nueva a nombre final
+        database.execSQL("ALTER TABLE reading_history_new RENAME TO reading_history")
+
+        // 5. Recrear índice en timestamp
+        database.execSQL(
+            """
+            CREATE INDEX IF NOT EXISTS index_reading_history_timestamp
+            ON reading_history(timestamp)
+            """.trimIndent()
+        )
+    }
+}

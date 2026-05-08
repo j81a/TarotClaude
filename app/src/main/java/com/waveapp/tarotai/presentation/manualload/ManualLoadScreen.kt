@@ -53,6 +53,7 @@ fun ManualLoadScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCardSelector: (Int) -> Unit,
     onNavigateToReadingDetail: (Long) -> Unit,
+    onNavigateToHome: () -> Unit,
     viewModel: ManualLoadViewModel = hiltViewModel()
 ) {
     val configuration by viewModel.configuration.collectAsState()
@@ -86,6 +87,14 @@ fun ManualLoadScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
                         )
                     }
                 }

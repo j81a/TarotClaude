@@ -76,6 +76,11 @@ fun NavGraph(
             EncyclopediaScreen(
                 onCardClick = { cardId ->
                     navController.navigate(Screen.CardDetail.createRoute(cardId))
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
                 }
             )
         }
@@ -91,7 +96,12 @@ fun NavGraph(
             )
         ) {
             CardDetailScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
+                }
             )
         }
 
@@ -113,6 +123,11 @@ fun NavGraph(
                     navController.navigate(
                         Screen.Question.createRoute(spreadType.name, isManualLoad)
                     )
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
                 }
             )
         }
@@ -158,6 +173,11 @@ fun NavGraph(
                         Log.d("NavGraph", "Navigating to ReadingScreen: $route, consultant: $consultantName")
                         navController.navigate(route)
                     }
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
                 }
             )
         }
@@ -201,6 +221,11 @@ fun NavGraph(
                     navController.navigate(
                         Screen.CardDetail.createRoute(cardId = drawnCard.card.id)
                     )
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
                 }
             )
         }
@@ -228,6 +253,11 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onReadingClick = { readingId ->
                     navController.navigate(Screen.ReadingDetail.createRoute(readingId))
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
                 }
             )
         }
@@ -243,6 +273,11 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onCardClick = { cardId ->
                     navController.navigate(Screen.CardDetail.createRoute(cardId))
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
                 }
             )
         }
@@ -269,6 +304,11 @@ fun NavGraph(
                     navController.navigate(Screen.ReadingDetail.createRoute(readingId)) {
                         // Limpiar el back stack hasta ManualLoad (exclusivo)
                         popUpTo(Screen.ManualLoad.route) { inclusive = true }
+                    }
+                },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
                     }
                 }
             )
@@ -299,7 +339,12 @@ fun NavGraph(
                     sharedViewModel.addCard(card, positionIndex, orientation)
                     navController.popBackStack()
                 },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
+                }
             )
         }
     }

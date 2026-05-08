@@ -50,8 +50,19 @@ interface ReadingHistoryRepository {
      * @param id ID de la lectura a actualizar
      * @param notes Nuevas notas (puede ser null para borrar)
      * @return Result con Unit si éxito, o error si falla
+     * @deprecated Usar updateReading para mayor flexibilidad (v1.2.0+)
+     * NOTA: Comentado porque el método updateNotes en el DAO fue removido
      */
-    suspend fun updateNotes(id: Long, notes: String?): Result<Unit>
+    // suspend fun updateNotes(id: Long, notes: String?): Result<Unit>
+
+    /**
+     * Actualiza una lectura completa.
+     * v1.2.0: Reemplaza updateNotes para mayor flexibilidad.
+     *
+     * @param reading Lectura actualizada
+     * @return Result con Unit si éxito, o error si falla
+     */
+    suspend fun updateReading(reading: ReadingHistory): Result<Unit>
 
     /**
      * Elimina una lectura del historial.

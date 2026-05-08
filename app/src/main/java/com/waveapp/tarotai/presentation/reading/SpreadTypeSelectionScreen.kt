@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,7 +22,8 @@ import com.waveapp.tarotai.domain.model.SpreadType
 @Composable
 fun SpreadTypeSelectionScreen(
     onNavigateBack: () -> Unit,
-    onSpreadTypeSelected: (SpreadType) -> Unit
+    onSpreadTypeSelected: (SpreadType) -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -32,6 +34,14 @@ fun SpreadTypeSelectionScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.nav_back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
                         )
                     }
                 }

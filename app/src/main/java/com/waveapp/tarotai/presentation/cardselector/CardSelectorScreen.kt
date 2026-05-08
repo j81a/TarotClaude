@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,6 +56,7 @@ fun CardSelectorScreen(
     manualLoadState: ManualLoadState,
     onCardSelected: (TarotCard, CardOrientation) -> Unit,
     onNavigateBack: () -> Unit,
+    onNavigateToHome: () -> Unit,
     viewModel: CardSelectorViewModel = hiltViewModel()
 ) {
     // Inicializar ViewModel con el estado actual
@@ -98,6 +100,14 @@ fun CardSelectorScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToHome) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Volver al inicio"
                         )
                     }
                 }

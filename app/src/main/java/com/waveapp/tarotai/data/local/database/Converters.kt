@@ -85,4 +85,24 @@ class Converters {
     fun toInterpretation(value: String): Interpretation {
         return json.decodeFromString(value)
     }
+
+    // ========== Converters para notas (v1.2.0) ==========
+
+    /**
+     * Convierte una List<ReadingNote> a String JSON para almacenarla en la BD.
+     * Usado en ReadingHistoryEntity.notesJson
+     */
+    @TypeConverter
+    fun fromReadingNoteList(value: List<com.waveapp.tarotai.domain.model.ReadingNote>): String {
+        return json.encodeToString(value)
+    }
+
+    /**
+     * Convierte un String JSON de la BD a List<ReadingNote>.
+     * Usado para recuperar las notas guardadas en el historial.
+     */
+    @TypeConverter
+    fun toReadingNoteList(value: String): List<com.waveapp.tarotai.domain.model.ReadingNote> {
+        return json.decodeFromString(value)
+    }
 }

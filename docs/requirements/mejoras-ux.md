@@ -255,6 +255,100 @@ Pregunta: [pregunta]
 
 ---
 
+## RF-19: Mejoras Finales de UX (v1.2.0)
+
+### Descripción
+Correcciones finales identificadas durante testing de v1.2.0:
+1. Agregar botón X (cerrar) en todas las pantallas secundarias
+2. ReadingDetailScreen debe mostrar cartas igual que ReadingScreen (layout visual)
+3. ReadingDetailScreen debe mostrar interpretación con cards igual que ReadingScreen
+4. Sistema de notas mejorado: listado con fecha, editar/eliminar individual
+
+### Cambios Requeridos
+
+#### 1. Botón X en TopAppBar (Cierre Rápido)
+Todas las pantallas secundarias deben tener botón X arriba a la derecha:
+- EncyclopediaScreen
+- CardDetailScreen
+- SpreadTypeSelectionScreen
+- QuestionScreen
+- ReadingScreen
+- HistoryScreen
+- ReadingDetailScreen
+- ManualLoadScreen
+- CardSelectorScreen
+
+**Comportamiento**: Al presionar X, navega directo a Home limpiando back stack.
+
+```kotlin
+actions = {
+    IconButton(onClick = {
+        navController.navigate(Screen.Home.route) {
+            popUpTo(Screen.Home.route) { inclusive = false }
+        }
+    }) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Volver al inicio"
+        )
+    }
+}
+```
+
+#### 2. ReadingDetailScreen - Mostrar Cartas como Layout Visual
+**Problema actual**: Muestra cartas como lista de strings
+**Solución**: Reutilizar componentes de ReadingScreen:
+- `HorizontalCardsLayout` para tiradas Simple/YesNo/Present/Tendency
+- `CrossCardsLayout` para tirada Cross
+- Mostrar imágenes de cartas con orientación
+
+#### 3. ReadingDetailScreen - Interpretación con Cards
+**Problema actual**: Muestra interpretación como texto plano
+**Solución**: Reutilizar componentes:
+- `YesNoAnswerCard` (si aplica)
+- `GeneralInterpretationCard`
+- Mismo estilo visual que ReadingScreen
+
+#### 4. Sistema de Notas Mejorado
+**Problema actual**: Un solo TextField de notas
+**Solución**: Listado de notas con:
+- Cada nota tiene: timestamp, texto, acciones
+- Botón "Agregar Nota"
+- Diálogo para agregar/editar nota
+- Cada item muestra:
+  - Fecha/hora formateada
+  - Texto de la nota
+  - Botones: Editar (ícono lápiz), Eliminar (ícono basura)
+
+**Modelo de datos**:
+```kotlin
+data class ReadingNote(
+    val id: String,  // UUID
+    val timestamp: Long,
+    val text: String
+)
+```
+
+### Criterios de Aceptación
+- [ ] Todas las pantallas secundarias tienen botón X funcional
+- [ ] ReadingDetailScreen muestra cartas en layout visual (igual que ReadingScreen)
+- [ ] ReadingDetailScreen muestra interpretación con cards (igual que ReadingScreen)
+- [ ] Sistema de notas permite agregar múltiples notas
+- [ ] Cada nota tiene fecha, editar y eliminar
+- [ ] Notas se guardan en Room Database
+
+### Impacto en Código
+- 9 archivos: Agregar botón X en TopAppBar
+- `ReadingDetailScreen.kt`: Refactorizar completamente
+- `ReadingHistory.kt`: Cambiar `notes: String?` a `notes: List<ReadingNote>`
+- `ReadingHistoryEntity.kt`: TypeConverter para `List<ReadingNote>`
+- `Converters.kt`: Agregar serialización de notas
+
+### Prioridad
+**Alta** - Mejoras críticas de UX identificadas en testing final
+
+---
+
 ## Resumen de Cambios
 
 ### Impacto en Documentación

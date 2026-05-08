@@ -1,5 +1,14 @@
 package com.waveapp.tarotai.domain.usecase.history
 
+/*
+ * DEPRECATED: Este UseCase ya no se usa desde v1.2.0
+ * Se reemplazó con UpdateReadingUseCase que usa readingHistory.notes (List<ReadingNote>)
+ * en lugar de readingHistory.notes (String?)
+ *
+ * Comentado completamente para evitar errores de compilación.
+ */
+
+/*
 import com.waveapp.tarotai.domain.repository.ReadingHistoryRepository
 import javax.inject.Inject
 
@@ -54,3 +63,4 @@ class UpdateReadingNotesUseCase @Inject constructor(
         return readingHistoryRepository.updateNotes(id, finalNotes)
     }
 }
+*/
