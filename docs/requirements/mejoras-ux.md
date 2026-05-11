@@ -483,4 +483,287 @@ Box(
 
 ---
 
-*Última actualización: 2026-05-07*
+## RF-21: Entrada de Voz en QuestionScreen (v1.3.0) 🆕
+
+### Descripción
+Permitir al usuario dictar su pregunta usando reconocimiento de voz, facilitando la entrada de texto especialmente para preguntas largas o consultas reflexivas.
+
+### Problema Actual
+- El usuario debe escribir manualmente la pregunta
+- Puede ser tedioso en dispositivos móviles
+- Algunas preguntas son largas y reflexivas (difícil escribir con teclado)
+
+### Solución Requerida
+- **Botón de micrófono**: Icono de micrófono al lado del campo de texto de pregunta
+- **Reconocimiento de voz nativo**: Usar SpeechRecognizer API de Android (gratuito, integrado)
+- **Transcripción en tiempo real**: El texto reconocido se escribe directamente en el TextField
+- **Feedback visual**: Indicador animado mientras está escuchando
+- **Idioma español**: Configurar reconocimiento para español (es-ES o es-MX)
+- **Manejo de permisos**: Solicitar permiso de micrófono en tiempo de ejecución
+- **Manejo de errores**: Si no hay conexión, no hay micrófono, o no se entiende el audio
+
+### Criterios de Aceptación
+- [ ] Botón de micrófono visible al lado del campo "Pregunta"
+- [ ] Al tocar el micrófono, se solicita permiso si es primera vez
+- [ ] Al activarse, muestra indicador visual (animación o cambio de color)
+- [ ] El texto reconocido se escribe en el TextField en tiempo real
+- [ ] Se puede detener manualmente o se detiene automáticamente por timeout
+- [ ] Funciona en español (es-ES)
+- [ ] Muestra mensaje de error si falla el reconocimiento
+- [ ] El botón funciona tanto en modo automático como manual
+
+### Especificaciones Técnicas
+
+#### Android Manifest - Permisos
+```xml
+<!-- AndroidManifest.xml -->
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+```
+
+#### SpeechRecognizer Setup
+```kotlin
+// Configuración del reconocedor
+val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+
+val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+    putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")  // Español de España
+    putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)  // Resultados parciales en tiempo real
+    putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+}
+```
+
+#### Estados de Reconocimiento
+```kotlin
+sealed class SpeechRecognitionState {
+    object Idle : SpeechRecognitionState()
+    object Listening : SpeechRecognitionState()
+    object Processing : SpeechRecognitionState()
+    data class Error(val message: String) : SpeechRecognitionState()
+}
+```
+
+#### Componente UI
+```kotlin
+// En QuestionScreen.kt
+OutlinedTextField(
+    value = question,
+    onValueChange = { question = it },
+    label = { Text("Tu pregunta") },
+    trailingIcon = {
+        IconButton(
+            onClick = {
+                if (speechState is SpeechRecognitionState.Listening) {
+                    // Detener reconocimiento
+                    viewModel.stopListening()
+                } else {
+                    // Iniciar reconocimiento
+                    viewModel.startListening()
+                }
+            }
+        ) {
+            when (speechState) {
+                is SpeechRecognitionState.Idle -> {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = "Dictar pregunta",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                is SpeechRecognitionState.Listening -> {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = "Detener dictado",
+                        tint = Color.Red,
+                        modifier = Modifier.scale(1.2f)  // Animación pulsante
+                    )
+                }
+                is SpeechRecognitionState.Processing -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+    },
+    modifier = Modifier.fillMaxWidth()
+)
+
+// Mostrar error si existe
+if (speechState is SpeechRecognitionState.Error) {
+    Text(
+        text = speechState.message,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall
+    )
+}
+```
+
+### Manejo de Permisos
+
+#### ViewModel
+```kotlin
+// QuestionViewModel.kt
+class QuestionViewModel : ViewModel() {
+
+    private val _speechState = MutableStateFlow<SpeechRecognitionState>(SpeechRecognitionState.Idle)
+    val speechState: StateFlow<SpeechRecognitionState> = _speechState.asStateFlow()
+
+    private var speechRecognizer: SpeechRecognizer? = null
+
+    fun initSpeechRecognizer(context: Context) {
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        speechRecognizer?.setRecognitionListener(object : RecognitionListener {
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.firstOrNull()?.let { recognizedText ->
+                    _question.value = recognizedText
+                }
+                _speechState.value = SpeechRecognitionState.Idle
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {
+                val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.firstOrNull()?.let { partialText ->
+                    _question.value = partialText  // Actualizar en tiempo real
+                }
+            }
+
+            override fun onError(error: Int) {
+                val errorMessage = when (error) {
+                    SpeechRecognizer.ERROR_AUDIO -> "Error de audio"
+                    SpeechRecognizer.ERROR_CLIENT -> "Error del cliente"
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Permiso de micrófono denegado"
+                    SpeechRecognizer.ERROR_NETWORK -> "Error de conexión"
+                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Tiempo de espera agotado"
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No se entendió el audio"
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Reconocedor ocupado"
+                    SpeechRecognizer.ERROR_SERVER -> "Error del servidor"
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No se detectó voz"
+                    else -> "Error desconocido"
+                }
+                _speechState.value = SpeechRecognitionState.Error(errorMessage)
+            }
+
+            override fun onBeginningOfSpeech() {
+                _speechState.value = SpeechRecognitionState.Listening
+            }
+
+            override fun onEndOfSpeech() {
+                _speechState.value = SpeechRecognitionState.Processing
+            }
+
+            override fun onReadyForSpeech(params: Bundle?) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+    }
+
+    fun startListening() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
+        speechRecognizer?.startListening(intent)
+        _speechState.value = SpeechRecognitionState.Listening
+    }
+
+    fun stopListening() {
+        speechRecognizer?.stopListening()
+        _speechState.value = SpeechRecognitionState.Idle
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        speechRecognizer?.destroy()
+    }
+}
+```
+
+#### Solicitud de Permisos en Compose
+```kotlin
+// QuestionScreen.kt
+val context = LocalContext.current
+val permissionLauncher = rememberLauncherForActivityResult(
+    ActivityResultContracts.RequestPermission()
+) { isGranted ->
+    if (isGranted) {
+        viewModel.startListening()
+    } else {
+        // Mostrar mensaje explicativo
+        Toast.makeText(context, "Permiso de micrófono requerido", Toast.LENGTH_SHORT).show()
+    }
+}
+
+// Al tocar el botón de micrófono
+IconButton(onClick = {
+    when {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED -> {
+            // Permiso ya concedido
+            viewModel.startListening()
+        }
+        else -> {
+            // Solicitar permiso
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+})
+```
+
+### Flujo de Usuario
+
+1. **Usuario llega a QuestionScreen**
+2. **Ve campo "Pregunta" con icono de micrófono**
+3. **Toca el icono de micrófono**
+4. **Si es primera vez**: Sistema solicita permiso de micrófono
+5. **Si acepta**: Ícono cambia a rojo (pulsante) - indica escuchando
+6. **Usuario habla su pregunta**
+7. **Texto se transcribe en tiempo real** en el TextField
+8. **Usuario detiene** (tocando icono nuevamente) o espera timeout automático
+9. **Ícono vuelve a estado normal**
+10. **Usuario revisa/edita** el texto si es necesario
+11. **Continúa** con el flujo normal
+
+### Consideraciones de Diseño
+
+#### UX
+- **Icono intuitivo**: Micrófono es universalmente reconocido
+- **Feedback visual claro**: Rojo pulsante = escuchando
+- **No intrusivo**: No bloquea el teclado manual, es complementario
+- **Editable**: El usuario puede corregir errores de transcripción
+
+#### Performance
+- **Reconocimiento en dispositivo si disponible**: Android 12+ puede usar reconocimiento offline
+- **Fallback a nube**: Si no hay soporte local, usa API de Google (requiere conexión)
+- **Timeout automático**: 10 segundos sin hablar = detiene automáticamente
+
+#### Accesibilidad
+- **ContentDescription**: Describir estado del botón para lectores de pantalla
+- **Alternativa de teclado**: Siempre disponible si voz falla
+- **Mensajes de error claros**: Guiar al usuario en caso de problemas
+
+### Dependencias
+
+**No requiere dependencias externas** - API nativa de Android
+
+### Impacto en Código
+
+**Archivos a crear**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/viewmodel/QuestionViewModel.kt` (si no existe)
+
+**Archivos a modificar**:
+- `app/src/main/AndroidManifest.xml` - Agregar permiso RECORD_AUDIO
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/QuestionScreen.kt` - Agregar botón y lógica de voz
+
+### Prioridad
+**Media** - Funcionalidad útil pero no bloqueante, mejora significativa de UX
+
+---
+
+*Última actualización: 2026-05-11*

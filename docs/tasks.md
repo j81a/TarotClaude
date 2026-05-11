@@ -31,8 +31,14 @@
 | **Fase 8: Mejoras de UX** | 5 | 0 | ⏳ 0% |
 | **Subtotal v1.2.0** | **5** | **0** | **⏳ 0%** |
 
+### v1.3.0 (PLANIFICACIÓN) 🆕
+| Fase | Tareas | Completadas | Progreso |
+|------|--------|-------------|----------|
+| **Fase 9: Reconocimiento de Voz** | 3 | 0 | ⏳ 0% |
+| **Subtotal v1.3.0** | **3** | **0** | **⏳ 0%** |
+
 ### Total General
-| **TOTAL** | **37** | **32** | **📊 86%** |
+| **TOTAL** | **40** | **32** | **📊 80%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -1460,3 +1466,383 @@ private fun CardSelectorItem(
 - ⏳ Tarea 8.6: Obtener/crear imagen card_back.jpg
 
 **Siguiente: Tarea 8.3 - ManualLoadViewModel - Remover guardado automático**
+
+---
+
+## 🎙️ FASE 9: Reconocimiento de Voz (v1.3.0)
+
+### Tarea 9.1: Agregar Permiso de Micrófono ⏳
+
+**Descripción**: Agregar permiso `RECORD_AUDIO` al AndroidManifest.xml para permitir el uso del micrófono.
+
+**Criterios de Aceptación**:
+- [ ] Permiso `RECORD_AUDIO` agregado en AndroidManifest.xml
+- [ ] El proyecto compila sin errores
+- [ ] El permiso aparece en la lista de permisos de la app
+
+**Archivos a modificar**:
+- `app/src/main/AndroidManifest.xml`
+
+**Cambios técnicos**:
+```xml
+<!-- AndroidManifest.xml -->
+<manifest ...>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    ...
+</manifest>
+```
+
+**Tiempo estimado**: 15 minutos
+
+---
+
+### Tarea 9.2: Crear QuestionViewModel con Lógica de Reconocimiento de Voz ⏳
+
+**Descripción**: Crear (o actualizar) `QuestionViewModel` para manejar el estado y lógica del reconocimiento de voz usando SpeechRecognizer API.
+
+**Criterios de Aceptación**:
+- [ ] `QuestionViewModel` creado/actualizado con `@HiltViewModel`
+- [ ] Sealed class `SpeechRecognitionState` definida (Idle, Listening, Processing, Error)
+- [ ] `StateFlow<SpeechRecognitionState>` expuesto para la UI
+- [ ] Función `initSpeechRecognizer(context)` implementada
+- [ ] Función `startListening()` implementada con configuración en español
+- [ ] Función `stopListening()` implementada
+- [ ] `RecognitionListener` implementado con todos los callbacks
+- [ ] Resultados parciales actualizan el texto en tiempo real
+- [ ] Manejo de errores con mensajes en español
+- [ ] `onCleared()` destruye el SpeechRecognizer correctamente
+- [ ] El proyecto compila sin errores
+
+**Archivos a crear/modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/viewmodel/QuestionViewModel.kt`
+
+**Código esperado**:
+```kotlin
+@HiltViewModel
+class QuestionViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
+
+    private val _speechState = MutableStateFlow<SpeechRecognitionState>(
+        SpeechRecognitionState.Idle
+    )
+    val speechState: StateFlow<SpeechRecognitionState> = _speechState.asStateFlow()
+
+    private val _question = MutableStateFlow("")
+    val question: StateFlow<String> = _question.asStateFlow()
+
+    private var speechRecognizer: SpeechRecognizer? = null
+
+    fun initSpeechRecognizer(context: Context) {
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        speechRecognizer?.setRecognitionListener(object : RecognitionListener {
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.firstOrNull()?.let { recognizedText ->
+                    _question.value = recognizedText
+                }
+                _speechState.value = SpeechRecognitionState.Idle
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {
+                val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.firstOrNull()?.let { partialText ->
+                    _question.value = partialText
+                }
+            }
+
+            override fun onError(error: Int) {
+                val errorMessage = when (error) {
+                    SpeechRecognizer.ERROR_AUDIO -> "Error de audio"
+                    SpeechRecognizer.ERROR_CLIENT -> "Error del cliente"
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Permiso de micrófono denegado"
+                    SpeechRecognizer.ERROR_NETWORK -> "Error de conexión"
+                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Tiempo de espera agotado"
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No se entendió el audio"
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Reconocedor ocupado"
+                    SpeechRecognizer.ERROR_SERVER -> "Error del servidor"
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No se detectó voz"
+                    else -> "Error desconocido"
+                }
+                _speechState.value = SpeechRecognitionState.Error(errorMessage)
+            }
+
+            override fun onBeginningOfSpeech() {
+                _speechState.value = SpeechRecognitionState.Listening
+            }
+
+            override fun onEndOfSpeech() {
+                _speechState.value = SpeechRecognitionState.Processing
+            }
+
+            override fun onReadyForSpeech(params: Bundle?) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+    }
+
+    fun startListening() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
+        speechRecognizer?.startListening(intent)
+        _speechState.value = SpeechRecognitionState.Listening
+    }
+
+    fun stopListening() {
+        speechRecognizer?.stopListening()
+        _speechState.value = SpeechRecognitionState.Idle
+    }
+
+    fun updateQuestion(text: String) {
+        _question.value = text
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        speechRecognizer?.destroy()
+    }
+}
+
+sealed class SpeechRecognitionState {
+    object Idle : SpeechRecognitionState()
+    object Listening : SpeechRecognitionState()
+    object Processing : SpeechRecognitionState()
+    data class Error(val message: String) : SpeechRecognitionState()
+}
+```
+
+**Imports necesarios**:
+```kotlin
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+```
+
+**Tiempo estimado**: 2 horas
+
+---
+
+### Tarea 9.3: Actualizar QuestionScreen con Botón de Micrófono ⏳
+
+**Descripción**: Modificar `QuestionScreen` para agregar botón de micrófono con manejo de permisos y feedback visual según estado.
+
+**Criterios de Aceptación**:
+- [ ] `QuestionViewModel` inyectado con Hilt
+- [ ] `LaunchedEffect` inicializa SpeechRecognizer
+- [ ] `rememberLauncherForActivityResult` maneja solicitud de permisos
+- [ ] Botón de micrófono agregado como `trailingIcon` del TextField de pregunta
+- [ ] Icono cambia según estado (Idle: gris, Listening: rojo pulsante, Processing: spinner)
+- [ ] Al tocar botón verifica permiso y solicita si es necesario
+- [ ] Si permiso concedido, inicia reconocimiento
+- [ ] Texto reconocido se muestra en TextField en tiempo real
+- [ ] Muestra mensaje de error si reconocimiento falla
+- [ ] Verificación de disponibilidad de SpeechRecognizer en dispositivo
+- [ ] El proyecto compila sin errores
+- [ ] Funciona en modo automático y manual (ambos flujos)
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/QuestionScreen.kt`
+
+**Cambios técnicos**:
+```kotlin
+@Composable
+fun QuestionScreen(
+    spreadType: SpreadType,
+    isManualLoad: Boolean = false,
+    onNavigateBack: () -> Unit,
+    onContinue: (String, String?) -> Unit,
+    onNavigateToHome: () -> Unit,
+    viewModel: QuestionViewModel = hiltViewModel()  // Agregar ViewModel
+) {
+    val context = LocalContext.current
+    val speechState by viewModel.speechState.collectAsState()
+    val recognizedQuestion by viewModel.question.collectAsState()
+
+    // Inicializar SpeechRecognizer
+    LaunchedEffect(Unit) {
+        if (SpeechRecognizer.isRecognitionAvailable(context)) {
+            viewModel.initSpeechRecognizer(context)
+        }
+    }
+
+    // Manejo de permisos
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.startListening()
+        } else {
+            Toast.makeText(
+                context,
+                "Permiso de micrófono requerido para dictar",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    // ... resto del contenido existente ...
+
+    // TextField de pregunta con botón de micrófono
+    OutlinedTextField(
+        value = recognizedQuestion.ifEmpty { question },
+        onValueChange = {
+            question = it
+            viewModel.updateQuestion(it)
+        },
+        label = { Text(stringResource(R.string.question_label)) },
+        placeholder = { Text(stringResource(R.string.question_hint)) },
+        modifier = Modifier.fillMaxWidth(),
+        trailingIcon = {
+            // Solo mostrar si SpeechRecognizer está disponible
+            if (SpeechRecognizer.isRecognitionAvailable(context)) {
+                IconButton(
+                    onClick = {
+                        when (speechState) {
+                            is SpeechRecognitionState.Listening -> {
+                                viewModel.stopListening()
+                            }
+                            else -> {
+                                when {
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.RECORD_AUDIO
+                                    ) == PackageManager.PERMISSION_GRANTED -> {
+                                        viewModel.startListening()
+                                    }
+                                    else -> {
+                                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    when (speechState) {
+                        is SpeechRecognitionState.Idle -> {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Dictar pregunta con voz",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        is SpeechRecognitionState.Listening -> {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Detener dictado",
+                                tint = Color.Red,
+                                modifier = Modifier.scale(1.2f)
+                            )
+                        }
+                        is SpeechRecognitionState.Processing -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        }
+                        is SpeechRecognitionState.Error -> {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Error en reconocimiento",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    )
+
+    // Mostrar error si existe
+    if (speechState is SpeechRecognitionState.Error) {
+        Text(
+            text = (speechState as SpeechRecognitionState.Error).message,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+        )
+    }
+}
+```
+
+**Imports adicionales necesarios**:
+```kotlin
+import android.Manifest
+import android.content.pm.PackageManager
+import android.speech.SpeechRecognizer
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+```
+
+**Tiempo estimado**: 2.5 horas
+
+---
+
+**Total Fase 9: ~4.75 horas**
+
+---
+
+## 📊 Estimación Total de Tiempo (Actualizado v1.3.0)
+
+| Fase | Tiempo Estimado |
+|------|-----------------|
+| Fase 1: Infraestructura Base | 3.5 horas |
+| Fase 2: Enciclopedia | 11.5 horas |
+| Fase 3: Sistema de Tiradas | 8.5 horas |
+| Fase 4: Integración con IA | 7.5 horas |
+| Fase 5: Pulido y Testing | 7.5 horas |
+| **Subtotal v1.0.0** | **38.5 horas** ✅ |
+| Fase 6: Historial de Lecturas | 12 horas |
+| Fase 7: Carga Manual | 13 horas |
+| **Subtotal v1.1.0** | **25 horas** ✅ |
+| Fase 8: Mejoras de UX | 10 horas |
+| **Subtotal v1.2.0** | **10 horas** ⏳ |
+| Fase 9: Reconocimiento de Voz | 4.75 horas |
+| **Subtotal v1.3.0** | **4.75 horas** 🆕 |
+| **TOTAL GENERAL** | **~78.25 horas** |
+
+---
+
+## 🚦 Próximo Paso
+
+**v1.0.0 completada** ✅
+**v1.1.0 completada** ✅
+
+**Fase 8 - EN PROGRESO** ⏳
+- ✅ Tarea 8.1: QuestionScreen - Consultante opcional en ambos modos
+- ✅ Tarea 8.2: ReadingScreen - Botón guardar siempre visible con valor por defecto
+- ⏳ Tarea 8.3: ManualLoadViewModel - Remover guardado automático
+- ⏳ Tarea 8.4: ManualLoadScreen - Cartas de dorso + interpretación en misma pantalla
+- ⏳ Tarea 8.5: CardSelectorScreen - Agregar imágenes de cartas
+- ⏳ Tarea 8.6: Obtener/crear imagen card_back.jpg
+
+**Fase 9 - PLANIFICACIÓN** 🆕
+- ⏳ Tarea 9.1: Agregar Permiso de Micrófono
+- ⏳ Tarea 9.2: Crear QuestionViewModel con Lógica de Reconocimiento de Voz
+- ⏳ Tarea 9.3: Actualizar QuestionScreen con Botón de Micrófono
+
+**Siguiente: Completar Fase 8, luego Fase 9**

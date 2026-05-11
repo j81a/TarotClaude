@@ -14,6 +14,9 @@
 ### v1.2.0 (En desarrollo) ⏳
 - **Mejoras de UX** - Corrección de problemas de usabilidad identificados en testing
 
+### v1.3.0 (Planificación) 🆕
+- **Reconocimiento de Voz** - Entrada por voz en QuestionScreen
+
 ---
 
 ## Introducción
@@ -46,7 +49,10 @@ Ofrecer dos experiencias complementarias:
 6. [Carga Manual de Tiradas](./carga-manual.md) - RF-12
 
 ### Requisitos v1.2.0 ⏳
-7. [Mejoras de UX](./mejoras-ux.md) - RF-13 a RF-17
+7. [Mejoras de UX](./mejoras-ux.md) - RF-13 a RF-20
+
+### Requisitos v1.3.0 🆕
+8. [Reconocimiento de Voz](./mejoras-ux.md#rf-21) - RF-21
 
 ---
 
