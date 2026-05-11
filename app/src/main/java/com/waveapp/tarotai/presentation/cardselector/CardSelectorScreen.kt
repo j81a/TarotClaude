@@ -1,5 +1,6 @@
 package com.waveapp.tarotai.presentation.cardselector
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -16,12 +17,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.waveapp.tarotai.R
 import com.waveapp.tarotai.domain.model.CardFilter
 import com.waveapp.tarotai.domain.model.CardOrientation
 import com.waveapp.tarotai.domain.model.ManualLoadState
@@ -240,30 +244,28 @@ private fun CardGridItem(
             )
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // v1.2.0: Imagen de la carta
+                Image(
+                    painter = painterResource(id = getDrawableResourceId(card.imagePath)),
+                    contentDescription = card.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Nombre de la carta
                 Text(
                     text = card.name,
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Indicador de arcano
-                Text(
-                    text = if (card.arcanaType.name == "MAJOR") "Arcano Mayor" else card.suit?.name ?: "",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
                 )
             }
         }
@@ -285,6 +287,20 @@ private fun CardGridItem(
             }
         }
     }
+}
+
+/**
+ * Función helper para obtener el ID de recurso drawable desde el nombre.
+ * Convierte "card_major_00" al ID R.drawable.card_major_00
+ */
+@Composable
+private fun getDrawableResourceId(imagePath: String): Int {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    return context.resources.getIdentifier(
+        imagePath,
+        "drawable",
+        context.packageName
+    ).takeIf { it != 0 } ?: R.drawable.ic_launcher_foreground // Fallback si no existe
 }
 
 @Composable

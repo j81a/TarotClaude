@@ -27,13 +27,15 @@ Esta funcionalidad diferencia TarotAI de apps genéricas y la posiciona como her
 **Entonces** debe poder:
 
 1. Seleccionar el **tipo de tirada** (mismos 5 tipos que tirada automática)
-2. Ingresar **nombre del consultante**
+2. Ingresar **nombre del consultante** (opcional, valor por defecto: "Lectura personal")
 3. Ingresar la **pregunta**
-4. **Seleccionar manualmente cada carta** en el orden correcto
-5. Ver las cartas cargadas **boca abajo inicialmente**
-6. **Modificar cartas** antes de interpretar (por si se equivocó)
-7. Solicitar **interpretación** una vez cargadas todas las cartas
-8. Ver la interpretación **exactamente igual** que en una tirada automática
+4. **Ver las cartas de dorso** en sus posiciones (layout visual igual a ReadingScreen)
+5. **Seleccionar manualmente cada carta** tocando el dorso
+6. **Ver las cartas seleccionadas** reveladas en su posición
+7. **Modificar cartas** antes de interpretar (por si se equivocó)
+8. Solicitar **interpretación** una vez cargadas todas las cartas
+9. Ver la interpretación **en la misma pantalla** (ManualLoadScreen)
+10. **Guardar manualmente** en el historial después de ver la interpretación
 
 ---
 
@@ -41,15 +43,17 @@ Esta funcionalidad diferencia TarotAI de apps genéricas y la posiciona como her
 
 | Aspecto | Nueva Lectura (Automática) | Cargar Lectura (Manual) |
 |---------|---------------------------|------------------------|
-| **Flujo de pantallas** | SpreadTypeScreen → QuestionScreen → ReadingScreen | SpreadTypeScreen → QuestionScreen (modo manual) → ManualLoadScreen |
-| **Campo consultante en QuestionScreen** | Opcional (toggle puede estar OFF) | Obligatorio (toggle forzado a ON) |
+| **Flujo de pantallas** | SpreadTypeScreen → QuestionScreen → ReadingScreen | SpreadTypeScreen → QuestionScreen → ManualLoadScreen |
+| **Campo consultante** | Opcional (toggle OFF por defecto) | Opcional (toggle OFF por defecto) |
+| **Valor por defecto consultante** | "Lectura personal" | "Lectura personal" |
 | **Selección de cartas** | Automática (aleatoria) | Manual (tarotista elige) |
-| **Momento de interpretación** | Inmediato después de revelar | Tras botón "Interpretar" |
+| **Visualización inicial** | Cartas de dorso → flip → reveladas | Cartas de dorso (icono +) → selección → reveladas (icono lápiz) |
+| **Iconos en cartas** | Icono 'i' (info) abajo al centro | Icono '+' (agregar), lápiz (editar), 'i' (info) según estado |
+| **Momento de interpretación** | Inmediato después de revelar | Tras botón "Generar Interpretación" |
+| **Pantalla de interpretación** | ReadingScreen (scroll hacia abajo) | ManualLoadScreen (scroll hacia abajo) |
 | **Edición de cartas** | No se puede | Sí, antes de interpretar |
 | **Orientación de cartas** | Automática (50/50) | Manual (tarotista elige) |
-| **Animaciones** | Revelar cartas (flip) | Cargar cartas (fade in) |
-| **Pantalla de cartas** | ReadingScreen (cartas reveladas) | ManualLoadScreen (cartas con "+" icono) |
-| **Guardado en historial** | ✅ Sí | ✅ Sí (idéntico) |
+| **Guardado en historial** | Manual (botón después de interpretación) | Manual (botón después de interpretación) |
 
 ---
 
@@ -74,83 +78,93 @@ El usuario selecciona uno de los 5 tipos de tirada:
 
 **Pantalla compartida con tirada automática**, pero con comportamiento específico para carga manual.
 
-**Elementos de UI en Modo Manual**:
+**Elementos de UI** (idénticos en ambos modos):
 - **Título**: "Configuración de Lectura"
 - **Campo de texto**: "Pregunta" (obligatorio excepto para Carta Simple, mín 10 caracteres)
-- **Toggle/Checkbox**: "Esta lectura es para alguien más"
-  - **En modo manual**: Forzado a ON (no se puede desactivar)
-- **Campo de texto**: "Nombre del consultante" (visible y obligatorio, mín 2 caracteres)
-- **Hint visual**: "Cargarás las cartas manualmente en el siguiente paso"
-- **Botón**: "Continuar" (deshabilitado hasta que campos obligatorios estén completos)
+- **Toggle/Checkbox**: "Esta lectura es para alguien más" (OFF por defecto en ambos modos)
+- **Campo de texto**: "Nombre del consultante" (visible solo si toggle ON, mín 2 caracteres)
+- **Hint visual**:
+  - Modo automático: "Las cartas se seleccionarán automáticamente"
+  - Modo manual: "Cargarás las cartas manualmente en el siguiente paso"
+- **Botón**: "Continuar"
 
 **Validaciones**:
-- Nombre del consultante: obligatorio en modo manual, 2-100 caracteres
+- Nombre del consultante: opcional en ambos modos, si se ingresa debe tener 2-100 caracteres
 - Pregunta: obligatoria (excepto Carta Simple), 10-500 caracteres
 
-**Diferencias con Modo Automático**:
-| Aspecto | Modo Automático | Modo Manual |
-|---------|-----------------|-------------|
-| Toggle "Esta lectura es para alguien más" | Opcional (OFF por defecto) | Forzado a ON |
-| Campo consultante | Visible solo si toggle ON | Siempre visible y obligatorio |
-| Hint visual | "Las cartas se seleccionarán automáticamente" | "Cargarás las cartas manualmente" |
+**Sin diferencias en comportamiento**: QuestionScreen funciona igual en ambos modos, solo cambia el hint visual y la navegación destino.
 
 ---
 
-### 2. Pantalla de Carga de Cartas (`ManualLoadScreen`)
+### 3. Pantalla de Carga de Cartas (`ManualLoadScreen`)
 
 Esta es la pantalla principal donde se cargan las cartas manualmente.
 
-**Layout visual**:
+**Layout visual** (igual a ReadingScreen pero con cartas de dorso):
 ```
 ┌─────────────────────────────┐
-│  ← Cargar Lectura           │
+│  ← Cargar Lectura        X  │  ← Botón X para volver a Home
 │                             │
-│  María González             │  ← Nombre consultante
+│  María González             │  ← Nombre consultante (o "Lectura personal")
 │  Tirada: Cruz               │  ← Tipo de tirada
+│  "¿Qué me depara el amor?"  │  ← Pregunta
 │                             │
-│       [?]  (Ayuda)          │  ← Carta boca abajo
-│        ↑                    │
-│   (Arriba - Ayuda)          │
+│  ┌─────────────────────┐    │
+│  │    [DORSO]          │    │  ← Carta de dorso (imagen card_back)
+│  │     Ayuda           │    │
+│  └─────────────────────┘    │
 │                             │
-│  [?] ← [?] → [?]            │  ← Layout tipo Cruz
-│  (Pasado) (Centro) (Futuro) │
+│  [DORSO]  [DORSO]  [DORSO]  │  ← Layout tipo Cruz
+│  Pasado   Centro   Futuro   │
 │                             │
-│       [?]  ↓                │
-│   (Abajo - Obstáculo)       │
+│  ┌─────────────────────┐    │
+│  │    [DORSO]          │    │
+│  │   Obstáculo         │    │
+│  └─────────────────────┘    │
 │                             │
-│  ─────────────────────────  │
+│  Progreso: 0/5 cartas       │  ← Progress indicator
 │                             │
-│  Cartas cargadas: 0/5       │  ← Progress indicator
-│                             │
-│  [ Interpretar ]            │  ← Botón deshabilitado
+│  [Generar Interpretación]   │  ← Botón deshabilitado
 │                             │
 └─────────────────────────────┘
 ```
 
 **Comportamiento de cada carta**:
 
-1. **Estado inicial**: Carta boca abajo con ícono "+" en el centro
-2. **Al tocar la carta**: Abre `CardSelectorScreen`
-3. **Después de seleccionar**: Carta muestra la imagen seleccionada + badge de orientación
-4. **Editar carta ya cargada**: Tocar nuevamente abre `CardSelectorScreen` con carta pre-seleccionada
+1. **Estado inicial**: Carta de dorso (imagen `card_back.jpg`) clickeable + **icono '+' circular** abajo al centro
+2. **Al tocar la carta de dorso**: Abre `CardSelectorScreen`
+3. **Después de seleccionar** (antes de interpretar): Carta muestra la imagen seleccionada (frente) + badge de orientación + **icono 'lápiz' circular** abajo al centro
+4. **Después de interpretar**: Carta muestra la imagen seleccionada + **icono 'i' circular** abajo al centro (solo info, no editable)
+5. **Editar carta ya cargada** (antes de interpretar): Tocar nuevamente abre `CardSelectorScreen` con carta actual
 
-**Botón "Interpretar"**:
+**Iconos visuales en cartas** (v1.2.0):
+- **Icono '+'**: Circle con símbolo '+' dentro, indica "agregar carta"
+- **Icono 'lápiz'**: Circle con símbolo 'edit' dentro, indica "editar carta"
+- **Icono 'i'**: Circle con símbolo 'info' dentro, indica "ver detalle" (abre CardDetailScreen)
+
+**Botón "Generar Interpretación"**:
 - **Deshabilitado** (gris) si faltan cartas por cargar
-- **Habilitado** (verde) cuando todas las cartas están cargadas
+- **Habilitado** cuando todas las cartas están cargadas
 - **Loading state** mientras se genera interpretación
-- **Al presionar**: Llamada a API de Claude → Navega a `InterpretationScreen`
+- **Al presionar**: Llamada a API de Claude → **Muestra interpretación en la misma pantalla** (scroll hacia abajo)
+
+**Después de generar interpretación**:
+- Las cartas **ya no son clickeables** (no se pueden editar)
+- Se muestra la interpretación completa (igual que ReadingScreen)
+- Aparece botón **"Guardar en Historial"** (como ReadingScreen)
+- Al guardar, navega a `ReadingDetailScreen` del historial
 
 ---
 
-### 3. Selector de Cartas (`CardSelectorScreen`)
+### 4. Selector de Cartas (`CardSelectorScreen`)
 
-Pantalla similar a `EncyclopediaScreen` pero con **filtros excluyentes** (solo uno activo a la vez).
+Pantalla similar a `EncyclopediaScreen` pero con **filtros excluyentes** (solo uno activo a la vez) y **mostrando imágenes de cartas**.
 
 **Elementos de UI**:
 
 ```
 ┌─────────────────────────────┐
-│  ← Seleccionar Carta        │
+│  ← Seleccionar Carta     X  │  ← Botón X para volver a Home
 │                             │
 │  Posición: Centro           │  ← Muestra qué posición está llenando
 │                             │
@@ -160,14 +174,20 @@ Pantalla similar a `EncyclopediaScreen` pero con **filtros excluyentes** (solo u
 │  [Bastos][Copas][Espadas][Oros] │ ← Subfilters (solo si "Menores")
 │                             │
 │  ┌─────┐ ┌─────┐ ┌─────┐   │
-│  │ El  │ │ La  │ │ La  │   │  ← Grid de cartas
-│  │ Loco│ │Papisa│ │Impe-│   │
-│  └─────┘ └─────┘ │ratriz│   │
-│                  └─────┘   │
+│  │IMG  │ │IMG  │ │IMG  │   │  ← Grid con IMÁGENES de cartas
+│  │Loco │ │Mago │ │Papisa│   │
+│  └─────┘ └─────┘ └─────┘   │
+│  ┌─────┐ ┌─────┐ ┌─────┐   │
+│  │IMG  │ │IMG  │ │IMG  │   │  ← Cada carta muestra su imagen
+│  │Impe-│ │Empe-│ │Hierof│   │
+│  │ratriz│ │rador│ │ante  │   │
+│  └─────┘ └─────┘ └─────┘   │
 │  [más cartas scrolleables] │
 │                             │
 └─────────────────────────────┘
 ```
+
+**Cambio importante**: Cada carta muestra su **imagen visual** (no solo el nombre), igual que en EncyclopediaScreen.
 
 **Filtros disponibles** (exclusivos):
 - **Todos** (sin filtro, muestra las 78 cartas)
@@ -206,17 +226,33 @@ Pantalla similar a `EncyclopediaScreen` pero con **filtros excluyentes** (solo u
 
 ---
 
-### 4. Pantalla de Interpretación (`InterpretationScreen`)
+### 5. Visualización de Interpretación (en `ManualLoadScreen`)
 
-**Una vez interpretada**, la lectura manual funciona **exactamente igual** que una lectura automática:
+**Una vez generada la interpretación**, ManualLoadScreen muestra el contenido **en la misma pantalla** (scroll hacia abajo):
 
-- ✅ Muestra interpretación individual y general
-- ✅ Las cartas son clickeables → Navega a `CardDetailScreen`
-- ✅ Se puede guardar en historial con nombre de consultante
-- ✅ Botón "Nueva Lectura" reinicia el flujo
-- ✅ Comportamiento idéntico al de lectura automática
+**Comportamiento post-interpretación**:
+- ✅ Muestra interpretación general (igual que ReadingScreen)
+- ✅ Para tiradas Sí/No: muestra respuesta destacada
+- ✅ Las cartas ya NO son clickeables (no se pueden editar después de interpretar)
+- ✅ Aparece botón **"Guardar en Historial"** (igual que ReadingScreen)
+- ✅ Al guardar exitosamente, navega a `ReadingDetailScreen` del historial
 
-**Diferencia visual**: Badge "Carga Manual" en el encabezado (opcional, para historial)
+**Layout visual después de interpretación**:
+```
+[Cartas reveladas - ya no clickeables]
+─────────────────────────────
+📊 Interpretación
+
+[Card de interpretación general]
+
+[Botón "Guardar en Historial"]
+  (si no está guardada todavía)
+
+[Mensaje "✓ Lectura guardada"]
+  (si ya se guardó)
+```
+
+**Diferencia con ReadingScreen automática**: Ninguna, el comportamiento es idéntico después de la interpretación.
 
 ---
 
@@ -224,40 +260,44 @@ Pantalla similar a `EncyclopediaScreen` pero con **filtros excluyentes** (solo u
 
 ### Acceso y Configuración
 - [ ] **CA-12.1**: Existe opción "Cargar Lectura" en el menú principal (HomeScreen)
-- [ ] **CA-12.2**: Primera pantalla pide: tipo de tirada, nombre consultante, pregunta
-- [ ] **CA-12.3**: Validaciones de campos obligatorios funcionan correctamente
-- [ ] **CA-12.4**: Botón "Continuar" deshabilitado hasta completar campos obligatorios
+- [ ] **CA-12.2**: QuestionScreen funciona igual en modo manual y automático (toggle OFF por defecto)
+- [ ] **CA-12.3**: Campo consultante es opcional en ambos modos
+- [ ] **CA-12.4**: Validaciones de campos obligatorios funcionan correctamente
 
 ### Pantalla de Carga de Cartas
-- [ ] **CA-12.5**: Segunda pantalla muestra N cartas boca abajo (según tipo de tirada)
-- [ ] **CA-12.6**: Cada carta tiene ícono "+" visible claramente
+- [ ] **CA-12.5**: ManualLoadScreen muestra N cartas de dorso (imagen card_back) según tipo de tirada
+- [ ] **CA-12.6**: Layout visual es igual a ReadingScreen (con dorsos en lugar de cartas reveladas)
 - [ ] **CA-12.7**: Layout de tirada Cruz muestra disposición en cruz (no lineal)
-- [ ] **CA-12.8**: Progress indicator muestra "X/N cartas cargadas"
-- [ ] **CA-12.9**: Botón "Interpretar" está deshabilitado si faltan cartas
+- [ ] **CA-12.8**: Progress indicator muestra "Progreso: X de N cartas"
+- [ ] **CA-12.9**: Botón "Generar Interpretación" está deshabilitado si faltan cartas
+- [ ] **CA-12.10**: Al tocar carta de dorso, abre CardSelectorScreen
 
 ### Selector de Cartas
-- [ ] **CA-12.10**: Al tocar "+" abre selector con grid de cartas
-- [ ] **CA-12.11**: Los filtros son excluyentes (solo uno activo a la vez)
-- [ ] **CA-12.12**: Filtro "Arcanos Mayores" muestra solo 22 cartas
-- [ ] **CA-12.13**: Filtros de palos muestran solo 14 cartas cada uno
-- [ ] **CA-12.14**: Cartas ya seleccionadas no son clickeables (overlay gris)
-- [ ] **CA-12.15**: Al seleccionar una carta, pregunta orientación (Derecha/Invertida)
+- [ ] **CA-12.11**: CardSelectorScreen muestra grid con IMÁGENES de cartas (no solo nombres)
+- [ ] **CA-12.12**: Los filtros son excluyentes (solo uno activo a la vez)
+- [ ] **CA-12.13**: Filtro "Arcanos Mayores" muestra solo 22 cartas con imágenes
+- [ ] **CA-12.14**: Filtros de palos muestran solo 14 cartas cada uno con imágenes
+- [ ] **CA-12.15**: Cartas ya seleccionadas no son clickeables (overlay gris)
+- [ ] **CA-12.16**: Al seleccionar una carta, pregunta orientación (Derecha/Invertida)
 
 ### Edición de Cartas
-- [ ] **CA-12.16**: Se pueden cambiar cartas ya cargadas antes de interpretar
-- [ ] **CA-12.17**: Al tocar una carta cargada, abre selector con carta pre-seleccionada
-- [ ] **CA-12.18**: Cambiar una carta libera la anterior para ser usada nuevamente
+- [ ] **CA-12.17**: Se pueden cambiar cartas ya cargadas antes de interpretar
+- [ ] **CA-12.18**: Al tocar una carta ya revelada (antes de interpretar), abre selector
+- [ ] **CA-12.19**: Cambiar una carta libera la anterior para ser usada nuevamente
 
 ### Interpretación
-- [ ] **CA-12.19**: Al presionar "Interpretar" se llama a la API de Claude
-- [ ] **CA-12.20**: Muestra indicador de carga durante generación
-- [ ] **CA-12.21**: Manejo de errores si falla la API (reintentar)
-- [ ] **CA-12.22**: Una vez interpretada, las cartas ya no se pueden editar
+- [ ] **CA-12.20**: Al presionar "Generar Interpretación" se llama a la API de Claude
+- [ ] **CA-12.21**: Muestra indicador de carga durante generación (en el mismo botón)
+- [ ] **CA-12.22**: La interpretación se muestra en la misma pantalla (scroll hacia abajo)
+- [ ] **CA-12.23**: Manejo de errores si falla la API (mensaje + botón reintentar)
+- [ ] **CA-12.24**: Una vez interpretada, las cartas ya NO son clickeables
 
-### Comportamiento Post-Interpretación
-- [ ] **CA-12.23**: Tocar una carta interpretada → CardDetailScreen (igual que tirada normal)
-- [ ] **CA-12.24**: La lectura cargada se puede guardar en historial
-- [ ] **CA-12.25**: En el historial, no se distingue de una lectura automática (mismos datos)
+### Guardado en Historial
+- [ ] **CA-12.25**: Después de la interpretación aparece botón "Guardar en Historial"
+- [ ] **CA-12.26**: El botón usa valor por defecto "Lectura personal" si no hay consultante
+- [ ] **CA-12.27**: Al guardar exitosamente, muestra mensaje "✓ Lectura guardada"
+- [ ] **CA-12.28**: Al guardar, navega a ReadingDetailScreen del historial
+- [ ] **CA-12.29**: En el historial, no se distingue de una lectura automática
 
 ---
 
@@ -307,19 +347,21 @@ object CardSelector : Screen(
 ```
 HomeScreen
     ↓ (opción "Cargar Lectura")
-SpreadTypeScreen (reutilizada)
+SpreadTypeScreen
     ↓ (seleccionar tipo de tirada)
-QuestionScreen (modo manual: isManualLoad=true)
-    ↓ (ingresar consultante + pregunta)
-ManualLoadScreen
-    ↓ (tocar carta con "+")
-CardSelectorScreen
+QuestionScreen (isManualLoad=true)
+    ↓ (ingresar pregunta + opcional consultante)
+ManualLoadScreen (cartas de dorso)
+    ↓ (tocar carta de dorso)
+CardSelectorScreen (con imágenes)
     ↓ (seleccionar carta + orientación)
-ManualLoadScreen (actualizada)
-    ↓ (botón "Interpretar")
-InterpretationScreen
-    ↓ (tocar carta)
-CardDetailScreen
+ManualLoadScreen (carta revelada)
+    ↓ (repetir hasta completar)
+ManualLoadScreen (todas las cartas completas)
+    ↓ (botón "Generar Interpretación")
+ManualLoadScreen (scroll → interpretación)
+    ↓ (botón "Guardar en Historial")
+ReadingDetailScreen (historial)
 ```
 
 ---

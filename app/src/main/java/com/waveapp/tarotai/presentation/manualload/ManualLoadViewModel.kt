@@ -56,7 +56,8 @@ class ManualLoadViewModel @Inject constructor(
     // Obtener parámetros de navegación
     private val spreadTypeStr: String = savedStateHandle.get<String>("spreadType") ?: "SIMPLE"
     private val question: String? = savedStateHandle.get<String>("question")
-    private val consultantName: String = savedStateHandle.get<String>("consultantName") ?: ""
+    // v1.2.0: Usar valor por defecto "Lectura personal" si consultantName es null o vacío
+    private val consultantName: String = savedStateHandle.get<String>("consultantName")?.takeIf { it.isNotBlank() } ?: "Lectura personal"
 
     private val spreadType = try {
         SpreadType.valueOf(spreadTypeStr)
@@ -90,6 +91,12 @@ class ManualLoadViewModel @Inject constructor(
     // ID de la lectura guardada (para navegar al detalle)
     private val _savedReadingId = MutableStateFlow<Long?>(null)
     val savedReadingId: StateFlow<Long?> = _savedReadingId.asStateFlow()
+
+    // v1.2.0: Estado de guardado manual (igual que ReadingViewModel)
+    private val _saveState = MutableStateFlow<com.waveapp.tarotai.presentation.reading.viewmodel.SaveState>(
+        com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.NotSaved
+    )
+    val saveState: StateFlow<com.waveapp.tarotai.presentation.reading.viewmodel.SaveState> = _saveState.asStateFlow()
 
     /**
      * Agrega una carta a una posición específica.
@@ -147,7 +154,7 @@ class ManualLoadViewModel @Inject constructor(
     }
 
     /**
-     * Genera la interpretación de la tirada manual y la guarda en el historial.
+     * Genera la interpretación de la tirada manual (v1.2.0: NO guarda automáticamente).
      * Solo se ejecuta si la configuración está completa.
      */
     fun generateInterpretation() {
@@ -160,43 +167,58 @@ class ManualLoadViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
 
-            // 1. Generar interpretación
             val interpretationResult = generateInterpretationFromManualLoadUseCase(_configuration.value)
 
             interpretationResult.fold(
                 onSuccess = { interpretation ->
                     _interpretationGenerated.value = interpretation
-
-                    // 2. Guardar la lectura en el historial
-                    val reading = ReadingHistory(
-                        id = 0, // Se genera automáticamente
-                        timestamp = System.currentTimeMillis(),
-                        consultantName = _configuration.value.consultantName,
-                        spreadType = _configuration.value.spreadType,
-                        question = _configuration.value.question,
-                        drawnCards = _configuration.value.state.toDrawnCards(),
-                        interpretation = interpretation,
-                        notes = emptyList()
-                    )
-
-                    val saveResult = saveReadingUseCase(reading)
-
-                    saveResult.fold(
-                        onSuccess = { readingId ->
-                            _savedReadingId.value = readingId
-                            _isLoading.value = false
-                        },
-                        onFailure = { saveException ->
-                            // La interpretación se generó, pero falló el guardado
-                            // Aún así navegar, pero mostrar warning
-                            _error.value = "Interpretación generada, pero no se pudo guardar: ${saveException.message}"
-                            _isLoading.value = false
-                        }
-                    )
+                    _isLoading.value = false
+                    // v1.2.0: NO guardar automáticamente
                 },
                 onFailure = { exception ->
                     _error.value = exception.message ?: "Error al generar la interpretación"
                     _isLoading.value = false
+                }
+            )
+        }
+    }
+
+    /**
+     * v1.2.0: Guarda la lectura en el historial manualmente (controlado por el usuario).
+     * Similar a ReadingViewModel.saveToHistory()
+     */
+    fun saveToHistory() {
+        val interpretation = _interpretationGenerated.value
+        if (interpretation == null) {
+            _error.value = "No hay interpretación generada para guardar"
+            return
+        }
+
+        viewModelScope.launch {
+            _saveState.value = com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saving
+
+            val reading = ReadingHistory(
+                id = 0, // Se genera automáticamente
+                timestamp = System.currentTimeMillis(),
+                consultantName = _configuration.value.consultantName.ifBlank { "Lectura personal" },
+                spreadType = _configuration.value.spreadType,
+                question = _configuration.value.question,
+                drawnCards = _configuration.value.state.toDrawnCards(),
+                interpretation = interpretation,
+                notes = emptyList()
+            )
+
+            val saveResult = saveReadingUseCase(reading)
+
+            saveResult.fold(
+                onSuccess = { readingId ->
+                    _saveState.value = com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saved(readingId)
+                    _savedReadingId.value = readingId // Para navegación
+                },
+                onFailure = { exception ->
+                    _saveState.value = com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Error(
+                        exception.message ?: "Error al guardar la lectura"
+                    )
                 }
             )
         }

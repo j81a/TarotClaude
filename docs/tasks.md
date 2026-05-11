@@ -1136,6 +1136,297 @@ suspend fun insert(reading: ReadingHistoryEntity): Long
 
 ---
 
+### Tarea 8.1: QuestionScreen - Consultante opcional en ambos modos ✅
+
+**Descripción**: Unificar comportamiento de QuestionScreen para que el consultante sea opcional tanto en modo automático como manual.
+
+**Cambios realizados**:
+- Toggle "Esta lectura es para alguien más" OFF por defecto en ambos modos
+- Remover lógica que forzaba toggle ON en modo manual
+- Campo consultante opcional en ambos modos
+- Comportamiento idéntico (solo cambia hint visual)
+
+**Archivos modificados**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/QuestionScreen.kt`
+
+**Tiempo estimado**: 30 minutos ✅
+
+---
+
+### Tarea 8.2: ReadingScreen - Botón guardar siempre visible con valor por defecto ✅
+
+**Descripción**: Mostrar botón "Guardar en Historial" siempre, usando "Lectura personal" como valor por defecto si no hay consultantName.
+
+**Cambios realizados**:
+- Remover condicional `consultantName?.let { }`
+- Agregar `val finalConsultantName = consultantName ?: "Lectura personal"`
+- Botón siempre visible después de interpretación
+
+**Archivos modificados**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/ReadingScreen.kt`
+
+**Tiempo estimado**: 30 minutos ✅
+
+---
+
+### Tarea 8.3: ManualLoadViewModel - Remover guardado automático ⏳
+
+**Descripción**: Separar la generación de interpretación del guardado, permitiendo guardado manual controlado por el usuario.
+
+**Cambios a realizar**:
+1. Remover lógica de guardado automático de `generateInterpretation()`
+2. Actualizar estados para mostrar interpretación sin navegar
+3. Agregar método `saveToHistory()` similar a ReadingViewModel
+4. Agregar `SaveState` para manejar estados de guardado
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/manualload/ManualLoadViewModel.kt`
+
+**Código esperado**:
+```kotlin
+// Estado de guardado (nuevo)
+private val _saveState = MutableStateFlow<SaveState>(SaveState.NotSaved)
+val saveState: StateFlow<SaveState> = _saveState.asStateFlow()
+
+fun generateInterpretation() {
+    if (!_configuration.value.isComplete()) {
+        _error.value = "Debes seleccionar todas las cartas"
+        return
+    }
+
+    viewModelScope.launch {
+        _isLoading.value = true
+        _error.value = null
+
+        val result = generateInterpretationFromManualLoadUseCase(_configuration.value)
+
+        result.fold(
+            onSuccess = { interpretation ->
+                _interpretationGenerated.value = interpretation
+                _isLoading.value = false
+                // NO guardar automáticamente
+            },
+            onFailure = { exception ->
+                _error.value = exception.message ?: "Error al generar interpretación"
+                _isLoading.value = false
+            }
+        )
+    }
+}
+
+fun saveToHistory() {
+    val interpretation = _interpretationGenerated.value ?: return
+
+    viewModelScope.launch {
+        _saveState.value = SaveState.Saving
+
+        val reading = ReadingHistory(
+            id = 0,
+            timestamp = System.currentTimeMillis(),
+            consultantName = _configuration.value.consultantName,
+            spreadType = _configuration.value.spreadType,
+            question = _configuration.value.question,
+            drawnCards = _configuration.value.state.toDrawnCards(),
+            interpretation = interpretation,
+            notes = emptyList()
+        )
+
+        val result = saveReadingUseCase(reading)
+
+        result.fold(
+            onSuccess = { readingId ->
+                _saveState.value = SaveState.Saved(readingId)
+            },
+            onFailure = { exception ->
+                _saveState.value = SaveState.Error(
+                    exception.message ?: "Error al guardar"
+                )
+            }
+        )
+    }
+}
+```
+
+**Tiempo estimado**: 1 hora
+
+---
+
+### Tarea 8.4: ManualLoadScreen - Cartas de dorso + interpretación en misma pantalla ⏳
+
+**Descripción**: Rediseñar ManualLoadScreen para mostrar cartas de dorso inicialmente y la interpretación en la misma pantalla (sin navegar).
+
+**Cambios a realizar**:
+1. Cambiar de CardPositionItem a layout con cartas de dorso/reveladas
+2. Reutilizar HorizontalCardsLayout y CrossCardsLayout
+3. Mostrar interpretación después del botón (scroll hacia abajo)
+4. Agregar botón "Guardar en Historial" después de interpretación
+5. Deshabilitar click en cartas después de interpretar
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/manualload/ManualLoadScreen.kt`
+
+**Componentes a reutilizar**:
+- `HorizontalCardsLayout` (de ReadingScreen)
+- `CrossCardsLayout` (de ReadingScreen)
+- `GeneralInterpretationCard` (de ReadingScreen)
+- `YesNoAnswerCard` (de ReadingScreen)
+
+**Estructura esperada**:
+```kotlin
+Column(modifier = Modifier.verticalScroll(...)) {
+    // Header con info
+    ManualLoadHeader(...)
+
+    Spacer(...)
+
+    // Cartas (dorso o reveladas)
+    when (config.layout) {
+        LayoutType.HORIZONTAL -> {
+            HorizontalCardsLayout(
+                drawnCards = configuration.state.toDrawnCards(),
+                showAsBack = !configuration.isComplete(),
+                onCardClick = if (!isInterpreted) {
+                    { position -> onNavigateToCardSelector(position) }
+                } else {
+                    {}  // No clickeable después de interpretar
+                }
+            )
+        }
+        LayoutType.CROSS -> {
+            CrossCardsLayout(...)
+        }
+    }
+
+    // Progreso
+    Text("Progreso: ${current}/${required} cartas")
+
+    // Botón generar interpretación
+    Button(
+        enabled = configuration.isComplete() && !isLoading,
+        onClick = { viewModel.generateInterpretation() }
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(...)
+            Text("Generando...")
+        } else {
+            Text("Generar Interpretación")
+        }
+    }
+
+    // Interpretación (si existe)
+    interpretation?.let {
+        HorizontalDivider(...)
+
+        if (it.yesNoAnswer != null) {
+            YesNoAnswerCard(answer = it.yesNoAnswer)
+        }
+
+        // Botón guardar
+        when (saveState) {
+            SaveState.NotSaved -> {
+                Button(onClick = { viewModel.saveToHistory() }) {
+                    Text("Guardar en Historial")
+                }
+            }
+            // ... otros estados
+        }
+
+        GeneralInterpretationCard(...)
+    }
+}
+```
+
+**Tiempo estimado**: 3 horas
+
+---
+
+### Tarea 8.5: CardSelectorScreen - Agregar imágenes de cartas ⏳
+
+**Descripción**: Actualizar CardSelectorScreen para mostrar imágenes de cartas en lugar de solo nombres.
+
+**Cambios a realizar**:
+1. Actualizar CardSelectorItem para incluir AsyncImage
+2. Mostrar imagen + nombre de carta
+3. Mantener overlay para cartas ya seleccionadas
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/cardselector/CardSelectorScreen.kt`
+
+**Código esperado**:
+```kotlin
+@Composable
+private fun CardSelectorItem(
+    card: TarotCard,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .clickable(onClick = onClick, enabled = !isSelected),
+        colors = if (isSelected) {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+        } else {
+            CardDefaults.cardColors()
+        }
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AsyncImage(
+                model = card.imageResId,
+                contentDescription = card.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(0.7f),
+                contentScale = ContentScale.Fit
+            )
+
+            Text(
+                text = card.name,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            if (isSelected) {
+                Text(
+                    text = "En uso",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+```
+
+**Tiempo estimado**: 2 horas
+
+---
+
+### Tarea 8.6: Obtener/crear imagen card_back.jpg ⏳
+
+**Descripción**: Buscar o crear imagen de dorso de carta para usar en ManualLoadScreen.
+
+**Opciones**:
+1. Buscar imagen de dominio público en Wikimedia Commons
+2. Usar imagen placeholder temporal (color + texto)
+3. Crear imagen simple con Figma/Canva
+
+**Especificaciones**:
+- Archivo: `app/src/main/res/drawable/card_back.jpg`
+- Dimensiones: 600x1000 px
+- Formato: JPG
+- Peso máximo: 200KB
+
+**Tiempo estimado**: 1 hora
+
+---
+
 ## 📊 Estimación Total de Tiempo (Actualizado v1.2.0)
 
 | Fase | Tiempo Estimado |
@@ -1161,10 +1452,11 @@ suspend fun insert(reading: ReadingHistoryEntity): Long
 **v1.1.0 completada** ✅
 
 **Fase 8 - EN PROGRESO** ⏳
-- ⏳ Tarea 8.1: Fix QuestionScreen - Manejo Correcto del Teclado
-- ⏳ Tarea 8.2: Implementar Guardado Manual en Historial
-- ⏳ Tarea 8.3: Agregar Botones de Cierre Rápido (X)
-- ⏳ Tarea 8.4: Remover Botón + del HistoryScreen
-- ⏳ Tarea 8.5: Verificar y Corregir Guardado en Historial
+- ✅ Tarea 8.1: QuestionScreen - Consultante opcional en ambos modos
+- ✅ Tarea 8.2: ReadingScreen - Botón guardar siempre visible con valor por defecto
+- ⏳ Tarea 8.3: ManualLoadViewModel - Remover guardado automático
+- ⏳ Tarea 8.4: ManualLoadScreen - Cartas de dorso + interpretación en misma pantalla
+- ⏳ Tarea 8.5: CardSelectorScreen - Agregar imágenes de cartas
+- ⏳ Tarea 8.6: Obtener/crear imagen card_back.jpg
 
-**Siguiente: Tarea 8.1 - Fix QuestionScreen - Manejo Correcto del Teclado**
+**Siguiente: Tarea 8.3 - ManualLoadViewModel - Remover guardado automático**

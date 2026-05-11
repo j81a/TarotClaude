@@ -349,6 +349,95 @@ data class ReadingNote(
 
 ---
 
+## RF-20: Iconos Visuales en Cartas (v1.2.0) 🆕
+
+### Descripción
+Agregar iconos visuales en las cartas para mejorar la intuitividad de las interacciones, haciendo explícito qué acciones están disponibles en cada estado.
+
+### Problema Actual
+- No es intuitivo que las cartas son click able en ReadingScreen
+- En ManualLoadScreen no queda claro que se pueden tocar las cartas de dorso
+- Después de seleccionar una carta no es obvio que se puede editar antes de interpretar
+
+### Solución Requerida
+
+#### Iconos en ReadingScreen (Tiradas Automáticas)
+- **Icono 'i' (info)**: Circle con símbolo 'info' dentro, ubicado abajo al centro de cada carta
+- **Acción**: Al tocar la carta (o el ícono), abre CardDetailScreen con información de la carta
+- **Aplicable a**: Todas las cartas reveladas en una lectura automática
+
+#### Iconos en ManualLoadScreen (Carga Manual)
+Los iconos cambian según el estado de la carta:
+
+1. **Estado inicial (dorso sin seleccionar)**:
+   - **Icono '+'**: Circle con símbolo '+' dentro
+   - **Ubicación**: Abajo al centro del card_back
+   - **Acción**: Al tocar, abre CardSelectorScreen
+
+2. **Estado seleccionado (antes de interpretar)**:
+   - **Icono 'lápiz'** (edit): Circle con símbolo 'edit' dentro
+   - **Ubicación**: Abajo al centro de la carta revelada
+   - **Acción**: Al tocar, abre CardSelectorScreen para cambiar la carta
+
+3. **Estado interpretado (después de generar interpretación)**:
+   - **Icono 'i'** (info): Circle con símbolo 'info' dentro
+   - **Ubicación**: Abajo al centro de la carta revelada
+   - **Acción**: Al tocar, abre CardDetailScreen (solo lectura)
+
+### Especificaciones Técnicas
+
+**Diseño del ícono circular**:
+```kotlin
+// Material Icons a usar:
+Icons.Filled.Info       // Para icono 'i'
+Icons.Filled.Add        // Para icono '+'
+Icons.Filled.Edit       // Para icono 'lápiz'
+
+// Estilo visual:
+Box(
+    modifier = Modifier
+        .size(32.dp)
+        .background(
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+            shape = CircleShape
+        ),
+    contentAlignment = Alignment.Center
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = description,
+        tint = MaterialTheme.colorScheme.onPrimary,
+        modifier = Modifier.size(18.dp)
+    )
+}
+```
+
+**Posicionamiento**:
+- Usar `Box` con `Alignment.BottomCenter`
+- Padding bottom: 8.dp
+- Z-index arriba de la imagen de la carta
+
+### Criterios de Aceptación
+- [ ] ReadingScreen muestra icono 'i' en todas las cartas reveladas
+- [ ] ManualLoadScreen muestra icono '+' en cartas de dorso (sin seleccionar)
+- [ ] ManualLoadScreen muestra icono 'lápiz' en cartas seleccionadas (antes de interpretar)
+- [ ] ManualLoadScreen muestra icono 'i' en cartas después de interpretar
+- [ ] Los iconos son círculos con color primary y símbolo onPrimary
+- [ ] Los iconos están ubicados abajo al centro de cada carta
+- [ ] Al tocar el icono (o la carta), ejecuta la acción correcta
+
+### Impacto en Código
+- `app/src/main/java/com/waveapp/tarotai/presentation/reading/components/`:
+  - `HorizontalCardsLayout.kt` - Agregar icono 'i' a CardItem
+  - `CrossCardsLayout.kt` - Agregar icono 'i' a CardItem
+- `app/src/main/java/com/waveapp/tarotai/presentation/manualload/`:
+  - `ManualLoadScreen.kt` - Agregar iconos '+', 'lápiz', 'i' según estado en ManualLoadCardItem
+
+### Prioridad
+**Media** - Mejora significativa de UX pero no bloqueante
+
+---
+
 ## Resumen de Cambios
 
 ### Impacto en Documentación

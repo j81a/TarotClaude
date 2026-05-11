@@ -291,7 +291,10 @@ fun NavGraph(
                     type = NavType.StringType
                     nullable = true
                 },
-                navArgument("consultantName") { type = NavType.StringType }
+                navArgument("consultantName") {
+                    type = NavType.StringType
+                    nullable = true  // v1.2.0: Opcional, se usa valor por defecto
+                }
             )
         ) {
             ManualLoadScreen(

@@ -11,10 +11,16 @@
 - Interpretación por IA
 - Enciclopedia offline
 
-### v1.1.0 (En desarrollo) ⏳
+### v1.1.0 (Completada) ✅
 - Historial de lecturas guardadas
 - Carga manual de tiradas
 - Reutilización de pantallas (QuestionScreen compartida)
+
+### v1.2.0 (En desarrollo) ⏳
+- Guardado consistente con valor por defecto
+- Consultante opcional en ambos modos
+- Carga manual con visualización mejorada
+- Imágenes en selector de cartas
 
 ---
 
@@ -52,4 +58,5 @@ Este es un documento vivo que sirve como referencia durante todo el ciclo de des
 
 ### Cambios de Versión
 
-18. **[Cambios de v1.1.0](./18-v1.1.0.md)** 🆕 - Historial, Carga Manual, decisiones arquitecturales
+18. **[Cambios de v1.1.0](./18-v1.1.0.md)** ✅ - Historial, Carga Manual, decisiones arquitecturales
+19. **[Cambios de v1.2.0](./19-v1.2.0.md)** 🆕 - Guardado consistente, consultante opcional, carga manual mejorada

@@ -48,8 +48,8 @@ fun QuestionScreen(
     var question by remember { mutableStateOf("") }
     var showQuestionError by remember { mutableStateOf(false) }
 
-    // v1.1.0: Estados para consultante
-    var isForSomeoneElse by remember { mutableStateOf(isManualLoad) } // En manual, siempre ON
+    // v1.2.0: Estados para consultante (opcional en ambos modos)
+    var isForSomeoneElse by remember { mutableStateOf(false) } // OFF por defecto
     var consultantName by remember { mutableStateOf("") }
     var showConsultantError by remember { mutableStateOf(false) }
 
@@ -125,11 +125,7 @@ fun QuestionScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isManualLoad) {
-                            "Nombre del consultante (obligatorio)"
-                        } else {
-                            "Esta lectura es para alguien más"
-                        },
+                        text = "Esta lectura es para alguien más",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f)
                     )
@@ -137,15 +133,12 @@ fun QuestionScreen(
                     Switch(
                         checked = isForSomeoneElse,
                         onCheckedChange = {
-                            if (!isManualLoad) { // Solo permitir cambio en modo automático
-                                isForSomeoneElse = it
-                                if (!it) {
-                                    consultantName = ""
-                                    showConsultantError = false
-                                }
+                            isForSomeoneElse = it
+                            if (!it) {
+                                consultantName = ""
+                                showConsultantError = false
                             }
-                        },
-                        enabled = !isManualLoad // Deshabilitado en modo manual
+                        }
                     )
                 }
 
@@ -188,11 +181,12 @@ fun QuestionScreen(
                     val isQuestionValid = question.length >= 10
                     showQuestionError = !isQuestionValid
 
-                    // Validar consultante si el toggle está activado
-                    val isConsultantValid = if (isForSomeoneElse) {
+                    // v1.2.0: Validar consultante SOLO si se escribió algo
+                    // Si el campo está vacío, es válido (se usará valor por defecto)
+                    val isConsultantValid = if (isForSomeoneElse && consultantName.isNotBlank()) {
                         consultantName.trim().length in 2..100
                     } else {
-                        true // No se requiere consultante
+                        true // Válido si está vacío o toggle OFF
                     }
                     showConsultantError = !isConsultantValid
 

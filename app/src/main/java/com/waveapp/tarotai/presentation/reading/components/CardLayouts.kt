@@ -1,8 +1,12 @@
 package com.waveapp.tarotai.presentation.reading.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -190,28 +194,52 @@ fun DrawnCardItem(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Imagen de la carta - Altura fija
-            Card(
+            // Imagen de la carta con icono 'i' - Altura fija
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
             ) {
-                Image(
-                    painter = painterResource(
-                        id = getDrawableResourceId(drawnCard.card.imagePath)
-                    ),
-                    contentDescription = drawnCard.card.name,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(
-                            if (drawnCard.orientation == CardOrientation.REVERSED) {
-                                Modifier.rotate(180f)
-                            } else {
-                                Modifier
-                            }
+                Card(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Image(
+                        painter = painterResource(
+                            id = getDrawableResourceId(drawnCard.card.imagePath)
                         ),
-                    contentScale = ContentScale.Fit
-                )
+                        contentDescription = drawnCard.card.name,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(
+                                if (drawnCard.orientation == CardOrientation.REVERSED) {
+                                    Modifier.rotate(180f)
+                                } else {
+                                    Modifier
+                                }
+                            ),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                // v1.2.0: Icono 'i' (info) circular abajo al centro
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 8.dp)
+                        .size(32.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = "Ver detalle de la carta",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(6.dp))

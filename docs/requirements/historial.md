@@ -24,7 +24,7 @@ Esta funcionalidad convierte la app en una herramienta profesional de gestión d
 **Cuando** decide guardar la lectura
 **Entonces** debe poder:
 
-1. Asignar un **nombre de consultante** a la lectura (obligatorio)
+1. Guardar con **nombre de consultante** (opcional, por defecto: "Lectura personal")
 2. Ver la lectura guardada en el **historial**
 3. Acceder al historial desde el **menú principal**
 4. **Agregar notas** a una lectura guardada
@@ -41,12 +41,12 @@ Cada lectura en el historial debe incluir los siguientes 7 elementos:
 | # | Campo | Tipo | Descripción |
 |---|-------|------|-------------|
 | 1 | **Fecha y hora** | Timestamp | Cuándo se realizó la tirada |
-| 2 | **Nombre del consultante** | String | Campo de texto libre (obligatorio para guardar) |
+| 2 | **Nombre del consultante** | String | Campo de texto libre (por defecto: "Lectura personal") |
 | 3 | **Tipo de tirada** | SpreadType | Cuál de los 5 tipos fue utilizado |
 | 4 | **Pregunta** | String | La pregunta formulada por el consultante |
 | 5 | **Cartas seleccionadas** | List\<DrawnCard\> | Las cartas que salieron (con posición y orientación) |
 | 6 | **Interpretación completa** | Interpretation | La interpretación generada por la IA |
-| 7 | **Notas personales** | String? | Campo de texto libre para observaciones del tarotista |
+| 7 | **Notas personales** | List\<Note\> | Lista de notas editables del tarotista |
 
 ---
 

@@ -325,91 +325,91 @@ private fun InterpretationSuccessView(
             )
         }
 
-        // Botón de guardar en historial (v1.2.0) - ANTES del mensaje
-        // Solo mostrar si hay consultante
-        consultantName?.let { name ->
-            when (saveState) {
-                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.NotSaved -> {
-                    Button(
-                        onClick = {
-                            viewModel.saveToHistory(reading, interpretation, name)
-                        },
+        // Botón de guardar en historial (v1.2.0)
+        // Siempre visible, usa valor por defecto si no hay consultantName
+        val finalConsultantName = consultantName ?: "Lectura personal"
+
+        when (saveState) {
+            is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.NotSaved -> {
+                Button(
+                    onClick = {
+                        viewModel.saveToHistory(reading, interpretation, finalConsultantName)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text("Guardar en Historial")
+                }
+            }
+            is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saving -> {
+                Button(
+                    onClick = {},
+                    enabled = false,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    CircularProgressIndicator(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .size(16.dp)
+                            .padding(end = 8.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Text("Guardando...")
+                }
+            }
+            is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saved -> {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            modifier = Modifier.padding(end = 8.dp)
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(end = 12.dp)
                         )
-                        Text("Guardar en Historial")
+                        Text(
+                            text = "Lectura guardada en el historial",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                     }
                 }
-                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saving -> {
-                    Button(
-                        onClick = {},
-                        enabled = false,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+            }
+            is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Error -> {
+                val error = saveState as com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Error
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .padding(end = 8.dp),
-                            strokeWidth = 2.dp
+                        Text(
+                            text = "Error al guardar: ${error.message}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
-                        Text("Guardando...")
-                    }
-                }
-                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Saved -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(end = 12.dp)
-                            )
-                            Text(
-                                text = "Lectura guardada en el historial",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                }
-                is com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Error -> {
-                    val error = saveState as com.waveapp.tarotai.presentation.reading.viewmodel.SaveState.Error
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Error al guardar: ${error.message}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            TextButton(onClick = {
-                                viewModel.saveToHistory(reading, interpretation, name)
-                            }) {
-                                Text("Reintentar")
-                            }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(onClick = {
+                            viewModel.saveToHistory(reading, interpretation, finalConsultantName)
+                        }) {
+                            Text("Reintentar")
                         }
                     }
                 }
