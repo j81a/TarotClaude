@@ -5,6 +5,9 @@
     <!-- Permiso necesario para hacer llamadas HTTP a la API de Claude -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Permiso necesario para reconocimiento de voz (v1.3.0) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:name=".TarotApplication"
         android:allowBackup="true"

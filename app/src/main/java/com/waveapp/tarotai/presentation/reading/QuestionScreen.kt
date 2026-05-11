@@ -1,5 +1,11 @@
 package com.waveapp.tarotai.presentation.reading
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.speech.SpeechRecognizer
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,10 +16,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.waveapp.tarotai.R
 import com.waveapp.tarotai.domain.model.SpreadType
+import com.waveapp.tarotai.presentation.reading.viewmodel.QuestionViewModel
+import com.waveapp.tarotai.presentation.reading.viewmodel.SpeechRecognitionState
 
 /**
  * Pantalla para ingresar una pregunta antes de realizar la tirada.
@@ -31,10 +44,16 @@ import com.waveapp.tarotai.domain.model.SpreadType
  * - Contenido con scroll para que campos sean visibles cuando se editan
  * - imePadding() para ajustar automáticamente el layout
  *
+ * v1.3.0: Reconocimiento de voz
+ * - Botón de micrófono en campo de pregunta
+ * - Soporte para dictar pregunta con voz
+ * - Feedback visual durante reconocimiento
+ *
  * @param spreadType Tipo de tirada seleccionada
  * @param isManualLoad true si es carga manual, false si es tirada automática
  * @param onNavigateBack Callback para navegación atrás
  * @param onContinue Callback al continuar con (question, consultantName)
+ * @param viewModel ViewModel con lógica de reconocimiento de voz
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,10 +62,44 @@ fun QuestionScreen(
     isManualLoad: Boolean = false,
     onNavigateBack: () -> Unit,
     onContinue: (question: String?, consultantName: String?) -> Unit,
-    onNavigateToHome: () -> Unit
+    onNavigateToHome: () -> Unit,
+    viewModel: QuestionViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    val speechState by viewModel.speechState.collectAsState()
+    val recognizedQuestion by viewModel.question.collectAsState()
+
     var question by remember { mutableStateOf("") }
     var showQuestionError by remember { mutableStateOf(false) }
+
+    // v1.3.0: Sincronizar texto reconocido con el campo de pregunta
+    LaunchedEffect(recognizedQuestion) {
+        if (recognizedQuestion.isNotBlank()) {
+            question = recognizedQuestion
+        }
+    }
+
+    // v1.3.0: Inicializar SpeechRecognizer si está disponible
+    LaunchedEffect(Unit) {
+        if (SpeechRecognizer.isRecognitionAvailable(context)) {
+            viewModel.initSpeechRecognizer(context)
+        }
+    }
+
+    // v1.3.0: Manejo de permisos de micrófono
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.startListening()
+        } else {
+            Toast.makeText(
+                context,
+                "Permiso de micrófono requerido para dictar",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
     // v1.2.0: Estados para consultante (opcional en ambos modos)
     var isForSomeoneElse by remember { mutableStateOf(false) } // OFF por defecto
@@ -94,22 +147,93 @@ fun QuestionScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
+                // v1.3.0: Campo de pregunta con botón de micrófono
                 OutlinedTextField(
                     value = question,
                     onValueChange = {
                         question = it
+                        viewModel.updateQuestion(it)
                         showQuestionError = false
                     },
                     label = { Text(stringResource(R.string.question_hint)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     maxLines = 5,
-                    isError = showQuestionError
+                    isError = showQuestionError,
+                    trailingIcon = {
+                        // Solo mostrar si SpeechRecognizer está disponible
+                        if (SpeechRecognizer.isRecognitionAvailable(context)) {
+                            IconButton(
+                                onClick = {
+                                    when (speechState) {
+                                        is SpeechRecognitionState.Listening -> {
+                                            viewModel.stopListening()
+                                        }
+                                        else -> {
+                                            when {
+                                                ContextCompat.checkSelfPermission(
+                                                    context,
+                                                    Manifest.permission.RECORD_AUDIO
+                                                ) == PackageManager.PERMISSION_GRANTED -> {
+                                                    viewModel.startListening()
+                                                }
+                                                else -> {
+                                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ) {
+                                when (speechState) {
+                                    is SpeechRecognitionState.Idle -> {
+                                        Text(
+                                            text = "🎤",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    is SpeechRecognitionState.Listening -> {
+                                        Text(
+                                            text = "🎤",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = Color.Red,
+                                            modifier = Modifier.scale(1.2f)
+                                        )
+                                    }
+                                    is SpeechRecognitionState.Processing -> {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(24.dp),
+                                            strokeWidth = 2.dp
+                                        )
+                                    }
+                                    is SpeechRecognitionState.Error -> {
+                                        Text(
+                                            text = "🎤",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 )
 
+                // Mostrar error de validación de pregunta
                 if (showQuestionError) {
                     Text(
                         text = stringResource(R.string.question_min_length),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                // v1.3.0: Mostrar error de reconocimiento de voz
+                if (speechState is SpeechRecognitionState.Error) {
+                    Text(
+                        text = (speechState as SpeechRecognitionState.Error).message,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 4.dp)
