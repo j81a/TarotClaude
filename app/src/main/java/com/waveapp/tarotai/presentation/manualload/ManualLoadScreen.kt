@@ -69,6 +69,7 @@ fun ManualLoadScreen(
     onNavigateToCardSelector: (Int) -> Unit,
     onNavigateToReadingDetail: (Long) -> Unit,
     onNavigateToHome: () -> Unit,
+    onNavigateToCardDetail: (Int) -> Unit = {},  // v1.2.0: Para abrir detalle de carta cuando está interpretado (cardId: Int)
     viewModel: ManualLoadViewModel = hiltViewModel()
 ) {
     val configuration by viewModel.configuration.collectAsState()
@@ -151,7 +152,12 @@ fun ManualLoadScreen(
                         onCardClick = if (!isInterpreted) {
                             { index -> onNavigateToCardSelector(index) }
                         } else {
-                            { } // No clickeable después de interpretar
+                            // v1.2.0: Cuando está interpretado, abrir detalle de carta
+                            { index ->
+                                drawnCards.getOrNull(index)?.let { drawnCard ->
+                                    onNavigateToCardDetail(drawnCard.card.id)
+                                }
+                            }
                         }
                     )
                 }
@@ -163,7 +169,12 @@ fun ManualLoadScreen(
                         onCardClick = if (!isInterpreted) {
                             { index -> onNavigateToCardSelector(index) }
                         } else {
-                            { } // No clickeable después de interpretar
+                            // v1.2.0: Cuando está interpretado, abrir detalle de carta
+                            { index ->
+                                drawnCards.getOrNull(index)?.let { drawnCard ->
+                                    onNavigateToCardDetail(drawnCard.card.id)
+                                }
+                            }
                         }
                     )
                 }
@@ -693,13 +704,14 @@ private fun ManualLoadCardItem(
                     }
                 }
 
+                // Círculo gris con símbolo verde (primary)
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 8.dp)
                         .size(32.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -707,7 +719,7 @@ private fun ManualLoadCardItem(
                     Icon(
                         imageVector = icon,
                         contentDescription = description,
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                 }

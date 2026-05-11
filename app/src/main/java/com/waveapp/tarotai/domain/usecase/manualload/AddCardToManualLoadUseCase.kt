@@ -49,23 +49,24 @@ class AddCardToManualLoadUseCase @Inject constructor() {
             )
         }
 
-        // Validar que la carta no esté ya en uso
-        if (currentState.isCardUsed(card.id)) {
+        // Validar que la carta no esté ya en uso (excepto si está en la misma posición que vamos a reemplazar)
+        val existingCardInPosition = currentState.selectedCards.find { it.positionIndex == positionIndex }
+        if (currentState.isCardUsed(card.id) && existingCardInPosition?.card?.id != card.id) {
             return Result.failure(
                 IllegalStateException("La carta '${card.name}' ya ha sido seleccionada para esta tirada")
             )
         }
 
-        // Validar que la posición no tenga ya una carta
-        if (currentState.selectedCards.any { it.positionIndex == positionIndex }) {
-            return Result.failure(
-                IllegalStateException("La posición '$positionName' ya tiene una carta asignada")
-            )
+        // v1.2.0: Si la posición ya tiene una carta, removerla primero (editar)
+        val stateAfterRemoval = if (existingCardInPosition != null) {
+            currentState.removeCardAtPosition(positionIndex)
+        } else {
+            currentState
         }
 
         // Intentar agregar la carta al estado
         return try {
-            val newState = currentState.addCard(
+            val newState = stateAfterRemoval.addCard(
                 card = card,
                 positionIndex = positionIndex,
                 positionName = positionName,

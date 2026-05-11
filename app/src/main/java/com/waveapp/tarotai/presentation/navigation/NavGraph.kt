@@ -313,6 +313,9 @@ fun NavGraph(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = false }
                     }
+                },
+                onNavigateToCardDetail = { cardId ->
+                    navController.navigate(Screen.CardDetail.createRoute(cardId = cardId, fromReading = true))
                 }
             )
         }

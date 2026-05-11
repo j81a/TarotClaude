@@ -221,14 +221,14 @@ fun DrawnCardItem(
                     )
                 }
 
-                // v1.2.0: Icono 'i' (info) circular abajo al centro
+                // v1.2.0: Icono 'i' (info) circular abajo al centro - círculo gris con símbolo verde
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 8.dp)
                         .size(32.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -236,7 +236,7 @@ fun DrawnCardItem(
                     Icon(
                         imageVector = Icons.Filled.Info,
                         contentDescription = "Ver detalle de la carta",
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                 }
