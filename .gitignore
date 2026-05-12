@@ -19,3 +19,11 @@ gradle.properties
 
 # Claude Code settings locales
 .claude/settings.local.json
+
+# ⚠️ CRÍTICO: NO SUBIR KEYSTORE NI SECRETOS ⚠️
+# Si estos archivos se suben a Git, cualquiera puede firmar apps con tu identidad
+*.jks
+*.keystore
+private/
+.tarotai_secrets
+keystore.properties

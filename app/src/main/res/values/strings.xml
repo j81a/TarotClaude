@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Nombre de la aplicación -->
-    <string name="app_name">TarotAI</string>
+    <string name="app_name">Tarot</string>
 
     <!-- Pantalla Home -->
-    <string name="home_title">TarotAI</string>
-    <string name="home_welcome">Bienvenido a TarotAI</string>
-    <string name="home_subtitle">Tu guía espiritual con inteligencia artificial</string>
+    <string name="home_title">Tarot Arcana</string>
+    <string name="home_welcome">ARCANA</string>
+    <string name="home_subtitle">Tu compañera en el aprendizaje del tarot</string>
     <string name="home_new_reading">Nueva Lectura</string>
     <string name="home_encyclopedia">Enciclopedia de Cartas</string>
     <string name="home_history">Historial de Lecturas</string>

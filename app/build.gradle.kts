@@ -23,17 +23,29 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("TAROT_KEYSTORE_PATH")
+                ?: "${System.getProperty("user.home")}/tarotai-release-key.jks")
+            storePassword = System.getenv("TAROT_KEYSTORE_PASSWORD")
+            keyAlias = "tarotai"
+            keyPassword = System.getenv("TAROT_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         debug {
             buildConfigField("String", "CLAUDE_API_KEY", "\"${project.findProperty("CLAUDE_API_KEY") ?: ""}\"")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
             buildConfigField("String", "CLAUDE_API_KEY", "\"${project.findProperty("CLAUDE_API_KEY") ?: ""}\"")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
