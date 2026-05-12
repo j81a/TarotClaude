@@ -38,10 +38,19 @@ class QuestionViewModel @Inject constructor(
     )
     val speechState: StateFlow<SpeechRecognitionState> = _speechState.asStateFlow()
 
+    private val _consultantSpeechState = MutableStateFlow<SpeechRecognitionState>(
+        SpeechRecognitionState.Idle
+    )
+    val consultantSpeechState: StateFlow<SpeechRecognitionState> = _consultantSpeechState.asStateFlow()
+
     private val _question = MutableStateFlow("")
     val question: StateFlow<String> = _question.asStateFlow()
 
+    private val _consultantName = MutableStateFlow("")
+    val consultantName: StateFlow<String> = _consultantName.asStateFlow()
+
     private var speechRecognizer: SpeechRecognizer? = null
+    private var consultantSpeechRecognizer: SpeechRecognizer? = null
 
     /**
      * Inicializa el reconocedor de voz con listener para callbacks.
@@ -130,12 +139,99 @@ class QuestionViewModel @Inject constructor(
     }
 
     /**
+     * Inicializa el reconocedor de voz para el campo de consultante.
+     *
+     * @param context Contexto de la aplicación para crear SpeechRecognizer
+     */
+    fun initConsultantSpeechRecognizer(context: Context) {
+        consultantSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+        consultantSpeechRecognizer?.setRecognitionListener(object : RecognitionListener {
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.firstOrNull()?.let { recognizedText ->
+                    _consultantName.value = recognizedText
+                }
+                _consultantSpeechState.value = SpeechRecognitionState.Idle
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {
+                val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.firstOrNull()?.let { partialText ->
+                    _consultantName.value = partialText
+                }
+            }
+
+            override fun onError(error: Int) {
+                val errorMessage = when (error) {
+                    SpeechRecognizer.ERROR_AUDIO -> "Error de audio"
+                    SpeechRecognizer.ERROR_CLIENT -> "Error del cliente"
+                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Permiso de micrófono denegado"
+                    SpeechRecognizer.ERROR_NETWORK -> "Error de conexión"
+                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Tiempo de espera agotado"
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No se entendió el audio"
+                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Reconocedor ocupado"
+                    SpeechRecognizer.ERROR_SERVER -> "Error del servidor"
+                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No se detectó voz"
+                    else -> "Error desconocido"
+                }
+                _consultantSpeechState.value = SpeechRecognitionState.Error(errorMessage)
+            }
+
+            override fun onBeginningOfSpeech() {
+                _consultantSpeechState.value = SpeechRecognitionState.Listening
+            }
+
+            override fun onEndOfSpeech() {
+                _consultantSpeechState.value = SpeechRecognitionState.Processing
+            }
+
+            override fun onReadyForSpeech(params: Bundle?) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+    }
+
+    /**
+     * Inicia el reconocimiento de voz para el campo de consultante.
+     */
+    fun startConsultantListening() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
+        consultantSpeechRecognizer?.startListening(intent)
+        _consultantSpeechState.value = SpeechRecognitionState.Listening
+    }
+
+    /**
+     * Detiene el reconocimiento de voz del consultante.
+     */
+    fun stopConsultantListening() {
+        consultantSpeechRecognizer?.stopListening()
+        _consultantSpeechState.value = SpeechRecognitionState.Idle
+    }
+
+    /**
+     * Actualiza manualmente el nombre del consultante.
+     * Usado cuando el usuario escribe con el teclado.
+     *
+     * @param text Nuevo nombre del consultante
+     */
+    fun updateConsultantName(text: String) {
+        _consultantName.value = text
+    }
+
+    /**
      * Limpia recursos al destruir el ViewModel.
-     * Destruye el SpeechRecognizer para evitar memory leaks.
+     * Destruye los SpeechRecognizers para evitar memory leaks.
      */
     override fun onCleared() {
         super.onCleared()
         speechRecognizer?.destroy()
+        consultantSpeechRecognizer?.destroy()
     }
 }
 

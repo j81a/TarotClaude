@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -68,6 +69,8 @@ fun QuestionScreen(
     val context = LocalContext.current
     val speechState by viewModel.speechState.collectAsState()
     val recognizedQuestion by viewModel.question.collectAsState()
+    val consultantSpeechState by viewModel.consultantSpeechState.collectAsState()
+    val recognizedConsultantName by viewModel.consultantName.collectAsState()
 
     var question by remember { mutableStateOf("") }
     var showQuestionError by remember { mutableStateOf(false) }
@@ -83,10 +86,11 @@ fun QuestionScreen(
     LaunchedEffect(Unit) {
         if (SpeechRecognizer.isRecognitionAvailable(context)) {
             viewModel.initSpeechRecognizer(context)
+            viewModel.initConsultantSpeechRecognizer(context)
         }
     }
 
-    // v1.3.0: Manejo de permisos de micrófono
+    // v1.3.0: Manejo de permisos de micrófono para pregunta
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -101,10 +105,32 @@ fun QuestionScreen(
         }
     }
 
+    // v1.3.0: Manejo de permisos de micrófono para consultante
+    val consultantPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.startConsultantListening()
+        } else {
+            Toast.makeText(
+                context,
+                "Permiso de micrófono requerido para dictar",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     // v1.2.0: Estados para consultante (opcional en ambos modos)
     var isForSomeoneElse by remember { mutableStateOf(false) } // OFF por defecto
     var consultantName by remember { mutableStateOf("") }
     var showConsultantError by remember { mutableStateOf(false) }
+
+    // v1.3.0: Sincronizar nombre del consultante reconocido
+    LaunchedEffect(recognizedConsultantName) {
+        if (recognizedConsultantName.isNotBlank()) {
+            consultantName = recognizedConsultantName
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -187,18 +213,21 @@ fun QuestionScreen(
                             ) {
                                 when (speechState) {
                                     is SpeechRecognitionState.Idle -> {
-                                        Text(
-                                            text = "🎤",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            color = MaterialTheme.colorScheme.primary
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_mic),
+                                            contentDescription = "Dictar pregunta con voz",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(24.dp)
                                         )
                                     }
                                     is SpeechRecognitionState.Listening -> {
-                                        Text(
-                                            text = "🎤",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            color = Color.Red,
-                                            modifier = Modifier.scale(1.2f)
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_mic),
+                                            contentDescription = "Detener dictado",
+                                            tint = Color.Red,
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .scale(1.2f)
                                         )
                                     }
                                     is SpeechRecognitionState.Processing -> {
@@ -208,10 +237,11 @@ fun QuestionScreen(
                                         )
                                     }
                                     is SpeechRecognitionState.Error -> {
-                                        Text(
-                                            text = "🎤",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            color = MaterialTheme.colorScheme.error
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_mic),
+                                            contentDescription = "Error en reconocimiento",
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(24.dp)
                                         )
                                     }
                                 }
@@ -270,11 +300,13 @@ fun QuestionScreen(
                 if (isForSomeoneElse) {
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // v1.3.0: Campo de nombre con botón de micrófono
                     OutlinedTextField(
                         value = consultantName,
                         onValueChange = {
                             if (it.length <= 100) { // Máximo 100 caracteres
                                 consultantName = it
+                                viewModel.updateConsultantName(it)
                                 showConsultantError = false
                             }
                         },
@@ -284,12 +316,84 @@ fun QuestionScreen(
                         isError = showConsultantError,
                         supportingText = {
                             Text("${consultantName.length}/100 caracteres")
+                        },
+                        trailingIcon = {
+                            // Solo mostrar si SpeechRecognizer está disponible
+                            if (SpeechRecognizer.isRecognitionAvailable(context)) {
+                                IconButton(
+                                    onClick = {
+                                        when (consultantSpeechState) {
+                                            is SpeechRecognitionState.Listening -> {
+                                                viewModel.stopConsultantListening()
+                                            }
+                                            else -> {
+                                                when {
+                                                    ContextCompat.checkSelfPermission(
+                                                        context,
+                                                        Manifest.permission.RECORD_AUDIO
+                                                    ) == PackageManager.PERMISSION_GRANTED -> {
+                                                        viewModel.startConsultantListening()
+                                                    }
+                                                    else -> {
+                                                        consultantPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    when (consultantSpeechState) {
+                                        is SpeechRecognitionState.Idle -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_mic),
+                                                contentDescription = "Dictar nombre con voz",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                        is SpeechRecognitionState.Listening -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_mic),
+                                                contentDescription = "Detener dictado",
+                                                tint = Color.Red,
+                                                modifier = Modifier
+                                                    .size(24.dp)
+                                                    .scale(1.2f)
+                                            )
+                                        }
+                                        is SpeechRecognitionState.Processing -> {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(24.dp),
+                                                strokeWidth = 2.dp
+                                            )
+                                        }
+                                        is SpeechRecognitionState.Error -> {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_mic),
+                                                contentDescription = "Error en reconocimiento",
+                                                tint = MaterialTheme.colorScheme.error,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     )
 
                     if (showConsultantError) {
                         Text(
                             text = "El nombre debe tener entre 2 y 100 caracteres",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+                    // v1.3.0: Mostrar error de reconocimiento de voz del consultante
+                    if (consultantSpeechState is SpeechRecognitionState.Error) {
+                        Text(
+                            text = (consultantSpeechState as SpeechRecognitionState.Error).message,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 4.dp)
