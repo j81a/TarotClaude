@@ -14,8 +14,14 @@
 ### v1.2.0 (En desarrollo) ⏳
 - **Mejoras de UX** - Corrección de problemas de usabilidad identificados en testing
 
-### v1.3.0 (Planificación) 🆕
+### v1.3.0 (Completada) ✅
 - **Reconocimiento de Voz** - Entrada por voz en QuestionScreen
+
+### v1.4.0 (Completada) ✅
+- **Splash Screen Personalizado** - Pantalla de carga con branding
+
+### v1.5.0 (Planificación) 🆕
+- **Modernización de HomeScreen** - Rediseño visual de pantalla principal
 
 ---
 
@@ -51,8 +57,14 @@ Ofrecer dos experiencias complementarias:
 ### Requisitos v1.2.0 ⏳
 7. [Mejoras de UX](./mejoras-ux.md) - RF-13 a RF-20
 
-### Requisitos v1.3.0 🆕
+### Requisitos v1.3.0 ✅
 8. [Reconocimiento de Voz](./mejoras-ux.md#rf-21) - RF-21
+
+### Requisitos v1.4.0 ✅
+9. Splash Screen Personalizado (ver docs/fases/)
+
+### Requisitos v1.5.0 🆕
+10. [Modernización de HomeScreen](./mejoras-ux.md#rf-22) - RF-22
 
 ---
 

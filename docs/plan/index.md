@@ -59,5 +59,6 @@ Este es un documento vivo que sirve como referencia durante todo el ciclo de des
 ### Cambios de Versión
 
 18. **[Cambios de v1.1.0](./18-v1.1.0.md)** ✅ - Historial, Carga Manual, decisiones arquitecturales
-19. **[Cambios de v1.2.0](./19-v1.2.0.md)** ⏳ - Guardado consistente, consultante opcional, carga manual mejorada
-20. **[Cambios de v1.3.0](./20-v1.3.0.md)** 🆕 - Reconocimiento de voz (Speech-to-Text)
+19. **[Cambios de v1.2.0](./19-v1.2.0.md)** ✅ - Guardado consistente, consultante opcional, carga manual mejorada
+20. **[Cambios de v1.3.0](./20-v1.3.0.md)** ✅ - Reconocimiento de voz (Speech-to-Text)
+21. **[Cambios de v1.5.0](./21-v1.5.0.md)** 🆕 - Modernización de HomeScreen (UI/UX)

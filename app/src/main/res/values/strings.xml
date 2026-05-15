@@ -12,6 +12,13 @@
     <string name="home_history">Historial de Lecturas</string>
     <string name="home_settings">Configuración</string>
 
+    <!-- HomeScreen - Descripciones de opciones (v1.5.0) -->
+    <string name="home_new_reading_desc">Genera una tirada automática del tarot</string>
+    <string name="home_manual_load">Cargar Lectura Manual</string>
+    <string name="home_manual_load_desc">Interpreta una tirada física que hayas realizado</string>
+    <string name="home_encyclopedia_desc">Consulta las 78 cartas del Tarot Rider-Waite</string>
+    <string name="home_history_desc">Revisa lecturas anteriores guardadas</string>
+
     <!-- Navegación general -->
     <string name="nav_back">Volver</string>
 

@@ -62,9 +62,6 @@ fun NavGraph(
                     // Navegar a SpreadTypeSelection con flag de carga manual
                     navController.navigate(Screen.SpreadTypeSelection.createRoute(isManualLoad = true))
                 },
-                onNavigateToSettings = {
-                    navController.navigate(Screen.Settings.route)
-                },
                 onNavigateToHistory = {
                     navController.navigate(Screen.History.route)
                 }

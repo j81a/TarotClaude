@@ -43,8 +43,14 @@
 | **Fase 10: Splash Screen Personalizado** | 2 | 2 | ✅ 100% |
 | **Subtotal v1.4.0** | **2** | **2** | **✅ 100%** |
 
+### v1.5.0 🆕
+| Fase | Tareas | Completadas | Progreso |
+|------|--------|-------------|----------|
+| **Fase 11: Modernización de HomeScreen** | 3 | 0 | ⏳ 0% |
+| **Subtotal v1.5.0** | **3** | **0** | **⏳ 0%** |
+
 ### Total General
-| **TOTAL** | **45** | **45** | **📊 100%** |
+| **TOTAL** | **48** | **45** | **📊 93.75%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -1465,18 +1471,18 @@ private fun CardSelectorItem(
 
 ## 🚦 Próximo Paso
 
-**v1.0.0 completada** ✅
-**v1.1.0 completada** ✅
+**v1.0.0 completada** ✅ (21 tareas)
+**v1.1.0 completada** ✅ (11 tareas)
+**v1.2.0 completada** ✅ (6 tareas)
+**v1.3.0 completada** ✅ (3 tareas)
+**v1.4.0 completada** ✅ (2 tareas)
 
-**Fase 8 - EN PROGRESO** ⏳
-- ✅ Tarea 8.1: QuestionScreen - Consultante opcional en ambos modos
-- ✅ Tarea 8.2: ReadingScreen - Botón guardar siempre visible con valor por defecto
-- ⏳ Tarea 8.3: ManualLoadViewModel - Remover guardado automático
-- ⏳ Tarea 8.4: ManualLoadScreen - Cartas de dorso + interpretación en misma pantalla
-- ⏳ Tarea 8.5: CardSelectorScreen - Agregar imágenes de cartas
-- ⏳ Tarea 8.6: Obtener/crear imagen card_back.jpg
+**Fase 11 (v1.5.0) - EN PLANIFICACIÓN** 🆕
+- ⏳ Tarea 11.1: Crear Componente HomeOptionCard
+- ⏳ Tarea 11.2: Refactorizar HomeScreen con Nuevo Diseño
+- ⏳ Tarea 11.3: Actualizar Recursos y Navegación
 
-**Siguiente: Tarea 8.3 - ManualLoadViewModel - Remover guardado automático**
+**Siguiente: Tarea 11.1 - Crear Componente HomeOptionCard**
 
 ---
 
@@ -1961,3 +1967,269 @@ Android 12+ fuerza un ícono circular de 288dp máximo en el splash del sistema.
 
 **Total Fase 10**: 2.5 horas
 **Estado**: ✅ Completada 100%
+
+---
+
+## 🎨 FASE 11: Modernización de HomeScreen (v1.5.0)
+
+### Tarea 11.1: Crear Componente HomeOptionCard
+
+**Descripción**: Implementar componente reutilizable `HomeOptionCard` para las opciones de la pantalla principal.
+
+**Criterios de Aceptación**:
+- [ ] Archivo `HomeOptionCard.kt` creado en `presentation/screens/components/`
+- [ ] Componente acepta parámetros: icon, title, description, onClick, isPrimary
+- [ ] Variante primaria usa `primaryContainer` color
+- [ ] Variante secundaria usa colores por defecto
+- [ ] Card tiene elevación de 2dp
+- [ ] Layout: Row con Icon (48dp) + Column (título + descripción)
+- [ ] Ripple effect automático con `Modifier.clickable`
+- [ ] Documentación KDoc completa
+- [ ] El proyecto compila sin errores
+
+**Archivos a crear**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/screens/components/HomeOptionCard.kt`
+
+**Código esperado**:
+```kotlin
+@Composable
+fun HomeOptionCard(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isPrimary: Boolean = false
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = if (isPrimary) {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        } else {
+            CardDefaults.cardColors()
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(end = 16.dp),
+                tint = if (isPrimary) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isPrimary) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isPrimary) {
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+        }
+    }
+}
+```
+
+**Tiempo estimado**: 45 minutos
+
+---
+
+### Tarea 11.2: Refactorizar HomeScreen con Nuevo Diseño
+
+**Descripción**: Modernizar `HomeScreen` eliminando TopAppBar, agregando logo con imagen, reemplazando botones por cards, y respetando márgenes del sistema.
+
+**Criterios de Aceptación**:
+- [ ] Remover `TopAppBar` del `Scaffold`
+- [ ] Reemplazar `Scaffold` por `Column` con `statusBarsPadding()` y `navigationBarsPadding()`
+- [ ] Agregar `Image` con `nombre_solo.png` como logo (60% ancho, ContentScale.Fit)
+- [ ] Reemplazar todos los `Button` y `OutlinedButton` por `HomeOptionCard`
+- [ ] Card "Nueva Lectura" es primaria (`isPrimary = true`)
+- [ ] Resto de cards son secundarias
+- [ ] Remover botón de "Configuración" completamente
+- [ ] Remover parámetro `onNavigateToSettings` de la función
+- [ ] Agregar `verticalScroll` a la Column
+- [ ] Actualizar iconos: Face → LibraryBooks, Info → Assignment
+- [ ] Espaciado de 12dp entre cards
+- [ ] Padding horizontal de 24dp
+- [ ] El proyecto compila sin errores
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/screens/HomeScreen.kt`
+
+**Estructura esperada**:
+```kotlin
+@Composable
+fun HomeScreen(
+    onNavigateToEncyclopedia: () -> Unit,
+    onNavigateToReadingSelection: () -> Unit,
+    onNavigateToManualLoad: () -> Unit,
+    onNavigateToHistory: () -> Unit  // Removido: onNavigateToSettings
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Logo
+        Image(
+            painter = painterResource(id = R.drawable.nombre_solo),
+            contentDescription = "Arcana - Logo de la aplicación",
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .padding(vertical = 32.dp),
+            contentScale = ContentScale.Fit
+        )
+
+        // Card primaria
+        HomeOptionCard(
+            icon = Icons.Default.Star,
+            title = stringResource(R.string.home_new_reading),
+            description = stringResource(R.string.home_new_reading_desc),
+            onClick = onNavigateToReadingSelection,
+            isPrimary = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Cards secundarias
+        HomeOptionCard(
+            icon = Icons.Default.AddCircle,
+            title = "Cargar Lectura Manual",
+            description = stringResource(R.string.home_manual_load_desc),
+            onClick = onNavigateToManualLoad
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        HomeOptionCard(
+            icon = Icons.Default.LibraryBooks,  // CAMBIADO de Face
+            title = stringResource(R.string.home_encyclopedia),
+            description = stringResource(R.string.home_encyclopedia_desc),
+            onClick = onNavigateToEncyclopedia
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        HomeOptionCard(
+            icon = Icons.Default.Assignment,  // CAMBIADO de Info
+            title = stringResource(R.string.home_history),
+            description = stringResource(R.string.home_history_desc),
+            onClick = onNavigateToHistory
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+```
+
+**Tiempo estimado**: 1.5 horas
+
+---
+
+### Tarea 11.3: Actualizar Recursos y Navegación
+
+**Descripción**: Agregar strings de descripciones para las cards, actualizar navegación en NavGraph, y verificar funcionamiento completo.
+
+**Criterios de Aceptación**:
+- [ ] Strings de descripciones agregados en `strings.xml`:
+  - `home_new_reading_desc`
+  - `home_manual_load_desc`
+  - `home_encyclopedia_desc`
+  - `home_history_desc`
+- [ ] Parámetro `onNavigateToSettings` removido de `NavGraph.kt`
+- [ ] Verificar que `nombre_solo.png` existe y se visualiza correctamente
+- [ ] Testing visual en emulador
+- [ ] Testing de navegación a cada pantalla
+- [ ] Testing de scroll si contenido excede pantalla
+- [ ] Testing de márgenes del sistema (status bar, navigation bar)
+- [ ] El proyecto compila y funciona sin errores
+
+**Archivos a modificar**:
+- `app/src/main/res/values/strings.xml`
+- `app/src/main/java/com/waveapp/tarotai/presentation/navigation/NavGraph.kt`
+
+**Strings a agregar**:
+```xml
+<!-- HomeScreen - Descripciones de opciones -->
+<string name="home_new_reading_desc">Genera una tirada automática del tarot</string>
+<string name="home_manual_load_desc">Interpreta una tirada física que hayas realizado</string>
+<string name="home_encyclopedia_desc">Consulta las 78 cartas del Tarot Rider-Waite</string>
+<string name="home_history_desc">Revisa lecturas anteriores guardadas</string>
+```
+
+**Cambio en NavGraph**:
+```kotlin
+// ANTES
+composable(Screen.Home.route) {
+    HomeScreen(
+        onNavigateToEncyclopedia = { ... },
+        onNavigateToReadingSelection = { ... },
+        onNavigateToManualLoad = { ... },
+        onNavigateToSettings = { ... },  // REMOVER
+        onNavigateToHistory = { ... }
+    )
+}
+
+// DESPUÉS
+composable(Screen.Home.route) {
+    HomeScreen(
+        onNavigateToEncyclopedia = { ... },
+        onNavigateToReadingSelection = { ... },
+        onNavigateToManualLoad = { ... },
+        onNavigateToHistory = { ... }
+    )
+}
+```
+
+**Checklist de Testing**:
+- [ ] Logo se muestra correctamente (tamaño apropiado)
+- [ ] Card "Nueva Lectura" tiene color destacado (primaryContainer)
+- [ ] Resto de cards tienen color estándar
+- [ ] Todas las cards tienen ripple effect
+- [ ] Navegación a cada pantalla funciona
+- [ ] NO hay botón de configuración
+- [ ] Status bar NO se superpone con contenido
+- [ ] Navigation bar NO se superpone con contenido
+- [ ] Funciona en pantalla pequeña (scroll si es necesario)
+- [ ] Funciona en pantalla grande
+
+**Tiempo estimado**: 1.25 horas
+
+---
+
+**Total Fase 11**: ~3.5 horas
+**Estado**: ⏳ En planificación

@@ -1,170 +1,131 @@
 package com.waveapp.tarotai.presentation.screens
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.waveapp.tarotai.R
+import com.waveapp.tarotai.presentation.screens.components.HomeOptionCard
 
 /**
  * Pantalla principal (Home) de TarotAI.
  *
  * @Composable: Marca esta función como un componente de UI de Compose.
- * @OptIn(ExperimentalMaterial3Api::class): Usamos APIs experimentales de Material3.
  *
- * Muestra el menú principal con opciones para:
- * - Iniciar una lectura del tarot (automática)
- * - Cargar una lectura manual (de tirada física)
- * - Ver la enciclopedia de cartas
- * - Ver historial de lecturas
- * - Ir a configuración
+ * Muestra el menú principal modernizado con:
+ * - Logo de la aplicación (nombre_solo.png)
+ * - Cards clickeables para navegación principal:
+ *   - Nueva Lectura (primaria, destacada)
+ *   - Cargar Lectura Manual
+ *   - Enciclopedia de Cartas
+ *   - Historial de Lecturas
  *
- * @param onNavigateToEncyclopedia: Lambda ejecutada al presionar "Enciclopedia"
- * @param onNavigateToReadingSelection: Lambda ejecutada al presionar "Nueva Lectura"
- * @param onNavigateToManualLoad: Lambda ejecutada al presionar "Cargar Lectura Manual"
- * @param onNavigateToSettings: Lambda ejecutada al presionar "Configuración"
- * @param onNavigateToHistory: Lambda ejecutada al presionar "Historial"
+ * Diseño moderno sin TopAppBar, respetando márgenes del sistema
+ * (status bar y navigation bar) para una experiencia edge-to-edge.
+ *
+ * @param onNavigateToEncyclopedia Lambda ejecutada al presionar "Enciclopedia"
+ * @param onNavigateToReadingSelection Lambda ejecutada al presionar "Nueva Lectura"
+ * @param onNavigateToManualLoad Lambda ejecutada al presionar "Cargar Lectura Manual"
+ * @param onNavigateToHistory Lambda ejecutada al presionar "Historial"
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToEncyclopedia: () -> Unit,
     onNavigateToReadingSelection: () -> Unit,
     onNavigateToManualLoad: () -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToHistory: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.home_title),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                }
-            )
-        }
-    ) { paddingValues ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()        // Respeta status bar del sistema
+            .navigationBarsPadding()    // Respeta navigation bar del sistema
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState()),  // Permite scroll si es necesario
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Logo de la aplicación
+        Image(
+            painter = painterResource(id = R.drawable.nombre_solo),
+            contentDescription = "Arcana - Logo de la aplicación",
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Título de bienvenida
-            Text(
-                text = stringResource(R.string.home_welcome),
-                style = MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Center
-            )
+                .fillMaxWidth(0.6f)    // 90% del ancho de pantalla
+                .padding(top = 64.dp, bottom = 16.dp),
+            contentScale = ContentScale.Fit  // Mantener proporciones
+        )
 
-            Text(
-                text = stringResource(R.string.home_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+        // Subtítulo debajo del logo
+        Text(
+            text = stringResource(R.string.home_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 64.dp)
+        )
 
-            Spacer(modifier = Modifier.height(48.dp))
+        // Card primaria (acción principal destacada)
+        HomeOptionCard(
+            icon = Icons.Default.Star,
+            title = stringResource(R.string.home_new_reading),
+            description = stringResource(R.string.home_new_reading_desc),
+            onClick = onNavigateToReadingSelection,
+            isPrimary = true  // Color destacado (primaryContainer)
+        )
 
-            // Botón principal: Nueva Lectura
-            Button(
-                onClick = onNavigateToReadingSelection,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(stringResource(R.string.home_new_reading))
-            }
+        Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
+        // Cards secundarias
+        HomeOptionCard(
+            icon = Icons.Default.AddCircle,
+            title = stringResource(R.string.home_manual_load),
+            description = stringResource(R.string.home_manual_load_desc),
+            onClick = onNavigateToManualLoad
+        )
 
-            // Botón: Cargar Lectura Manual
-            OutlinedButton(
-                onClick = onNavigateToManualLoad,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text("Cargar Lectura Manual")
-            }
+        Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+        HomeOptionCard(
+            icon = Icons.Default.Info,  // Enciclopedia (información de cartas)
+            title = stringResource(R.string.home_encyclopedia),
+            description = stringResource(R.string.home_encyclopedia_desc),
+            onClick = onNavigateToEncyclopedia
+        )
 
-            // Botón: Enciclopedia
-            OutlinedButton(
-                onClick = onNavigateToEncyclopedia,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(stringResource(R.string.home_encyclopedia))
-            }
+        Spacer(modifier = Modifier.height(12.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+        HomeOptionCard(
+            icon = Icons.Default.List,  // Historial (lista de lecturas)
+            title = stringResource(R.string.home_history),
+            description = stringResource(R.string.home_history_desc),
+            onClick = onNavigateToHistory
+        )
 
-            // Botón: Historial
-            OutlinedButton(
-                onClick = onNavigateToHistory,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(stringResource(R.string.home_history))
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Botón: Configuración
-            OutlinedButton(
-                onClick = onNavigateToSettings,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                Text(stringResource(R.string.home_settings))
-            }
-        }
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }

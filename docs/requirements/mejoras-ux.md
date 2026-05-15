@@ -766,4 +766,296 @@ IconButton(onClick = {
 
 ---
 
-*Última actualización: 2026-05-11*
+## RF-22: Modernización de HomeScreen (v1.5.0) 🆕
+
+### Descripción
+Rediseñar la pantalla principal (HomeScreen) con un enfoque más moderno, limpio y profesional, mejorando la jerarquía visual y la experiencia de usuario.
+
+### Problema Actual
+- Top AppBar ocupa espacio innecesario con título redundante
+- Botones genéricos sin personalidad visual
+- No aprovecha márgenes del sistema (status bar, navigation bar)
+- Logo "Arcana" solo en texto, poco impactante
+- Botón "Configuración" visible sin funcionalidad implementada
+
+### Solución Requerida
+
+#### 1. Remover TopAppBar
+- Eliminar `TopAppBar` del `Scaffold`
+- Liberar espacio vertical para contenido más relevante
+
+#### 2. Agregar Márgenes del Sistema
+- Usar `WindowInsets` para respetar status bar y navigation bar
+- Usar `Modifier.systemBarsPadding()` o `Modifier.statusBarsPadding()`
+- Asegurar que el contenido no se superponga con elementos del SO
+
+#### 3. Logo con Imagen
+- Reemplazar `Text("Arcana")` por `Image` usando `nombre_solo.png`
+- Ubicación: Parte superior de la pantalla (donde estaba el título)
+- Tamaño: Máximo 60% del ancho de pantalla
+- `contentScale = ContentScale.Fit`
+
+#### 4. Modernizar Botones → Cards Clickeables
+- Reemplazar `Button` y `OutlinedButton` por `Card` con `Modifier.clickable`
+- Cada Card contiene:
+  - **Icono**: Icon representativo de la función (tamaño: 48dp)
+  - **Título**: Nombre de la función (Typography.titleMedium)
+  - **Descripción**: Breve texto explicativo (Typography.bodySmall)
+- Layout de cada Card:
+  - Icono a la izquierda
+  - Título y descripción a la derecha (Column)
+  - Padding: 16dp
+  - Elevation: 2dp
+  - Ripple effect al tocar
+
+#### 5. Ocultar Botón de Configuración
+- Remover completamente el botón/card de "Configuración"
+- Se agregará en una versión futura cuando esté implementado
+
+### Especificaciones Técnicas
+
+#### Estructura Visual Propuesta
+```
+┌─────────────────────────────────┐
+│  [Status Bar Padding]           │
+│                                 │
+│     [Logo nombre_solo.png]      │  ← Imagen centrada
+│                                 │
+│  ┌─────────────────────────┐   │
+│  │ 🌟 Nueva Lectura        │   │  ← Card primaria
+│  │    Genera una tirada... │   │
+│  └─────────────────────────┘   │
+│                                 │
+│  ┌─────────────────────────┐   │
+│  │ ➕ Cargar Lectura Manual│   │  ← Card secundaria
+│  │    Interpreta tirada... │   │
+│  └─────────────────────────┘   │
+│                                 │
+│  ┌─────────────────────────┐   │
+│  │ 📖 Enciclopedia         │   │  ← Card secundaria
+│  │    Consulta las 78...   │   │
+│  └─────────────────────────┘   │
+│                                 │
+│  ┌─────────────────────────┐   │
+│  │ 📜 Historial            │   │  ← Card secundaria
+│  │    Revisa lecturas...   │   │
+│  └─────────────────────────┘   │
+│                                 │
+│  [Navigation Bar Padding]       │
+└─────────────────────────────────┘
+```
+
+#### Código Esperado
+
+**Logo con Imagen**:
+```kotlin
+Image(
+    painter = painterResource(id = R.drawable.nombre_solo),
+    contentDescription = "Arcana - Logo",
+    modifier = Modifier
+        .fillMaxWidth(0.6f)
+        .padding(vertical = 32.dp),
+    contentScale = ContentScale.Fit
+)
+```
+
+**Card Clickeable**:
+```kotlin
+@Composable
+fun HomeOptionCard(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isPrimary: Boolean = false
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = if (isPrimary) {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        } else {
+            CardDefaults.cardColors()
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(end = 16.dp),
+                tint = if (isPrimary) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+            )
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isPrimary) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isPrimary) {
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+        }
+    }
+}
+```
+
+**Uso de Cards**:
+```kotlin
+// Card primaria (destacada)
+HomeOptionCard(
+    icon = Icons.Default.Star,
+    title = "Nueva Lectura",
+    description = "Genera una tirada automática del tarot",
+    onClick = onNavigateToReadingSelection,
+    isPrimary = true
+)
+
+Spacer(modifier = Modifier.height(12.dp))
+
+// Cards secundarias
+HomeOptionCard(
+    icon = Icons.Default.AddCircle,
+    title = "Cargar Lectura Manual",
+    description = "Interpreta una tirada física que hayas realizado",
+    onClick = onNavigateToManualLoad
+)
+
+Spacer(modifier = Modifier.height(12.dp))
+
+HomeOptionCard(
+    icon = Icons.Default.Face,
+    title = "Enciclopedia",
+    description = "Consulta las 78 cartas del Tarot Rider-Waite",
+    onClick = onNavigateToEncyclopedia
+)
+
+Spacer(modifier = Modifier.height(12.dp))
+
+HomeOptionCard(
+    icon = Icons.Default.Info,
+    title = "Historial",
+    description = "Revisa lecturas anteriores guardadas",
+    onClick = onNavigateToHistory
+)
+```
+
+**Scaffold sin TopAppBar**:
+```kotlin
+Scaffold(
+    modifier = Modifier
+        .fillMaxSize()
+        .statusBarsPadding()  // Respeta status bar
+        .navigationBarsPadding()  // Respeta navigation bar
+) { paddingValues ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState()),  // Scroll si es necesario
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Logo
+        Image(...)
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Cards
+        HomeOptionCard(...)
+        // ... resto de cards
+    }
+}
+```
+
+### Iconos Sugeridos
+
+| Función | Icono Actual | Icono Sugerido | Justificación |
+|---------|--------------|----------------|---------------|
+| Nueva Lectura | `Icons.Default.Star` | `Icons.Default.Star` | ✅ Funciona bien (místico) |
+| Carga Manual | `Icons.Default.AddCircle` | `Icons.Default.AddCircle` | ✅ Claro (agregar) |
+| Enciclopedia | `Icons.Default.Face` | `Icons.Default.AutoStories` o `Icons.Default.MenuBook` | 📖 Más apropiado (libro) |
+| Historial | `Icons.Default.Info` | `Icons.Default.History` | 🕐 Más apropiado (historial) |
+
+**Nota**: `Icons.Default.AutoStories` y `Icons.Default.History` requieren `androidx.compose.material:material-icons-extended`.
+
+#### Alternativas sin dependencias extra:
+- Enciclopedia: `Icons.Default.LibraryBooks`
+- Historial: `Icons.Default.List` o `Icons.Default.Assignment`
+
+### Criterios de Aceptación
+- [ ] HomeScreen NO tiene TopAppBar
+- [ ] Respeta márgenes de status bar y navigation bar (sin superposición)
+- [ ] Muestra logo `nombre_solo.png` en lugar de texto "Arcana"
+- [ ] Logo tiene tamaño apropiado (máx 60% ancho)
+- [ ] Todos los botones son Cards con estructura: icono + título + descripción
+- [ ] Card de "Nueva Lectura" es primaria (color destacado)
+- [ ] Resto de cards son secundarias (color estándar)
+- [ ] Cards tienen ripple effect al tocar
+- [ ] Cards tienen elevación sutil (2dp)
+- [ ] NO se muestra botón/card de "Configuración"
+- [ ] Layout es scrolleable si contenido excede pantalla
+- [ ] Espaciado vertical equilibrado entre elementos
+- [ ] Iconos son intuitivos y representativos
+
+### Impacto en Código
+
+**Archivos a modificar**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/screens/HomeScreen.kt` - Refactorizar completamente
+
+**Archivos a crear**:
+- `app/src/main/java/com/waveapp/tarotai/presentation/screens/components/HomeOptionCard.kt` (opcional, componente reutilizable)
+
+**Recursos necesarios**:
+- `app/src/main/res/drawable/nombre_solo.png` (ya existe ✅)
+
+**Dependencias opcionales**:
+```toml
+# Si se quiere usar Icons.Default.AutoStories o Icons.Default.History
+[libraries]
+material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "compose" }
+```
+
+### Prioridad
+**Media** - Mejora visual significativa pero no afecta funcionalidad core
+
+### Notas de Implementación
+- Aprovechar para limpiar código y documentación
+- Considerar agregar animaciones sutiles al aparecer las cards (opcional)
+- Mantener accesibilidad (content descriptions, contraste, tamaño táctil)
+- Probar en diferentes tamaños de pantalla
+
+---
+
+*Última actualización: 2026-05-15*
