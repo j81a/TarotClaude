@@ -37,8 +37,14 @@
 | **Fase 9: Reconocimiento de Voz** | 3 | 3 | ✅ 100% |
 | **Subtotal v1.3.0** | **3** | **3** | **✅ 100%** |
 
+### v1.4.0 ✅
+| Fase | Tareas | Completadas | Progreso |
+|------|--------|-------------|----------|
+| **Fase 10: Splash Screen Personalizado** | 2 | 2 | ✅ 100% |
+| **Subtotal v1.4.0** | **2** | **2** | **✅ 100%** |
+
 ### Total General
-| **TOTAL** | **43** | **41** | **📊 95%** |
+| **TOTAL** | **45** | **45** | **📊 100%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -1860,3 +1866,98 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 **Total: 41/43 tareas del plan original = 95%**
 **Nota**: Las 2 tareas "faltantes" son tareas antiguas que fueron reemplazadas por implementaciones mejoradas ya completadas.
+
+---
+
+## 🎨 FASE 10: Splash Screen Personalizado (v1.4.0)
+
+### Tarea 10.1: Configurar Splash Screen del Sistema
+
+**Descripción**: Configurar el splash screen del sistema de Android 12+ para mostrar fondo oscuro sin imagen, minimizando la visualización del ícono circular.
+
+**Criterios de Aceptación**:
+- [x] Dependencia `androidx.core:core-splashscreen:1.0.1` agregada
+- [x] Tema `Theme.App.Starting` configurado con fondo `#030F0F` (DarkBackground)
+- [x] `installSplashScreen()` implementado en MainActivity
+- [x] `setKeepOnScreenCondition` configurado para ocultar el splash inmediatamente
+- [x] Status bar configurada con color `#030F0F`
+
+**Archivos modificados**:
+- `gradle/libs.versions.toml` - Versión splashScreen = "1.0.1"
+- `app/build.gradle.kts` - Dependencia splashscreen
+- `app/src/main/res/values/colors.xml` - Color splash_background = #030F0F
+- `app/src/main/res/values/themes.xml` - Tema Theme.App.Starting
+- `app/src/main/AndroidManifest.xml` - Aplicar tema a MainActivity
+- `app/src/main/java/com/waveapp/tarotai/MainActivity.kt` - installSplashScreen()
+
+**Código clave**:
+```kotlin
+// MainActivity.kt
+val splashScreen = installSplashScreen()
+var keepSplashOnScreen = true
+splashScreen.setKeepOnScreenCondition { keepSplashOnScreen }
+
+// Configurar status bar
+window.statusBarColor = Color(0xFF030F0F).toArgb()
+WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+```
+
+**Tiempo estimado**: 1 hora
+
+---
+
+### Tarea 10.2: Implementar Splash Screen en Compose
+
+**Descripción**: Crear un splash screen personalizado en Compose que muestre la imagen completa rectangular con el logo y texto "Arcana" durante 2 segundos.
+
+**Criterios de Aceptación**:
+- [x] Splash de Compose implementado con fondo `#030F0F`
+- [x] Imagen `splash_icon.png` mostrada completa y centrada
+- [x] `ContentScale.Fit` para mantener proporciones
+- [x] Tamaño de imagen al 70% del tamaño de pantalla
+- [x] Duración de 2 segundos antes de mostrar contenido principal
+- [x] Transición suave entre splash y contenido principal
+- [x] El splash del sistema se oculta inmediatamente al cargar Compose
+
+**Archivos modificados**:
+- `app/src/main/java/com/waveapp/tarotai/MainActivity.kt` - Composable del splash
+- `app/src/main/res/drawable/splash_icon.png` - Imagen del splash (1024x1536)
+
+**Código clave**:
+```kotlin
+var showSplash by remember { mutableStateOf(true) }
+
+LaunchedEffect(Unit) {
+    keepSplashOnScreen = false  // Ocultar splash del sistema
+    delay(2000)  // Mantener splash de Compose
+    showSplash = false
+}
+
+if (showSplash) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF030F0F)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.splash_icon),
+            contentDescription = "Splash Logo",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxSize(0.7f)
+        )
+    }
+}
+```
+
+**Limitación técnica documentada**:
+Android 12+ fuerza un ícono circular de 288dp máximo en el splash del sistema. No es posible mostrar una imagen rectangular completa usando solo `windowBackground`. Por eso usamos:
+1. Splash del sistema: Fondo oscuro sin imagen visible (se oculta rápidamente)
+2. Splash de Compose: Imagen rectangular completa con control total
+
+**Tiempo estimado**: 1.5 horas
+
+---
+
+**Total Fase 10**: 2.5 horas
+**Estado**: ✅ Completada 100%

@@ -28,7 +28,11 @@
       "Bash(git push:*)",
       "Bash(git fetch:*)",
       "Bash(git ls-tree:*)",
-      "Bash(adb logcat:*)"
+      "Bash(adb logcat:*)",
+      "Bash(adb uninstall:*)",
+      "Bash(xattr:*)",
+      "Bash(unzip:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

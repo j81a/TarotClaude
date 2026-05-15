@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.splashscreen)
 
     // Jetpack Compose - UI declarativa
     implementation(platform(libs.compose.bom))
