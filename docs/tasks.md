@@ -43,14 +43,20 @@
 | **Fase 10: Splash Screen Personalizado** | 2 | 2 | ✅ 100% |
 | **Subtotal v1.4.0** | **2** | **2** | **✅ 100%** |
 
-### v1.5.0 🆕
+### v1.5.0 ✅
 | Fase | Tareas | Completadas | Progreso |
 |------|--------|-------------|----------|
-| **Fase 11: Modernización de HomeScreen** | 3 | 0 | ⏳ 0% |
-| **Subtotal v1.5.0** | **3** | **0** | **⏳ 0%** |
+| **Fase 11: Modernización de HomeScreen** | 3 | 3 | ✅ 100% |
+| **Subtotal v1.5.0** | **3** | **3** | **✅ 100%** |
+
+### v1.5.1 🆕
+| Fase | Tareas | Completadas | Progreso |
+|------|--------|-------------|----------|
+| **Fase 12: Mejoras Visuales Globales** | 4 | 0 | ⏳ 0% |
+| **Subtotal v1.5.1** | **4** | **0** | **⏳ 0%** |
 
 ### Total General
-| **TOTAL** | **48** | **45** | **📊 93.75%** |
+| **TOTAL** | **52** | **48** | **📊 92.3%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)

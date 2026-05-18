@@ -3,7 +3,6 @@ package com.waveapp.tarotai
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -48,9 +47,9 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // Configurar status bar con el color del background de la app
-        window.statusBarColor = Color(0xFF030F0F).toArgb()
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+        // Configurar status bar visible (color oscuro para combinar con el tema)
+        window.statusBarColor = Color(0xFF0A1414).toArgb()
+        WindowCompat.getInsetsController(window, window.decorView)?.isAppearanceLightStatusBars = false
 
         // setContent: Configura Compose como el sistema de UI de esta Activity
         setContent {

@@ -20,8 +20,7 @@
         <item name="android:windowBackground">@color/splash_background</item>
         <!-- Sin Action Bar -->
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <!-- Status bar oscura -->
+        <!-- Status bar oscura (VISIBLE, no fullscreen) -->
         <item name="android:statusBarColor">@color/splash_background</item>
         <!-- SIN imagen en el splash del sistema -->
     </style>

@@ -1058,4 +1058,281 @@ material-icons-extended = { group = "androidx.compose.material", name = "materia
 
 ---
 
+## RF-23: Mejoras Visuales Globales + Modernización de Pantallas (v1.5.1) 🆕
+
+### Descripción
+Aplicar mejoras visuales consistentes en toda la aplicación, agregando márgenes de status bar a todas las pantallas y modernizando visualmente las pantallas clave del flujo de tirada.
+
+### Problema Actual
+1. **Márgenes inconsistentes**: Solo HomeScreen respeta el status bar, el resto de pantallas no
+2. **SpreadTypeSelectionScreen genérica**: Diseño básico con cards simples sin personalidad
+3. **QuestionScreen poco atractiva**: Layout funcional pero sin elementos visuales modernos
+
+### Solución Requerida
+
+#### 1. Márgenes de Status Bar Globales
+- Agregar `statusBarsPadding()` a **todas** las pantallas con Scaffold
+- Asegurar consistencia visual en toda la app
+- Evitar superposición de contenido con la barra de estado del sistema
+
+#### 2. Modernizar SpreadTypeSelectionScreen
+**Mejoras visuales**:
+- Agregar icono representativo a cada tipo de tirada
+- Mostrar número de cartas de forma prominente
+- Mejorar jerarquía visual (título + descripción + metadata)
+- Cards más espaciadas y con mejor padding
+- Color diferenciado para tipo de tirada recomendado/popular (opcional)
+
+**Iconos sugeridos por tipo**:
+| Tipo | Icono | Justificación |
+|------|-------|---------------|
+| Simple | `Star` | Carta única, básica |
+| Sí/No | `HelpOutline` o `QuestionMark` | Pregunta directa |
+| Presente | `Today` | Situación actual |
+| Tendencia | `TrendingUp` | Pasado-Presente-Futuro |
+| Cruz | `GridView` | Disposición compleja |
+
+#### 3. Modernizar QuestionScreen
+**Mejoras visuales**:
+- Agregar icono o ilustración sutil arriba del texto de instrucciones
+- Card con background sutil para el área de pregunta
+- Mejor espaciado y padding
+- Tipografía más clara y destacada para instrucciones
+- Color de acento en elementos interactivos (TextField, Switch)
+
+### Especificaciones Técnicas
+
+#### Márgenes de Status Bar
+**Patrón a aplicar**:
+```kotlin
+Scaffold(
+    modifier = Modifier.statusBarsPadding(),  // Agregar esto
+    topBar = { ... }
+) { ... }
+```
+
+**Pantallas a actualizar**:
+1. SpreadTypeSelectionScreen
+2. QuestionScreen
+3. ReadingScreen
+4. EncyclopediaScreen
+5. CardDetailScreen
+6. HistoryScreen
+7. ReadingDetailScreen
+8. ManualLoadScreen
+9. CardSelectorScreen
+
+#### SpreadTypeSelectionScreen Modernizada
+
+**Estructura de Card mejorada**:
+```kotlin
+@Composable
+private fun SpreadTypeCard(
+    icon: ImageVector,
+    title: String,
+    cardCount: String,  // "1 carta", "3 cartas", etc.
+    description: String,
+    onClick: () -> Unit,
+    isRecommended: Boolean = false
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = if (isRecommended) {
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        } else {
+            CardDefaults.cardColors()
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),  // Más padding
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icono grande a la izquierda
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(end = 16.dp),
+                tint = if (isRecommended) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+            )
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Título
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (isRecommended) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+
+                    // Badge con número de cartas
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = if (isRecommended) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        }
+                    ) {
+                        Text(
+                            text = cardCount,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isRecommended) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            },
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Descripción
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isRecommended) {
+                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+        }
+    }
+}
+```
+
+#### QuestionScreen Modernizada
+
+**Mejoras de layout**:
+```kotlin
+Column(
+    modifier = Modifier
+        .weight(1f)
+        .verticalScroll(rememberScrollState())
+        .padding(24.dp)  // Más padding horizontal
+) {
+    // Icono o ilustración arriba (opcional)
+    Icon(
+        imageVector = Icons.Default.Edit,  // o cualquier icono relevante
+        contentDescription = null,
+        modifier = Modifier
+            .size(64.dp)
+            .align(Alignment.CenterHorizontally)
+            .padding(bottom = 16.dp),
+        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+    )
+
+    // Instrucciones con tipografía mejorada
+    Text(
+        text = getInstructionText(spreadType),
+        style = MaterialTheme.typography.headlineSmall,  // Más grande
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp)
+    )
+
+    // Card contenedor para el área de pregunta
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            OutlinedTextField(
+                value = question,
+                onValueChange = { ... },
+                label = { Text(stringResource(R.string.question_hint)) },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 5,
+                // ... resto de parámetros
+            )
+            // ... errores y demás
+        }
+    }
+
+    // Resto del contenido
+}
+```
+
+### Criterios de Aceptación
+
+#### Márgenes Globales
+- [ ] Todas las pantallas con Scaffold tienen `statusBarsPadding()`
+- [ ] No hay superposición de contenido con status bar en ninguna pantalla
+- [ ] Consistencia visual en toda la aplicación
+
+#### SpreadTypeSelectionScreen
+- [ ] Cada card tiene icono representativo (48dp)
+- [ ] Badge con número de cartas visible
+- [ ] Título en `titleLarge` (más prominente)
+- [ ] Descripción clara con `bodyMedium`
+- [ ] Padding aumentado a 20dp en cards
+- [ ] Espaciado entre cards de 16dp
+- [ ] Ripple effect funcional
+
+#### QuestionScreen
+- [ ] Icono decorativo opcional arriba de instrucciones
+- [ ] Instrucciones con `headlineSmall` (más grandes)
+- [ ] Texto centrado y con buen contraste
+- [ ] Card sutil alrededor del área de pregunta (opcional)
+- [ ] Padding horizontal aumentado a 24dp
+- [ ] Mejor jerarquía visual general
+
+### Impacto en Código
+
+**Archivos a modificar**:
+1. `SpreadTypeSelectionScreen.kt` - Refactorizar componente SpreadTypeCard
+2. `QuestionScreen.kt` - Mejorar layout y tipografía
+3. **9 archivos** - Agregar `statusBarsPadding()` en Scaffold:
+   - SpreadTypeSelectionScreen.kt
+   - QuestionScreen.kt
+   - ReadingScreen.kt
+   - EncyclopediaScreen.kt
+   - CardDetailScreen.kt
+   - HistoryScreen.kt
+   - ReadingDetailScreen.kt
+   - ManualLoadScreen.kt
+   - CardSelectorScreen.kt
+
+**Dependencias**: Ninguna (iconos ya disponibles en Material Icons Default)
+
+### Prioridad
+**Alta** - Mejora significativa de UX y consistencia visual
+
+### Tiempo Estimado
+- Márgenes globales: 30 min
+- SpreadTypeSelectionScreen: 1.5h
+- QuestionScreen: 1h
+- **Total**: ~3 horas
+
+---
+
 *Última actualización: 2026-05-15*

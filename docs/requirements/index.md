@@ -20,8 +20,11 @@
 ### v1.4.0 (Completada) ✅
 - **Splash Screen Personalizado** - Pantalla de carga con branding
 
-### v1.5.0 (Planificación) 🆕
+### v1.5.0 (Completada) ✅
 - **Modernización de HomeScreen** - Rediseño visual de pantalla principal
+
+### v1.5.1 (Planificación) 🆕
+- **Mejoras Visuales Globales** - Márgenes consistentes + modernización de pantallas clave
 
 ---
 
@@ -63,8 +66,11 @@ Ofrecer dos experiencias complementarias:
 ### Requisitos v1.4.0 ✅
 9. Splash Screen Personalizado (ver docs/fases/)
 
-### Requisitos v1.5.0 🆕
+### Requisitos v1.5.0 ✅
 10. [Modernización de HomeScreen](./mejoras-ux.md#rf-22) - RF-22
+
+### Requisitos v1.5.1 🆕
+11. [Mejoras Visuales Globales + Modernización de Pantallas](./mejoras-ux.md#rf-23) - RF-23
 
 ---
 
