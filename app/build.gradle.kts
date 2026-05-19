@@ -26,7 +26,7 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file(System.getenv("TAROT_KEYSTORE_PATH")
-                ?: "${System.getProperty("user.home")}/tarotai-release-key.jks")
+                ?: "${rootProject.projectDir}/private/tarotai-release-key.jks")
             storePassword = System.getenv("TAROT_KEYSTORE_PASSWORD")
             keyAlias = "tarotai"
             keyPassword = System.getenv("TAROT_KEY_PASSWORD")
