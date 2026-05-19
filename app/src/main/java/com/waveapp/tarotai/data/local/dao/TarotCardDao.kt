@@ -68,4 +68,11 @@ interface TarotCardDao {
      */
     @Query("SELECT COUNT(*) FROM tarot_cards")
     suspend fun getCardsCount(): Int
+
+    /**
+     * Elimina todas las cartas de la base de datos.
+     * Útil para actualizaciones de datos cuando cambia el esquema.
+     */
+    @Query("DELETE FROM tarot_cards")
+    suspend fun deleteAll()
 }

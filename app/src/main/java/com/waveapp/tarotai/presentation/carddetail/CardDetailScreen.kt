@@ -198,6 +198,31 @@ private fun CardDetailContent(
                 style = MaterialTheme.typography.bodyMedium
             )
         }
+
+        // Reflexiones
+        if (card.reflexiones.isNotEmpty()) {
+            SectionCard(title = stringResource(R.string.card_reflexiones_title)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    card.reflexiones.forEach { reflexion ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = reflexion,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -31,5 +31,6 @@ data class TarotCardDto(
     val uprightMeaning: String,
     val reversedMeaning: String,
     val symbolism: String,
-    val keywords: List<String>
+    val keywords: List<String>,
+    val reflexiones: List<String> = emptyList()  // Preguntas de reflexión para el usuario
 )

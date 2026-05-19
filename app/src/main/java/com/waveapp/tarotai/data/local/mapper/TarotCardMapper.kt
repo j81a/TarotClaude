@@ -29,7 +29,8 @@ fun TarotCardEntity.toDomainModel(): TarotCard {
         uprightMeaning = uprightMeaning,
         reversedMeaning = reversedMeaning,
         symbolism = symbolism,
-        keywords = Json.decodeFromString(ListSerializer(String.serializer()), keywords)  // Convierte JSON string a List<String>
+        keywords = Json.decodeFromString(ListSerializer(String.serializer()), keywords),  // Convierte JSON string a List<String>
+        reflexiones = Json.decodeFromString(ListSerializer(String.serializer()), reflexiones)  // Convierte JSON string a List<String>
     )
 }
 
@@ -47,7 +48,8 @@ fun TarotCard.toEntity(): TarotCardEntity {
         uprightMeaning = uprightMeaning,
         reversedMeaning = reversedMeaning,
         symbolism = symbolism,
-        keywords = Json.encodeToString(ListSerializer(String.serializer()), keywords)  // Convierte List<String> a JSON string
+        keywords = Json.encodeToString(ListSerializer(String.serializer()), keywords),  // Convierte List<String> a JSON string
+        reflexiones = Json.encodeToString(ListSerializer(String.serializer()), reflexiones)  // Convierte List<String> a JSON string
     )
 }
 

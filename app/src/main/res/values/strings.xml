@@ -59,6 +59,7 @@
     <string name="card_upright_meaning_title">Posición Normal</string>
     <string name="card_reversed_meaning_title">Posición Invertida</string>
     <string name="card_symbolism_title">Simbolismo</string>
+    <string name="card_reflexiones_title">Reflexiones</string>
     <string name="card_image_placeholder">Imagen de carta</string>
 
     <!-- Tipos de lectura -->

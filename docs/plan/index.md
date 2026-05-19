@@ -16,11 +16,28 @@
 - Carga manual de tiradas
 - Reutilización de pantallas (QuestionScreen compartida)
 
-### v1.2.0 (En desarrollo) ⏳
+### v1.2.0 (Completada) ✅
 - Guardado consistente con valor por defecto
 - Consultante opcional en ambos modos
 - Carga manual con visualización mejorada
 - Imágenes en selector de cartas
+
+### v1.3.0 (Completada) ✅
+- Reconocimiento de voz en QuestionScreen
+
+### v1.4.0 (Completada) ✅
+- Splash Screen personalizado
+
+### v1.5.0 (Completada) ✅
+- Modernización de HomeScreen
+
+### v1.5.1 (Completada) ✅
+- Mejoras visuales globales
+
+### v1.6.0 (Completada) ✅
+- Campo reflexiones en cartas
+- Migración de BD 3→4
+- Actualización automática de datos
 
 ---
 

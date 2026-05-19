@@ -24,13 +24,14 @@ import com.waveapp.tarotai.data.local.entities.TarotCardEntity
  * - v1: Tabla tarot_cards (v1.0.0)
  * - v2: Agregada tabla reading_history (v1.1.0)
  * - v3: Cambio notes (String) a notesJson (String JSON array) (v1.2.0)
+ * - v4: Agregado campo reflexiones a tarot_cards (v1.6.0)
  */
 @Database(
     entities = [
         TarotCardEntity::class,
         ReadingHistoryEntity::class  // 🆕 Nueva tabla v1.1.0
     ],
-    version = 3,                     // 🔄 Incrementado para v1.2.0
+    version = 4,                     // 🔄 Incrementado para v1.6.0
     exportSchema = false
 )
 @TypeConverters(Converters::class)   // Converters para List<String>, DrawnCard, Interpretation

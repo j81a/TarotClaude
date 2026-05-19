@@ -49,14 +49,20 @@
 | **Fase 11: Modernización de HomeScreen** | 3 | 3 | ✅ 100% |
 | **Subtotal v1.5.0** | **3** | **3** | **✅ 100%** |
 
-### v1.5.1 🆕
+### v1.5.1 ✅
 | Fase | Tareas | Completadas | Progreso |
 |------|--------|-------------|----------|
-| **Fase 12: Mejoras Visuales Globales** | 4 | 0 | ⏳ 0% |
-| **Subtotal v1.5.1** | **4** | **0** | **⏳ 0%** |
+| **Fase 12: Mejoras Visuales Globales** | 4 | 4 | ✅ 100% |
+| **Subtotal v1.5.1** | **4** | **4** | **✅ 100%** |
+
+### v1.6.0 ✅
+| Fase | Tareas | Completadas | Progreso |
+|------|--------|-------------|----------|
+| **Fase 13: Campo Reflexiones en Cartas** | 6 | 6 | ✅ 100% |
+| **Subtotal v1.6.0** | **6** | **6** | **✅ 100%** |
 
 ### Total General
-| **TOTAL** | **52** | **48** | **📊 92.3%** |
+| **TOTAL** | **58** | **58** | **📊 100%** |
 
 **Referencias de implementación:**
 - ✅ Fase 1: Completada (ver commit inicial)
@@ -2239,3 +2245,124 @@ composable(Screen.Home.route) {
 
 **Total Fase 11**: ~3.5 horas
 **Estado**: ⏳ En planificación
+
+---
+
+## 🎨 FASE 13: Campo Reflexiones en Cartas (v1.6.0)
+
+### Tarea 13.1: Agregar campo reflexiones a modelos de datos ✅
+
+**Descripción**: Agregar campo `reflexiones: List<String>` a TarotCard (domain), TarotCardEntity (Room) y TarotCardDto (JSON).
+
+**Criterios de Aceptación**:
+- [x] Campo `reflexiones` agregado a TarotCardDto con valor por defecto `emptyList()`
+- [x] Campo `reflexiones` agregado a TarotCardEntity como String JSON con default `"[]"`
+- [x] Campo `reflexiones` agregado a TarotCard con valor por defecto `emptyList()`
+- [x] Documentación actualizada en cada modelo
+
+**Archivos Modificados**:
+- `data/local/dto/TarotCardsDto.kt`
+- `data/local/entities/TarotCardEntity.kt`
+- `domain/model/TarotCard.kt`
+
+**Tiempo**: 20 min
+
+---
+
+### Tarea 13.2: Actualizar mappers para reflexiones ✅
+
+**Descripción**: Actualizar los mappers para incluir el campo reflexiones en todas las conversiones (DTO→Entity, Entity→Domain, Domain→Entity).
+
+**Criterios de Aceptación**:
+- [x] `TarotCardDtoMapper.toEntity()` serializa reflexiones a JSON
+- [x] `TarotCardMapper.toDomainModel()` deserializa reflexiones desde JSON
+- [x] `TarotCardMapper.toEntity()` serializa reflexiones a JSON
+- [x] Usa `Json.encodeToString()` y `Json.decodeFromString()` con ListSerializer
+
+**Archivos Modificados**:
+- `data/local/mapper/TarotCardDtoMapper.kt`
+- `data/local/mapper/TarotCardMapper.kt`
+
+**Tiempo**: 15 min
+
+---
+
+### Tarea 13.3: Crear migración de base de datos 3→4 ✅
+
+**Descripción**: Crear migración de Room para agregar columna `reflexiones` a la tabla `tarot_cards` e incrementar versión de BD a 4.
+
+**Criterios de Aceptación**:
+- [x] `MIGRATION_3_4` creada en `Migrations.kt`
+- [x] Ejecuta `ALTER TABLE tarot_cards ADD COLUMN reflexiones TEXT NOT NULL DEFAULT '[]'`
+- [x] Versión de `TarotDatabase` incrementada a 4
+- [x] Migración agregada a `DatabaseModule.provideDatabase()`
+- [x] Historial de versiones actualizado en documentación
+
+**Archivos Modificados**:
+- `data/local/database/Migrations.kt`
+- `data/local/database/TarotDatabase.kt`
+- `core/di/DatabaseModule.kt`
+
+**Tiempo**: 25 min
+
+---
+
+### Tarea 13.4: Implementar actualización automática de datos ✅
+
+**Descripción**: Modificar `TarotCardRepositoryImpl.initializeDatabaseIfNeeded()` para detectar y actualizar cartas que no tienen reflexiones.
+
+**Criterios de Aceptación**:
+- [x] Detecta si cartas existentes tienen `reflexiones == "[]"`
+- [x] Método `deleteAll()` agregado a `TarotCardDao`
+- [x] Función `loadCardsFromJson()` extraída y reutilizable
+- [x] Log de "Actualizando cartas con reflexiones..."
+- [x] No afecta tabla `reading_history`
+
+**Archivos Modificados**:
+- `data/local/dao/TarotCardDao.kt`
+- `data/repository/TarotCardRepositoryImpl.kt`
+
+**Tiempo**: 30 min
+
+---
+
+### Tarea 13.5: Agregar sección Reflexiones en CardDetailScreen ✅
+
+**Descripción**: Mostrar la nueva sección "Reflexiones" al final del detalle de carta con lista de preguntas con bullets.
+
+**Criterios de Aceptación**:
+- [x] Sección solo visible si `card.reflexiones.isNotEmpty()`
+- [x] Usa `SectionCard` consistente con resto de la UI
+- [x] Lista de reflexiones con bullets (`•`) en color primary
+- [x] Espaciado de 12dp entre preguntas
+- [x] String resource `card_reflexiones_title` agregado
+- [x] Posición: Después de "Simbolismo"
+
+**Archivos Modificados**:
+- `presentation/carddetail/CardDetailScreen.kt`
+- `res/values/strings.xml`
+
+**Tiempo**: 25 min
+
+---
+
+### Tarea 13.6: Agregar reflexiones a las 78 cartas del JSON ✅
+
+**Descripción**: Completar el archivo `tarot_cards.json` con 4-6 preguntas de reflexión para cada una de las 78 cartas.
+
+**Criterios de Aceptación**:
+- [x] Las 78 cartas tienen campo `reflexiones` con array de strings
+- [x] 4-6 preguntas por carta
+- [x] Preguntas relevantes al significado de cada carta
+- [x] Lenguaje en segunda persona ("¿Qué estás...?", "¿Cómo puedes...?")
+- [x] Preguntas abiertas que inviten a la reflexión profunda
+
+**Archivos Modificados**:
+- `app/src/main/assets/tarot_cards.json`
+
+**Tiempo**: 45 min (contenido)
+
+---
+
+**Total Fase 13**: 6 tareas | 2 horas | ✅ 100% completado
+

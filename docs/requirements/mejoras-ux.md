@@ -1336,3 +1336,216 @@ Column(
 ---
 
 *Última actualización: 2026-05-15*
+
+
+---
+
+## RF-24: Campo Reflexiones en Cartas del Tarot
+
+> **Versión**: 1.6.0  
+> **Estado**: ✅ Completado  
+> **Fecha**: 2026-05-18
+
+### Descripción
+Agregar un nuevo campo `reflexiones` a cada carta del Tarot que contenga preguntas de reflexión personal para que el usuario profundice en el significado de la carta en su contexto personal.
+
+### Motivación
+Las cartas del Tarot son herramientas de autoconocimiento y reflexión personal. Además de los significados tradicionales, las preguntas de reflexión ayudan al usuario a:
+- Conectar el significado de la carta con su situación personal
+- Profundizar en el mensaje de la carta
+- Usar la carta como punto de partida para la introspección
+- Mejorar el aprendizaje del tarot mediante preguntas guiadas
+
+### Especificación Técnica
+
+#### Modelo de Datos
+
+**JSON (tarot_cards.json)**:
+```json
+{
+  "id": 0,
+  "name": "El Loco",
+  "reflexiones": [
+    "¿Qué nuevo comienzo estoy postergando por miedo a lo desconocido?",
+    "¿En qué área de mi vida necesito dar un salto de fe sin garantías?",
+    "¿Estoy cargando demasiado o viajando ligero hacia mis sueños?",
+    "¿Qué me impide actuar con la inocencia y espontaneidad del Loco?",
+    "¿Confío en que el universo me sostendrá cuando dé el próximo paso?",
+    "¿Soy capaz de abrazar la incertidumbre como parte del camino?"
+  ]
+}
+```
+
+**Modelo de Dominio (TarotCard.kt)**:
+```kotlin
+data class TarotCard(
+    val id: Int,
+    val name: String,
+    val arcanaType: ArcanaType,
+    val suit: Suit?,
+    val imagePath: String,
+    val generalMeaning: String,
+    val uprightMeaning: String,
+    val reversedMeaning: String,
+    val symbolism: String,
+    val keywords: List<String>,
+    val reflexiones: List<String> = emptyList()  // 🆕 v1.6.0
+)
+```
+
+**Entidad Room (TarotCardEntity.kt)**:
+```kotlin
+@Entity(tableName = "tarot_cards")
+data class TarotCardEntity(
+    @PrimaryKey val id: Int,
+    val name: String,
+    val arcanaType: String,
+    val suit: String?,
+    val imagePath: String,
+    val generalMeaning: String,
+    val uprightMeaning: String,
+    val reversedMeaning: String,
+    val symbolism: String,
+    val keywords: String,               // JSON: ["palabra1", "palabra2"]
+    val reflexiones: String = "[]"      // 🆕 JSON: ["pregunta1", "pregunta2"]
+)
+```
+
+#### Base de Datos
+
+**Migración 3 → 4**:
+```kotlin
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL(
+            """
+            ALTER TABLE tarot_cards
+            ADD COLUMN reflexiones TEXT NOT NULL DEFAULT '[]'
+            """.trimIndent()
+        )
+    }
+}
+```
+
+**Actualización Automática**:
+- Si existen cartas en BD pero tienen `reflexiones = '[]'`:
+  - Eliminar todas las cartas
+  - Recargar desde JSON con reflexiones completas
+- Preserva historial de lecturas (no se elimina)
+
+#### Interfaz de Usuario
+
+**CardDetailScreen - Nueva Sección**:
+```kotlin
+// Al final del detalle de carta, después de Simbolismo
+if (card.reflexiones.isNotEmpty()) {
+    SectionCard(title = stringResource(R.string.card_reflexiones_title)) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            card.reflexiones.forEach { reflexion ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "•",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = reflexion,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+```
+
+### Criterios de Aceptación
+
+Modelo de Datos:
+- [x] Campo `reflexiones` agregado a TarotCardDto
+- [x] Campo `reflexiones` agregado a TarotCardEntity
+- [x] Campo `reflexiones` agregado a TarotCard (domain)
+- [x] Mappers actualizados (DTO→Entity, Entity↔Domain)
+
+Base de Datos:
+- [x] Migración 3→4 creada y funcional
+- [x] Versión de BD incrementada a 4
+- [x] Actualización automática implementada para cartas existentes
+- [x] Historial de lecturas preservado durante actualización
+
+Interfaz:
+- [x] Sección "Reflexiones" visible en CardDetailScreen
+- [x] Lista con bullets y espaciado correcto
+- [x] Solo se muestra si hay reflexiones disponibles
+- [x] String resource `card_reflexiones_title` agregado
+- [x] Diseño consistente con resto de la pantalla
+
+Contenido:
+- [x] Todas las 78 cartas tienen reflexiones en JSON
+- [x] 4-6 preguntas por carta
+- [x] Preguntas relevantes al significado de cada carta
+- [x] Lenguaje claro y directo (segunda persona)
+
+### Impacto en Código
+
+**Archivos Modificados**:
+1. `data/local/dto/TarotCardsDto.kt` - Agregado campo reflexiones
+2. `data/local/entities/TarotCardEntity.kt` - Agregado campo reflexiones
+3. `domain/model/TarotCard.kt` - Agregado campo reflexiones
+4. `data/local/mapper/TarotCardDtoMapper.kt` - Actualizado mapper
+5. `data/local/mapper/TarotCardMapper.kt` - Actualizados mappers
+6. `data/local/database/TarotDatabase.kt` - Versión 4
+7. `data/local/database/Migrations.kt` - MIGRATION_3_4
+8. `core/di/DatabaseModule.kt` - Agregada migración
+9. `data/local/dao/TarotCardDao.kt` - Agregado deleteAll()
+10. `data/repository/TarotCardRepositoryImpl.kt` - Actualización automática
+11. `presentation/carddetail/CardDetailScreen.kt` - Nueva sección UI
+12. `res/values/strings.xml` - String card_reflexiones_title
+13. `assets/tarot_cards.json` - Reflexiones para 78 cartas
+
+**Dependencias**: Ninguna (usa funcionalidades existentes)
+
+### Beneficios
+
+**Para el Usuario**:
+- Profundización en el significado personal de cada carta
+- Herramienta de auto-reflexión guiada
+- Conexión más profunda con el mensaje del Tarot
+- Aprendizaje activo mediante preguntas
+
+**Para la App**:
+- Contenido educativo más rico
+- Diferenciación de otras apps de Tarot
+- Valor agregado sin complejidad técnica
+- Reutilización automática en todas las vistas (Enciclopedia, Tiradas, Carga Manual)
+
+### Prioridad
+**Media** - Mejora significativa de contenido sin afectar funcionalidad core
+
+### Tiempo Estimado
+- Modelo de datos y mappers: 30 min
+- Migración de BD: 30 min
+- UI en CardDetailScreen: 30 min
+- Testing y verificación: 30 min
+- **Total**: ~2 horas
+
+### Notas Técnicas
+
+**Actualización Automática**:
+- `initializeDatabaseIfNeeded()` detecta si las cartas necesitan actualización
+- Compara `reflexiones == "[]"` de la primera carta
+- Si necesita actualización: `deleteAll()` + `loadCardsFromJson()`
+- No afecta tabla `reading_history` (solo cartas)
+
+**Retrocompatibilidad**:
+- Valor por defecto `"[]"` en TarotCardEntity
+- Valor por defecto `emptyList()` en TarotCard
+- UI solo muestra sección si `reflexiones.isNotEmpty()`
+
+---
+
+*Última actualización: 2026-05-18*

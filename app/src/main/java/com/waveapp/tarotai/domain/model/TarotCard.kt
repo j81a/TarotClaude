@@ -18,6 +18,7 @@ import kotlinx.serialization.Serializable
  * @param reversedMeaning Significado en posición invertida
  * @param symbolism Explicación del simbolismo de la carta
  * @param keywords Lista de palabras clave asociadas
+ * @param reflexiones Lista de preguntas de reflexión para el usuario
  */
 @Serializable
 data class TarotCard(
@@ -30,7 +31,8 @@ data class TarotCard(
     val uprightMeaning: String,
     val reversedMeaning: String,
     val symbolism: String,
-    val keywords: List<String>
+    val keywords: List<String>,
+    val reflexiones: List<String> = emptyList()
 )
 
 /**

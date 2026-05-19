@@ -6,6 +6,7 @@ import com.waveapp.tarotai.data.local.dao.ReadingHistoryDao
 import com.waveapp.tarotai.data.local.dao.TarotCardDao
 import com.waveapp.tarotai.data.local.database.MIGRATION_1_2
 import com.waveapp.tarotai.data.local.database.MIGRATION_2_3
+import com.waveapp.tarotai.data.local.database.MIGRATION_3_4
 import com.waveapp.tarotai.data.local.database.TarotDatabase
 import dagger.Module
 import dagger.Provides
@@ -24,6 +25,7 @@ import javax.inject.Singleton
  *
  * v1.1.0: Agregada migración 1→2 y ReadingHistoryDao
  * v1.2.0: Agregada migración 2→3 para sistema de notas mejorado
+ * v1.6.0: Agregada migración 3→4 para campo reflexiones en cartas
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -44,6 +46,7 @@ object DatabaseModule {
      *
      * v1.1.0: Agregada MIGRATION_1_2 para tabla reading_history
      * v1.2.0: Agregada MIGRATION_2_3 para cambio de notes a notesJson
+     * v1.6.0: Agregada MIGRATION_3_4 para campo reflexiones
      */
     @Provides
     @Singleton
@@ -55,7 +58,7 @@ object DatabaseModule {
             TarotDatabase::class.java,
             "tarot_database"
         )
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)  // 🆕 Migraciones v1→v2, v2→v3
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)  // 🆕 Migraciones v1→v2, v2→v3, v3→v4
             .build()
     }
 

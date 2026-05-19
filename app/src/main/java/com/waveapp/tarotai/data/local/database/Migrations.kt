@@ -126,3 +126,26 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         )
     }
 }
+
+/**
+ * Migración de v3 a v4.
+ *
+ * Cambios en v4 (v1.6.0):
+ * - Agrega columna 'reflexiones' (TEXT, not null, default '[]') a tabla tarot_cards
+ * - Permite almacenar preguntas de reflexión para cada carta
+ *
+ * Estrategia:
+ * - SQLite soporta ADD COLUMN directamente
+ * - Valor por defecto: '[]' (JSON array vacío)
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // Agregar columna reflexiones a tarot_cards con valor por defecto '[]'
+        database.execSQL(
+            """
+            ALTER TABLE tarot_cards
+            ADD COLUMN reflexiones TEXT NOT NULL DEFAULT '[]'
+            """.trimIndent()
+        )
+    }
+}

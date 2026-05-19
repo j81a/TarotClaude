@@ -91,10 +91,30 @@ class TarotCardRepositoryImpl @Inject constructor(
     override suspend fun initializeDatabaseIfNeeded(): Boolean {
         // Verificar si la BD ya tiene datos
         val count = cardDao.getCardsCount()
-        if (count > 0) {
-            return false  // Ya está inicializada
+
+        // Si no hay cartas, inicializar desde cero
+        if (count == 0) {
+            return loadCardsFromJson()
         }
 
+        // Si hay cartas, verificar si necesitan actualización (v1.6.0: reflexiones)
+        // Revisamos si la primera carta tiene reflexiones vacías
+        val firstCard = cardDao.getCardById(0)
+        if (firstCard != null && firstCard.reflexiones == "[]") {
+            // Las cartas existen pero no tienen reflexiones, necesitan actualización
+            android.util.Log.d("TarotCardRepository", "Actualizando cartas con reflexiones...")
+            cardDao.deleteAll() // Eliminar cartas antiguas
+            return loadCardsFromJson() // Recargar desde JSON con reflexiones
+        }
+
+        return false  // Ya está inicializada y actualizada
+    }
+
+    /**
+     * Carga las cartas desde el JSON de assets.
+     * Separado en función privada para reutilizar en inicialización y actualización.
+     */
+    private suspend fun loadCardsFromJson(): Boolean {
         // Leer el archivo JSON desde assets
         val jsonString = context.assets.open("tarot_cards.json")
             .bufferedReader()
@@ -109,7 +129,8 @@ class TarotCardRepositoryImpl @Inject constructor(
         // Insertar en la base de datos
         cardDao.insertAll(entities)
 
-        return true  // Se inicializó correctamente
+        android.util.Log.d("TarotCardRepository", "Cartas cargadas: ${entities.size}")
+        return true  // Se cargó correctamente
     }
 
     override suspend fun getAllCardsOnce(): Result<List<TarotCard>> {

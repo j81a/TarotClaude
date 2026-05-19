@@ -23,8 +23,11 @@
 ### v1.5.0 (Completada) ✅
 - **Modernización de HomeScreen** - Rediseño visual de pantalla principal
 
-### v1.5.1 (Planificación) 🆕
+### v1.5.1 (Completada) ✅
 - **Mejoras Visuales Globales** - Márgenes consistentes + modernización de pantallas clave
+
+### v1.6.0 (Completada) ✅
+- **Campo Reflexiones en Cartas** - Preguntas de reflexión para cada carta del tarot
 
 ---
 
@@ -69,8 +72,11 @@ Ofrecer dos experiencias complementarias:
 ### Requisitos v1.5.0 ✅
 10. [Modernización de HomeScreen](./mejoras-ux.md#rf-22) - RF-22
 
-### Requisitos v1.5.1 🆕
+### Requisitos v1.5.1 ✅
 11. [Mejoras Visuales Globales + Modernización de Pantallas](./mejoras-ux.md#rf-23) - RF-23
+
+### Requisitos v1.6.0 ✅
+12. [Campo Reflexiones en Cartas](./mejoras-ux.md#rf-24) - RF-24
 
 ---
 

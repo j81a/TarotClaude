@@ -32,5 +32,7 @@ data class TarotCardEntity(
 
     val symbolism: String,          // Explicación del simbolismo e iconografía
 
-    val keywords: String            // Palabras clave en formato JSON: ["inicio", "locura", "libertad"]
+    val keywords: String,           // Palabras clave en formato JSON: ["inicio", "locura", "libertad"]
+
+    val reflexiones: String = "[]"  // Preguntas de reflexión en formato JSON: ["¿Qué...", "¿Cómo..."]
 )

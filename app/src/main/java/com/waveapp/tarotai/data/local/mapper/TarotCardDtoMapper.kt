@@ -26,7 +26,8 @@ fun TarotCardDto.toEntity(): TarotCardEntity {
         uprightMeaning = uprightMeaning,
         reversedMeaning = reversedMeaning,
         symbolism = symbolism,
-        keywords = Json.encodeToString(keywords)  // Convierte List<String> a JSON string
+        keywords = Json.encodeToString(keywords),  // Convierte List<String> a JSON string
+        reflexiones = Json.encodeToString(reflexiones)  // Convierte List<String> a JSON string
     )
 }
 
